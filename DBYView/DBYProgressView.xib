@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DBYProgressView" customModule="新版大班" customModuleProvider="target">
+            <connections>
+                <outlet property="iconView" destination="plm-ty-3fa" id="Icb-0b-HrH"/>
+                <outlet property="progressHeight" destination="zQq-qF-OYU" id="DXn-Rm-Efa"/>
+                <outlet property="progressTraceView" destination="ciH-PB-Lms" id="Dnv-bt-n5o"/>
+                <outlet property="progressView" destination="iYO-Ia-CDv" id="lCj-Ow-1tO"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="ZIN-vu-8cx">
+            <rect key="frame" x="0.0" y="0.0" width="40" height="400"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="brightness" translatesAutoresizingMaskIntoConstraints="NO" id="plm-ty-3fa">
+                    <rect key="frame" x="4" y="364" width="32" height="32"/>
+                    <constraints>
+                        <constraint firstAttribute="width" secondItem="plm-ty-3fa" secondAttribute="height" multiplier="1:1" id="gbs-De-SW7"/>
+                    </constraints>
+                </imageView>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="ciH-PB-Lms">
+                    <rect key="frame" x="16" y="8" width="8" height="352"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="iYO-Ia-CDv">
+                            <rect key="frame" x="0.0" y="352" width="8" height="0.0"/>
+                            <color key="backgroundColor" red="1" green="0.83529411764705885" blue="0.14117647058823529" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" id="zQq-qF-OYU"/>
+                            </constraints>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="8" id="BXM-Xv-2rJ"/>
+                        <constraint firstAttribute="trailing" secondItem="iYO-Ia-CDv" secondAttribute="trailing" id="Vre-Cg-yzZ"/>
+                        <constraint firstAttribute="bottom" secondItem="iYO-Ia-CDv" secondAttribute="bottom" id="h3w-aT-3dF"/>
+                        <constraint firstItem="iYO-Ia-CDv" firstAttribute="leading" secondItem="ciH-PB-Lms" secondAttribute="leading" id="z2S-oy-r9d"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.20000000000000001" colorSpace="calibratedRGB"/>
+            <constraints>
+                <constraint firstItem="ciH-PB-Lms" firstAttribute="top" secondItem="ZIN-vu-8cx" secondAttribute="top" constant="8" id="3ch-8I-TXd"/>
+                <constraint firstItem="ciH-PB-Lms" firstAttribute="centerX" secondItem="ZIN-vu-8cx" secondAttribute="centerX" id="AtB-Lj-9Tf"/>
+                <constraint firstItem="plm-ty-3fa" firstAttribute="top" secondItem="ciH-PB-Lms" secondAttribute="bottom" constant="4" id="BVA-WO-VQx"/>
+                <constraint firstAttribute="bottom" secondItem="plm-ty-3fa" secondAttribute="bottom" constant="4" id="Stt-Uz-9KP"/>
+                <constraint firstAttribute="trailing" secondItem="plm-ty-3fa" secondAttribute="trailing" constant="4" id="XVV-ve-6yM"/>
+                <constraint firstItem="plm-ty-3fa" firstAttribute="leading" secondItem="ZIN-vu-8cx" secondAttribute="leading" constant="4" id="Z6e-ma-UFf"/>
+            </constraints>
+            <nil key="simulatedTopBarMetrics"/>
+            <nil key="simulatedBottomBarMetrics"/>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <point key="canvasLocation" x="-342.02898550724638" y="59.598214285714285"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="brightness" width="18" height="19"/>
+    </resources>
+</document>

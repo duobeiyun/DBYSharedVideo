@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DBYSlider" customModule="新版大班" customModuleProvider="target">
+            <connections>
+                <outlet property="progressBackView" destination="Fwy-cY-TDx" id="q6q-BR-5yM"/>
+                <outlet property="progressView" destination="O3u-cI-fQR" id="as8-D2-xI7"/>
+                <outlet property="progressViewWidth" destination="VFQ-Bh-m8m" id="85G-zS-7hM"/>
+                <outlet property="sliderBar" destination="eNL-b0-STK" id="rNJ-43-p8x"/>
+                <outlet property="sliderLeft" destination="Sb3-eg-8bi" id="l5N-wm-IZP"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="AGY-4P-CvT">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="40"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Fwy-cY-TDx" userLabel="progressBack">
+                    <rect key="frame" x="4" y="19" width="367" height="2"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="O3u-cI-fQR" userLabel="progress">
+                            <rect key="frame" x="0.0" y="0.0" width="0.0" height="2"/>
+                            <color key="backgroundColor" red="0.98254626989364624" green="0.83217144012451172" blue="0.35162818431854248" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="width" id="VFQ-Bh-m8m"/>
+                                <constraint firstAttribute="height" constant="2" id="XYt-CN-hi2"/>
+                            </constraints>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" red="1" green="1" blue="1" alpha="0.40000000000000002" colorSpace="calibratedRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="2" id="0go-uW-Hvh"/>
+                        <constraint firstAttribute="bottom" secondItem="O3u-cI-fQR" secondAttribute="bottom" id="JPy-MC-hyh"/>
+                        <constraint firstItem="O3u-cI-fQR" firstAttribute="leading" secondItem="Fwy-cY-TDx" secondAttribute="leading" id="sIC-o1-Cv2"/>
+                        <constraint firstItem="O3u-cI-fQR" firstAttribute="top" secondItem="Fwy-cY-TDx" secondAttribute="top" id="zix-kt-4pb"/>
+                    </constraints>
+                </view>
+                <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="slider-bar" translatesAutoresizingMaskIntoConstraints="NO" id="eNL-b0-STK">
+                    <rect key="frame" x="4" y="14" width="12" height="12"/>
+                </imageView>
+            </subviews>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="eNL-b0-STK" firstAttribute="leading" secondItem="Fwy-cY-TDx" secondAttribute="leading" id="Sb3-eg-8bi"/>
+                <constraint firstItem="Fwy-cY-TDx" firstAttribute="centerY" secondItem="AGY-4P-CvT" secondAttribute="centerY" id="UP9-ko-VGc"/>
+                <constraint firstItem="Fwy-cY-TDx" firstAttribute="leading" secondItem="AGY-4P-CvT" secondAttribute="leading" constant="4" id="XbA-uk-KG0"/>
+                <constraint firstItem="eNL-b0-STK" firstAttribute="centerY" secondItem="AGY-4P-CvT" secondAttribute="centerY" id="crI-Sa-Q6K"/>
+                <constraint firstAttribute="trailing" secondItem="Fwy-cY-TDx" secondAttribute="trailing" constant="4" id="u1q-hP-c0J"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <point key="canvasLocation" x="86" y="76"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="slider-bar" width="12" height="12"/>
+    </resources>
+</document>

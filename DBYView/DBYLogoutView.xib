@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DBYLogoutView" customModule="DBY1VNUI" customModuleProvider="target">
+            <connections>
+                <outlet property="alertView" destination="FkD-ec-a2d" id="fbX-xn-9Q2"/>
+                <outlet property="exitBtn" destination="ECs-Ss-HTQ" id="hbY-k4-ujc"/>
+                <outlet property="retryBtn" destination="ren-Ax-GnA" id="Qum-aN-Mf2"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="xbu-CM-58x">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="FkD-ec-a2d">
+                    <rect key="frame" x="17.5" y="233.5" width="340" height="200"/>
+                    <subviews>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="您的账号在其他地方重复登录" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="kPn-wC-8zl">
+                            <rect key="frame" x="87.5" y="61" width="199" height="18"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                            <color key="textColor" red="0.1783681214" green="0.50864160059999997" blue="0.8412802815" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ren-Ax-GnA">
+                            <rect key="frame" x="16" y="144" width="146" height="40"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="40" id="N1v-Lu-ydK"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                            <state key="normal" title="重新进入"/>
+                            <connections>
+                                <action selector="enterRoom" destination="-1" eventType="touchUpInside" id="Rq3-JO-arV"/>
+                            </connections>
+                        </button>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ECs-Ss-HTQ">
+                            <rect key="frame" x="178" y="144" width="146" height="40"/>
+                            <color key="backgroundColor" red="0.1783681214" green="0.50864160059999997" blue="0.8412802815" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="40" id="kd6-LI-AO9"/>
+                            </constraints>
+                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                            <state key="normal" title=" 退出教室" image="btn-logout-classroom">
+                                <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </state>
+                            <connections>
+                                <action selector="exitRoom" destination="-1" eventType="touchUpInside" id="Hrm-Wy-4Ii"/>
+                            </connections>
+                        </button>
+                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="combined-shape-copy" translatesAutoresizingMaskIntoConstraints="NO" id="1UY-yu-ArE">
+                            <rect key="frame" x="65.5" y="63" width="14" height="14"/>
+                        </imageView>
+                    </subviews>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstItem="ECs-Ss-HTQ" firstAttribute="leading" secondItem="ren-Ax-GnA" secondAttribute="trailing" constant="16" id="7R8-CF-izo"/>
+                        <constraint firstItem="kPn-wC-8zl" firstAttribute="centerY" secondItem="FkD-ec-a2d" secondAttribute="centerY" multiplier="0.7" id="9vd-Sd-NKG"/>
+                        <constraint firstAttribute="bottom" secondItem="ECs-Ss-HTQ" secondAttribute="bottom" constant="16" id="G1H-8R-Zfs"/>
+                        <constraint firstItem="ECs-Ss-HTQ" firstAttribute="width" secondItem="ren-Ax-GnA" secondAttribute="width" id="Lvb-mO-rvK"/>
+                        <constraint firstItem="kPn-wC-8zl" firstAttribute="centerX" secondItem="FkD-ec-a2d" secondAttribute="centerX" multiplier="1.1" id="Tke-LK-AW2"/>
+                        <constraint firstItem="ren-Ax-GnA" firstAttribute="leading" secondItem="FkD-ec-a2d" secondAttribute="leading" constant="16" id="aHL-fw-aGD"/>
+                        <constraint firstAttribute="height" constant="200" id="apZ-Pk-60R"/>
+                        <constraint firstAttribute="trailing" secondItem="ECs-Ss-HTQ" secondAttribute="trailing" constant="16" id="eoN-th-14v"/>
+                        <constraint firstItem="1UY-yu-ArE" firstAttribute="centerY" secondItem="kPn-wC-8zl" secondAttribute="centerY" id="fz3-3F-oFS"/>
+                        <constraint firstAttribute="bottom" secondItem="ren-Ax-GnA" secondAttribute="bottom" constant="16" id="jkB-Wd-PaT"/>
+                        <constraint firstAttribute="width" constant="340" id="tcB-vk-T7A"/>
+                        <constraint firstItem="kPn-wC-8zl" firstAttribute="leading" secondItem="1UY-yu-ArE" secondAttribute="trailing" constant="8" id="z5M-0K-Ocv"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="FkD-ec-a2d" firstAttribute="centerY" secondItem="xbu-CM-58x" secondAttribute="centerY" id="Eew-Fb-oSY"/>
+                <constraint firstItem="FkD-ec-a2d" firstAttribute="centerX" secondItem="xbu-CM-58x" secondAttribute="centerX" id="man-mj-cEn"/>
+            </constraints>
+            <point key="canvasLocation" x="52" y="69.715142428785612"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="btn-logout-classroom" width="24" height="24"/>
+        <image name="combined-shape-copy" width="14" height="14"/>
+    </resources>
+</document>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DBYMicListView" customModule="新版大班" customModuleProvider="target">
+            <connections>
+                <outlet property="iconView" destination="9qb-g8-ery" id="WzR-Wc-iWm"/>
+                <outlet property="messageLab" destination="QBS-Qu-HY6" id="bxR-kb-rM4"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="1b3-Zm-gU2">
+            <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="mic" translatesAutoresizingMaskIntoConstraints="NO" id="9qb-g8-ery">
+                    <rect key="frame" x="4" y="4" width="30" height="30"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="30" id="F1o-xv-5tM"/>
+                        <constraint firstAttribute="height" constant="30" id="beS-YB-vl4"/>
+                    </constraints>
+                </imageView>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QBS-Qu-HY6">
+                    <rect key="frame" x="42" y="12" width="364" height="14.5"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                    <nil key="textColor"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <gestureRecognizers/>
+            <constraints>
+                <constraint firstItem="9qb-g8-ery" firstAttribute="top" secondItem="1b3-Zm-gU2" secondAttribute="top" constant="4" id="28j-hL-Bbi"/>
+                <constraint firstItem="9qb-g8-ery" firstAttribute="leading" secondItem="1b3-Zm-gU2" secondAttribute="leading" constant="4" id="2tT-Bc-El2"/>
+                <constraint firstItem="QBS-Qu-HY6" firstAttribute="leading" secondItem="9qb-g8-ery" secondAttribute="trailing" constant="8" id="V27-cq-Uey"/>
+                <constraint firstAttribute="trailing" secondItem="QBS-Qu-HY6" secondAttribute="trailing" constant="8" id="edo-Xf-5JC"/>
+                <constraint firstItem="QBS-Qu-HY6" firstAttribute="centerY" secondItem="9qb-g8-ery" secondAttribute="centerY" id="gl1-Nu-CBn"/>
+            </constraints>
+            <nil key="simulatedTopBarMetrics"/>
+            <nil key="simulatedBottomBarMetrics"/>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outletCollection property="gestureRecognizers" destination="z7U-aa-8L6" appends="YES" id="Acj-ua-wkZ"/>
+            </connections>
+            <point key="canvasLocation" x="-401.44927536231887" y="82.366071428571431"/>
+        </view>
+        <tapGestureRecognizer id="z7U-aa-8L6">
+            <connections>
+                <action selector="tapWithSender:" destination="-1" id="5wt-P6-Fcg"/>
+            </connections>
+        </tapGestureRecognizer>
+    </objects>
+    <resources>
+        <image name="mic" width="26" height="26"/>
+    </resources>
+</document>

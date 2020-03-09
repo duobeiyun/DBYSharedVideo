@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DBYNetworkTipView" customModule="DBYSharedVideo" customModuleProvider="target">
+            <connections>
+                <outlet property="confirmBtn" destination="2cQ-ti-4Dd" id="Da3-vY-QCk"/>
+                <outlet property="tipLab" destination="jV0-Qt-mhA" id="OCk-rB-akV"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="eJV-ER-NVh">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2cQ-ti-4Dd">
+                    <rect key="frame" x="121.5" y="381" width="132" height="38"/>
+                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="132" id="d44-UH-MnZ"/>
+                        <constraint firstAttribute="height" constant="38" id="fFY-ld-00y"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                    <state key="normal" title="  继续播放" image="btn-play"/>
+                    <connections>
+                        <action selector="confirmClick" destination="-1" eventType="touchUpInside" id="Rrd-7g-W5K"/>
+                    </connections>
+                </button>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="正在使用非WiFi网络，播放将消耗流量" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="jV0-Qt-mhA">
+                    <rect key="frame" x="66.5" y="258.5" width="242.5" height="17"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" red="0.29019607843137252" green="0.29019607843137252" blue="0.29019607843137252" alpha="1" colorSpace="calibratedRGB"/>
+            <constraints>
+                <constraint firstItem="2cQ-ti-4Dd" firstAttribute="centerY" secondItem="eJV-ER-NVh" secondAttribute="centerY" multiplier="1.2" id="CTj-pf-wj7"/>
+                <constraint firstItem="jV0-Qt-mhA" firstAttribute="centerY" secondItem="eJV-ER-NVh" secondAttribute="centerY" multiplier="0.8" id="TOe-ys-foV"/>
+                <constraint firstItem="jV0-Qt-mhA" firstAttribute="centerX" secondItem="eJV-ER-NVh" secondAttribute="centerX" id="sep-UX-Xmj"/>
+                <constraint firstItem="2cQ-ti-4Dd" firstAttribute="centerX" secondItem="eJV-ER-NVh" secondAttribute="centerX" id="t25-ec-Nw5"/>
+            </constraints>
+            <point key="canvasLocation" x="52" y="69.715142428785612"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="btn-play" width="24" height="24"/>
+    </resources>
+</document>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DBYChatBar" customModule="新版大班" customModuleProvider="target">
+            <connections>
+                <outlet property="emojiBtn" destination="0aq-Sy-7tM" id="6I8-7B-kIO"/>
+                <outlet property="textField" destination="qw3-Wb-JYk" id="0ed-Gu-Vwd"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="Cpp-r5-mok">
+            <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0aq-Sy-7tM">
+                    <rect key="frame" x="4" y="4" width="40" height="40"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="40" id="P7b-kd-PiA"/>
+                        <constraint firstAttribute="height" constant="40" id="j9p-Oq-qan"/>
+                    </constraints>
+                    <state key="normal" image="chat-emoji"/>
+                    <state key="selected" image="chat-keyboard"/>
+                    <connections>
+                        <action selector="showEmoji:" destination="-1" eventType="touchUpInside" id="btc-9x-a9G"/>
+                    </connections>
+                </button>
+                <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="快来和大家一起参与讨论吧" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="qw3-Wb-JYk">
+                    <rect key="frame" x="44" y="4" width="298" height="40"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits" returnKeyType="send"/>
+                    <connections>
+                        <outlet property="delegate" destination="-1" id="epi-61-wqa"/>
+                    </connections>
+                </textField>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8pq-1J-JEa">
+                    <rect key="frame" x="358" y="4" width="40" height="40"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="40" id="r2Y-Ox-t7O"/>
+                    </constraints>
+                    <state key="normal" title="发送">
+                        <color key="titleColor" systemColor="systemGrayColor" red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    </state>
+                    <connections>
+                        <action selector="send:" destination="-1" eventType="touchUpInside" id="T9v-9T-z0S"/>
+                    </connections>
+                </button>
+            </subviews>
+            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="8pq-1J-JEa" firstAttribute="height" secondItem="0aq-Sy-7tM" secondAttribute="height" id="Hqt-Ih-1Ty"/>
+                <constraint firstItem="8pq-1J-JEa" firstAttribute="top" secondItem="qw3-Wb-JYk" secondAttribute="top" id="Iwy-MZ-rtq"/>
+                <constraint firstAttribute="trailing" secondItem="8pq-1J-JEa" secondAttribute="trailing" constant="16" id="Sg9-yd-sZo"/>
+                <constraint firstItem="qw3-Wb-JYk" firstAttribute="height" secondItem="0aq-Sy-7tM" secondAttribute="height" id="XYM-23-vp9"/>
+                <constraint firstItem="8pq-1J-JEa" firstAttribute="leading" secondItem="qw3-Wb-JYk" secondAttribute="trailing" constant="16" id="aAV-gS-yXu"/>
+                <constraint firstItem="0aq-Sy-7tM" firstAttribute="leading" secondItem="Cpp-r5-mok" secondAttribute="leading" constant="4" id="eFq-dC-D43"/>
+                <constraint firstItem="8pq-1J-JEa" firstAttribute="bottom" secondItem="qw3-Wb-JYk" secondAttribute="bottom" id="euQ-AP-Ykf"/>
+                <constraint firstItem="qw3-Wb-JYk" firstAttribute="top" secondItem="0aq-Sy-7tM" secondAttribute="top" id="ezk-2P-j9O"/>
+                <constraint firstItem="qw3-Wb-JYk" firstAttribute="bottom" secondItem="0aq-Sy-7tM" secondAttribute="bottom" id="gm4-pV-jF2"/>
+                <constraint firstItem="0aq-Sy-7tM" firstAttribute="top" secondItem="Cpp-r5-mok" secondAttribute="top" constant="4" id="kbE-MJ-iGV"/>
+                <constraint firstItem="qw3-Wb-JYk" firstAttribute="leading" secondItem="0aq-Sy-7tM" secondAttribute="trailing" id="yUP-IY-G92"/>
+            </constraints>
+            <nil key="simulatedTopBarMetrics"/>
+            <nil key="simulatedBottomBarMetrics"/>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <point key="canvasLocation" x="-401.44927536231887" y="82.366071428571431"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="chat-emoji" width="24" height="24"/>
+        <image name="chat-keyboard" width="20" height="20"/>
+    </resources>
+</document>
