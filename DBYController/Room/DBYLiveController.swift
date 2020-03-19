@@ -22,6 +22,7 @@ public class DBYLiveController: DBY1VNController {
     var newMessageCount:Int = 0
     var showTip:Bool = false
     var micOpen:Bool = false
+    var zanCount = 0
     
     let btnWidth: CGFloat = 60
     let btnHeight: CGFloat = 30
@@ -38,6 +39,7 @@ public class DBYLiveController: DBY1VNController {
     lazy var hangUpView = DBYHangUpView()
     lazy var actionSheetView = DBYActionSheetView()
     lazy var forbiddenButton = DBYButton()
+    lazy var zanButton = UIButton(type: .custom)
     lazy var inputButton:DBYButton = {
         let btn = DBYButton()
         btn.setBackgroudnStyle(fillColor: DBYStyle.halfBlack,
@@ -72,6 +74,7 @@ public class DBYLiveController: DBY1VNController {
     var sensitiveWords: [String]?
     var animationTimer: Timer?
     var questions: [[String:Any]]?
+    var zanTimer:Timer?
     
     //MARK: - override functions
     override public func viewDidLoad() {
@@ -93,6 +96,8 @@ public class DBYLiveController: DBY1VNController {
         
         if authinfo?.classType == .sharedVideo {
             liveManager.setSharedVideoView(mainView)
+            liveManager.setLocalVideoView(videoView.video)
+            liveManager.setStudentViewWith(videoView.video)
         }else {
             liveManager.setTeacherViewWith(mainView)
         }
@@ -146,11 +151,14 @@ public class DBYLiveController: DBY1VNController {
         view.addSubview(micListView)
         view.addSubview(hangUpView)
         view.addSubview(actionSheetView)
+        view.addSubview(videoView)
+        view.addSubview(zanButton)
     }
     override func addActions() {
         super.addActions()
         inputButton.addTarget(self, action: #selector(showChatBar), for: .touchUpInside)
         audioBtn.addTarget(self, action: #selector(audioOnly), for: .touchUpInside)
+        zanButton.addTarget(self, action: #selector(zanAnimation), for: .touchUpInside)
     }
     override func setupStaticUI() {
         super.setupStaticUI()
@@ -170,6 +178,7 @@ public class DBYLiveController: DBY1VNController {
         hangUpView.setProgress(value: volume)
         forbiddenButton.titleLabel?.font = UIFont.systemFont(ofSize: 15)
         forbiddenButton.setTitle(" 已开启全体禁言", for: .normal)
+        zanButton.setImage(UIImage(name: "greate-icon"), for: .normal)
     }
     override func setupLandscapeUI() {
         super.setupLandscapeUI()
@@ -211,7 +220,9 @@ public class DBYLiveController: DBY1VNController {
         messageTipView.frame = smallPopViewFrame
         micListView.frame = micListViewFrame
         forbiddenButton.frame = forbiddenBtnFrame
-        loadingView.frame = mainView.bounds
+        loadingView.frame = mainViewFrame
+        videoView.frame = CGRect(x: mainViewFrame.minX, y: mainViewFrame.maxY, width: 170, height: 150)
+        zanButton.frame = CGRect(x: 300, y: 600, width: 48, height: 48)
         updateMicListViewFrame()
     }
     override func updatePortraitFrame() {
@@ -601,6 +612,25 @@ public class DBYLiveController: DBY1VNController {
         }
         present(inputVC, animated: true, completion: nil)
     }
+    @objc func zanAnimation(sender:UIButton) {
+        zanCount += 1
+        stopZanTimer()
+        startZanTimer()
+    }
+    func startZanTimer() {
+        zanTimer = Timer(timeInterval: 1, target: self, selector: #selector(updateZan), userInfo: nil, repeats: false)
+        RunLoop.main.add(zanTimer!, forMode: .common)
+    }
+    @objc func updateZan() {
+        liveManager.thumbsup(withCount: Int32(zanCount)) { (message) in
+            print(message ?? "updateZan")
+        }
+        zanCount = 0
+    }
+    func stopZanTimer() {
+        zanTimer?.invalidate()
+        zanTimer = nil
+    }
     @objc func audioOnly(sender:UIButton) {
         sender.isSelected = !sender.isSelected
         if sender.isSelected {
@@ -888,6 +918,37 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     }
     public func liveManager(_ manager: DBYLiveManager!, removedQuestion questionId: String!) {
         removeQustion(questionId: questionId)
+    }
+    public func liveManager(_ manager: DBYLiveManager!, cameraRequest index: UInt) {
+        print("前方还有 \(index) 人正在等待上台。")
+        let message = "前方还有 \(index) 人正在等待上台。"
+        let image = UIImage(name: "camera-request-icon")
+        showMessageTipView(image: image,
+                           message: message,
+                           type: .close)
+    }
+    public func initVideoRecorder(_ liveManager: DBYLiveManager!, userId uid: String!) {
+        roomControlbar.setCameraState(state: DBYRoomControlbar.CameraState.joined)
+    }
+    public func destroyVideoRecorder(_ liveManager: DBYLiveManager!, userId uid: String!) {
+        roomControlbar.setCameraState(state: DBYRoomControlbar.CameraState.normal)
+    }
+    public func willReceivedVideoData(_ liveManager: DBYLiveManager!, userId uid: String!) {
+        unowned let weakSelf = self
+        liveManager.getUserInfo(uid) { (dict) in
+            guard let userInfo = dict as? [String: Any] else {
+                return
+            }
+            guard let userName = userInfo["userName"] as? String else {
+                return
+            }
+            if weakSelf.videoView.userId == uid {
+                weakSelf.videoView.setUserName(name: userName)
+            }
+        }
+    }
+    public func willInterruptVideoData(_ liveManager: DBYLiveManager!, userId uid: String!) {
+        
     }
 }
 extension DBYLiveController:DBYNetworkTipViewDelegate {

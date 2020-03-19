@@ -84,6 +84,7 @@ public class DBY1VNController: UIViewController {
     lazy var cellHeightCache:[Int: CGFloat] = [Int: CGFloat]()
     
     lazy var mainView = DBYVideoView()
+    lazy var videoView = DBYStudentVideoView()
     lazy var chatContainer = UIView()
     lazy var courseInfoView = DBYCourseInfoView()
     lazy var videoTipView = DBYVideoTipView()
