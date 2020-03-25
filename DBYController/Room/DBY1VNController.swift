@@ -47,6 +47,7 @@ public class DBY1VNController: UIViewController {
     let roomControlbarHeight: CGFloat = 40
     let fromIdentifier: String = "DBYCommentFromCell"
     let toIdentifier: String = "DBYCommentToCell"
+    let zanCell = "DBYZanCell"
     
     @objc public var authinfo: DBYAuthInfo?
     
@@ -84,7 +85,6 @@ public class DBY1VNController: UIViewController {
     lazy var cellHeightCache:[Int: CGFloat] = [Int: CGFloat]()
     
     lazy var mainView = DBYVideoView()
-    lazy var videoView = DBYStudentVideoView()
     lazy var chatContainer = UIView()
     lazy var courseInfoView = DBYCourseInfoView()
     lazy var videoTipView = DBYVideoTipView()
@@ -99,13 +99,16 @@ public class DBY1VNController: UIViewController {
         
         let fromNib = UINib(nibName: fromIdentifier, bundle: currentBundle)
         let toNib = UINib(nibName: toIdentifier, bundle: currentBundle)
+        let zanNib = UINib(nibName: zanCell, bundle: currentBundle)
         
         t.backgroundColor = DBYStyle.lightGray
         t.separatorStyle = .none
         t.allowsSelection = false
-        t.estimatedRowHeight = estimatedRowHeight;
+        t.estimatedRowHeight = estimatedRowHeight
+        
         t.register(fromNib, forCellReuseIdentifier: fromIdentifier)
         t.register(toNib, forCellReuseIdentifier: toIdentifier)
+        t.register(zanNib, forCellReuseIdentifier: zanCell)
         
         return t
     }()
@@ -416,6 +419,31 @@ public class DBY1VNController: UIViewController {
         if let volume = notification.object as? CGFloat {
             volumeProgressView.setProgress(value: volume)
             print("---\(volume)")
+        }
+    }
+    @objc func dragVideoView(pan:UIPanGestureRecognizer) {
+        let videoView = pan.view
+        let position = pan.location(in: view)
+        let viewW = view.bounds.width
+        let halfW = viewW * 0.5
+        switch pan.state {
+        case .changed:
+            videoView?.center = position
+            break
+        case .ended:
+            var rect = videoView?.frame ?? .zero
+            if rect.midX < 0 || rect.midX <= halfW {
+                rect.origin.x = 0
+            }
+            if rect.midX > halfW {
+                rect.origin.x = viewW - rect.width
+            }
+            UIView.animate(withDuration: 0.25) {
+                videoView?.frame = rect
+            }
+            break
+        default:
+            break
         }
     }
     @objc func gestureControl(pan:UIPanGestureRecognizer) {

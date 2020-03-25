@@ -15,6 +15,10 @@ protocol DBYActionSheetViewDelegate: NSObjectProtocol {
 }
 @IBDesignable
 class DBYActionButton: UIButton {
+    typealias BtnAction = (UIButton)->()
+    
+    var action: BtnAction?
+    
     @IBInspectable var styleValue: Int = 0 {
         didSet {
             if styleValue == 0 {
@@ -51,6 +55,7 @@ class DBYActionButton: UIButton {
         setup()
     }
     private func setup() {
+        addTarget(self, action: #selector(touchUpInSideBtnAction), for: .touchUpInside)
         titleLabel?.font = DBYStyle.font14
         
         if style == .small {
@@ -68,24 +73,15 @@ class DBYActionButton: UIButton {
         layer.borderWidth = 1
         layer.cornerRadius = 8
     }
+    @objc func touchUpInSideBtnAction() {
+        action?(self)
+    }
 }
 class DBYActionSheetView: DBYView {
-    let kickOutDict = [
-        "title": "提示",
-        "message": "检测到你在其他设备上登录",
-        "confirmTitle": "重新登录",
-        "cancelTitle": "退出登录"
-    ]
-    let hangUpDict = [
-        "title": "提示",
-        "message": "你确定要挂断上麦么？",
-        "confirmTitle": "确定",
-        "cancelTitle": "取消"
-    ]
     let largeMargin:CGFloat = 24
     let smallMargin:CGFloat = 12
     let containerW:CGFloat = 200
-    let containerH:CGFloat = 170
+    var containerH:CGFloat = 170
     let btnHeight:CGFloat = 30
     
     var buttons:[DBYActionButton]?
@@ -148,6 +144,10 @@ class DBYActionSheetView: DBYView {
         buttons = actions
         let count = actions.count
         
+        let maxW = containerW - smallMargin * 2
+        let messageH = message.height(withMaxWidth: maxW, font: DBYStyle.font14)
+        
+        var btnY = 54 + messageH + smallMargin
         for i in 0..<count {
             var btnWidth = containerW - smallMargin * 2
             let button = actions[i]
@@ -156,19 +156,19 @@ class DBYActionSheetView: DBYView {
             }
             let offsetX = (containerW - btnWidth) * 0.5
             
-            let y = messageLab.frame.maxY + (smallMargin + btnHeight) * CGFloat(i) + smallMargin
-            
-            button.frame = CGRect(x: offsetX, y: y, width: btnWidth, height: btnHeight)
+            button.frame = CGRect(x: offsetX, y: btnY, width: btnWidth, height: btnHeight)
             container.addSubview(button)
+            
+            btnY += smallMargin + btnHeight
         }
-        UIView.animate(withDuration: 0.25, animations: {
-            self.isHidden = false
-        })
+        containerH = btnY > 170 ? btnY:170
+        let window = UIApplication.shared.keyWindow
+        window?.addSubview(self)
+        frame = window?.bounds ?? .zero
+        autoresizingMask = [.flexibleWidth, .flexibleHeight]
     }
     
     func dismiss() {
-        UIView.animate(withDuration: 0.25, animations: {
-            self.isHidden = true
-        })
+        removeFromSuperview()
     }
 }

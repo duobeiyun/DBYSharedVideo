@@ -23,12 +23,14 @@ public class DBYLiveController: DBY1VNController {
     var showTip:Bool = false
     var micOpen:Bool = false
     var zanCount = 0
+    var inviteIndex = 0
     
     let btnWidth: CGFloat = 60
     let btnHeight: CGFloat = 30
     let tipViewHeight:CGFloat = 38
     let forbiddenBtnHeight:CGFloat = 40
     
+    lazy var videoDict = [String: DBYStudentVideoView]()
     lazy var liveManager:DBYLiveManager = DBYLiveManager()
     
     lazy var chatBar = DBYChatBar()
@@ -37,7 +39,6 @@ public class DBYLiveController: DBY1VNController {
     lazy var messageTipView = DBYMessageTipView()
     lazy var micListView = DBYMicListView()
     lazy var hangUpView = DBYHangUpView()
-    lazy var actionSheetView = DBYActionSheetView()
     lazy var forbiddenButton = DBYButton()
     lazy var zanButton = UIButton(type: .custom)
     lazy var inputButton:DBYButton = {
@@ -63,12 +64,22 @@ public class DBYLiveController: DBY1VNController {
         btn.imageView?.contentMode = .center
         return btn
     }()
+    lazy var images:[UIImage] = {
+        var arr = [UIImage]()
+        for i in 0..<30 {
+            let name = "zan_000" + String(format: "%02d", i)
+            let image = UIImage(name: name)
+            arr.append(image!)
+        }
+        return arr
+    }()
     
     lazy var inputVC = DBYInputController()
     lazy var loadingView = DBYVideoLoadingView()
     lazy var watermarkView = DBYWatermarkView()
     lazy var marqueeView = DBYMarqueeView()
     lazy var questionView = DBYChatListView()
+    lazy var zanView = UIImageView()
     
     var roomConfig: DBYRoomConfig?
     var sensitiveWords: [String]?
@@ -96,8 +107,6 @@ public class DBYLiveController: DBY1VNController {
         
         if authinfo?.classType == .sharedVideo {
             liveManager.setSharedVideoView(mainView)
-            liveManager.setLocalVideoView(videoView.video)
-            liveManager.setStudentViewWith(videoView.video)
         }else {
             liveManager.setTeacherViewWith(mainView)
         }
@@ -150,9 +159,8 @@ public class DBYLiveController: DBY1VNController {
         view.addSubview(messageTipView)
         view.addSubview(micListView)
         view.addSubview(hangUpView)
-        view.addSubview(actionSheetView)
-        view.addSubview(videoView)
         view.addSubview(zanButton)
+        view.addSubview(zanView)
     }
     override func addActions() {
         super.addActions()
@@ -165,13 +173,14 @@ public class DBYLiveController: DBY1VNController {
         
         topBar.set(authinfo?.courseTitle)
         settingView.set(buttons: [audioBtn])
-        roomControlbar.append(title: "互动")
+        roomControlbar.append(title: "讨论")
+        roomControlbar.append(title: "课程信息")
         scrollContainer.append(view: chatContainer)
+        scrollContainer.append(view: courseInfoView)
         chatBar.emojiImageDict = emojiImageDict
         chatBar.backgroundColor = UIColor.white
         hangUpView.isHidden = true
         messageTipView.isHidden = true
-        actionSheetView.isHidden = true
         forbiddenButton.isHidden = true
         micListView.isHidden = true
         let volume = DBYSystemControl.shared.getVolume()
@@ -179,6 +188,7 @@ public class DBYLiveController: DBY1VNController {
         forbiddenButton.titleLabel?.font = UIFont.systemFont(ofSize: 15)
         forbiddenButton.setTitle(" 已开启全体禁言", for: .normal)
         zanButton.setImage(UIImage(name: "greate-icon"), for: .normal)
+        courseInfoView.set(title: authinfo?.courseTitle)
     }
     override func setupLandscapeUI() {
         super.setupLandscapeUI()
@@ -216,13 +226,13 @@ public class DBYLiveController: DBY1VNController {
         chatBar.frame = chatBarFrame
         hangUpView.frame = hangUpViewFrame
         announcementView.frame = announcementViewFrame
-        actionSheetView.frame = view.bounds
         messageTipView.frame = smallPopViewFrame
         micListView.frame = micListViewFrame
         forbiddenButton.frame = forbiddenBtnFrame
-        loadingView.frame = mainViewFrame
-        videoView.frame = CGRect(x: mainViewFrame.minX, y: mainViewFrame.maxY, width: 170, height: 150)
+        loadingView.frame = mainView.bounds
         zanButton.frame = CGRect(x: 300, y: 600, width: 48, height: 48)
+        zanView.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
+        zanView.center = view.center
         updateMicListViewFrame()
     }
     override func updatePortraitFrame() {
@@ -508,6 +518,17 @@ public class DBYLiveController: DBY1VNController {
         roomControlbar.scroll(at: 0)
         scrollContainer.scroll(at: 0)
     }
+    func createVideoView(uid: String) -> DBYStudentVideoView {
+        let videoView = DBYStudentVideoView()
+        videoView.userId = uid
+        videoDict[uid] = videoView
+        view.addSubview(videoView)
+        videoView.frame = CGRect(x: mainViewFrame.minX, y: mainViewFrame.maxY, width: 170, height: 150)
+        let drag = UIPanGestureRecognizer(target: self,
+                                          action: #selector(dragVideoView(pan:)))
+        videoView.addGestureRecognizer(drag)
+        return videoView
+    }
     func setQuestions(list: [[String:Any]]) {
         questions = list
         questionView.set(list: list)
@@ -576,13 +597,69 @@ public class DBYLiveController: DBY1VNController {
             chatListView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: true)
         }
     }
-    @objc func hiddenActionSheet() {
-        actionSheetView.dismiss()
+    
+    func requestOpenCamera() {
+        let actionSheetView = DBYActionSheetView()
+        let button1 = DBYActionButton(style: .confirm)
+        let button2 = DBYActionButton(style: .cancel)
+        
+        button1.setTitle("申请上台", for: .normal)
+        button2.setTitle("取消", for: .normal)
+        
+        unowned let weakSelf = self
+        button1.action = { btn in
+            actionSheetView.dismiss()
+            weakSelf.liveManager.requestToOpenCamera()
+            weakSelf.roomControlbar.setCameraState(state: .invite)
+        }
+        button2.action = { btn in
+            actionSheetView.dismiss()
+        }
+        actionSheetView.show(title: "申请上台",
+                             message: "是否要申请上台发言？",
+                             actions: [button1, button2])
     }
-    @objc func hangup() {
-        hangUpView.dismiss()
-        liveManager.closeMicrophone()
-        actionSheetView.dismiss()
+    func cancelOpenCamera() {
+        let actionSheetView = DBYActionSheetView()
+        let button1 = DBYActionButton(style: .confirm)
+        let button2 = DBYActionButton(style: .cancel)
+        
+        button1.setTitle("取消上台", for: .normal)
+        button2.setTitle("取消", for: .normal)
+        
+        unowned let weakSelf = self
+        button1.action = { btn in
+            actionSheetView.dismiss()
+            weakSelf.roomControlbar.setCameraState(state: .normal)
+            weakSelf.liveManager.requestToCloseCamera()
+        }
+        button2.action = { btn in
+            actionSheetView.dismiss()
+        }
+        actionSheetView.show(title: "上台信息",
+                             message: "前方还有 \(inviteIndex) 人等待上台点击取消上台申请",
+                             actions: [button1, button2])
+    }
+    func closeCamera() {
+        let actionSheetView = DBYActionSheetView()
+        let button1 = DBYActionButton(style: .confirm)
+        let button2 = DBYActionButton(style: .cancel)
+        
+        button1.setTitle("确认退出", for: .normal)
+        button2.setTitle("取消", for: .normal)
+        
+        unowned let weakSelf = self
+        button1.action = { btn in
+            actionSheetView.dismiss()
+            weakSelf.roomControlbar.setCameraState(state: .normal)
+            weakSelf.liveManager.requestToCloseCamera()
+        }
+        button2.action = { btn in
+            actionSheetView.dismiss()
+        }
+        actionSheetView.show(title: "确认退出上台",
+                             message: "你确认要退出上台？",
+                             actions: [button1, button2])
     }
     //MARK: - objc functions
     
@@ -613,6 +690,14 @@ public class DBYLiveController: DBY1VNController {
         present(inputVC, animated: true, completion: nil)
     }
     @objc func zanAnimation(sender:UIButton) {
+        if zanView.isAnimating {
+            return
+        }
+        zanView.animationImages = images
+        zanView.animationRepeatCount = 1
+        zanView.animationDuration = 0.3
+        zanView.startAnimating()
+        
         zanCount += 1
         stopZanTimer()
         startZanTimer()
@@ -680,7 +765,8 @@ public class DBYLiveController: DBY1VNController {
         super.oneTap(tap: tap)
         hiddenScrollContainer()
     }
-
+    
+//MARK: - scrollView
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         chatBar.endInput()
     }
@@ -717,46 +803,25 @@ extension DBYLiveController: UITableViewDelegate, UITableViewDataSource {
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var cell:DBYCommentCell = DBYCommentCell()
         
-        let chatList = allChatList
-        if chatList.count <= indexPath.row {
+        if allChatList.count <= indexPath.row {
             return cell
         }
-        let chatDict = chatList[indexPath.row]
-        let role:Int = chatDict["role"] as? Int ?? 0
-        let isOwner:Bool = chatDict["isOwner"] as? Bool ?? false
-        let name:String = chatDict["userName"] as? String ?? ""
-        let message:String = chatDict["message"] as? String ?? ""
+        var chatDict = allChatList[indexPath.row]
+        if let type:String = chatDict["type"] as? String, type == "thumbup" {
+            let thumbCell = tableView.dequeueReusableCell(withIdentifier: zanCell, for: indexPath) as! DBYZanCell
+            thumbCell.set(text: chatDict["name"] as? String)
+            return thumbCell
+        }
+        chatDict["size"] = tableView.bounds.size
+        let model = DBYCellModel.commentCellModel(dict: chatDict, roomConfig: roomConfig)
         
-        if isOwner {
-            cell = tableView.dequeueReusableCell(withIdentifier: toIdentifier) as! DBYCommentCell
-            if isPortrait() {
-                cell.setBubbleImage(UIImage(name: "chat-to-bubble"))
-            }else {
-                cell.setBubbleImage(UIImage(name: "chat-to-dark-bubble"))
-            }
-        }else {
-            cell = tableView.dequeueReusableCell(withIdentifier: fromIdentifier) as! DBYCommentCell
-            if isPortrait() {
-                cell.setBubbleImage(UIImage(name: "chat-from-bubble"))
-            }else {
-                cell.setBubbleImage(UIImage(name: "chat-from-dark-bubble"))
-            }
-        }
-        if isPortrait() {
-            cell.setTextColor(DBYStyle.dark)
-        }else {
-            cell.setTextColor(UIColor.white)
-        }
-        cell.indexPath = indexPath
-        cell.delegate = self
-        let avatarUrl = DBYUrlConfig.shared().staticUrl(withSourceName: roomConfig?.avatar ?? "")
-        let badge = badgeUrl(role: role, badgeDict: roomConfig?.badge)
-        let width = cell.bounds.width - 100
-        let attMessage = beautifyMessage(message: message, maxWidth: width)
-        cell.setText(name: name,
-                     message: attMessage,
-                     avatarUrl: avatarUrl,
-                     badge: badge)
+        cell = tableView.dequeueReusableCell(withIdentifier: model.identifier) as! DBYCommentCell
+        cell.setTextColor(model.textColor)
+        cell.setBubbleImage(model.bubbleImage)
+        cell.setText(name: model.name,
+                     message: model.message,
+                     avatarUrl: model.avatarUrl,
+                     badge: model.badge)
         
         return cell
     }
@@ -787,7 +852,7 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         }
     }
     public func liveManager(_ manager: DBYLiveManager!, onlineUserCountWith count: Int) {
-        
+        courseInfoView.setUserCount(count: count)
     }
     public func liveManager(_ manager: DBYLiveManager!, studentCanSpeak canSpeak: Bool) {
         micOpen = canSpeak
@@ -831,7 +896,9 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         
     }
     public func liveManager(_ manager: DBYLiveManager!, teacherStatusChangedWithOnline online: Bool, name: String!) {
-        
+        if online {
+            courseInfoView.setTeacherName(name: name)
+        }
     }
 
     public func liveManager(_ manager: DBYLiveManager!, teacherGiveMicToStudentWithUserInfo userInfo: [AnyHashable : Any]! = [:], canSpeak: Bool) {
@@ -847,18 +914,27 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     }
     public func liveManager(_ manager: DBYLiveManager!, hasVideo: Bool, in view: UIView!) {
         if hasVideo {
+            //切换到最前面
             showMarqueeView()
         }
     }
     public func liveManagerDidKickedOff(_ manager: DBYLiveManager!) {
+        let actionSheetView = DBYActionSheetView()
         let button1 = DBYActionButton(style: .confirm)
         let button2 = DBYActionButton(style: .cancel)
         
         button1.setTitle("重新登录", for: .normal)
         button2.setTitle("退出登录", for: .normal)
         
-        button1.addTarget(self, action: #selector(enterRoom), for: .touchUpInside)
-        button2.addTarget(self, action: #selector(exitRoom), for: .touchUpInside)
+        unowned let weakSelf = self
+        button1.action = { btn in
+            actionSheetView.dismiss()
+            weakSelf.enterRoom()
+        }
+        button2.action = { btn in
+            actionSheetView.dismiss()
+            weakSelf.exitRoom()
+        }
         
         actionSheetView.show(title: "提示",
                         message: "检测到你在其他设备上登录",
@@ -920,6 +996,7 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         removeQustion(questionId: questionId)
     }
     public func liveManager(_ manager: DBYLiveManager!, cameraRequest index: UInt) {
+        inviteIndex = Int(index)
         print("前方还有 \(index) 人正在等待上台。")
         let message = "前方还有 \(index) 人正在等待上台。"
         let image = UIImage(name: "camera-request-icon")
@@ -928,13 +1005,31 @@ extension DBYLiveController: DBYLiveManagerDelegate {
                            type: .close)
     }
     public func initVideoRecorder(_ liveManager: DBYLiveManager!, userId uid: String!) {
-        roomControlbar.setCameraState(state: DBYRoomControlbar.CameraState.joined)
+        let videoView = createVideoView(uid: uid)
+        liveManager.setLocalVideoView(videoView.video)
+        videoView.setUserName(name: authinfo?.nickName)
     }
     public func destroyVideoRecorder(_ liveManager: DBYLiveManager!, userId uid: String!) {
-        roomControlbar.setCameraState(state: DBYRoomControlbar.CameraState.normal)
+        let videoView = videoDict.removeValue(forKey: uid)
+        videoView?.removeFromSuperview()
+    }
+    public func liveManager(_ manager: DBYLiveManager!, cameraStateChange state: DBYCameraState) {
+        if state == .normal {
+            roomControlbar.setCameraState(state: .normal)
+        }
+        if state == .invite {
+            roomControlbar.setCameraState(state: .invite)
+        }
+        if state == .joined {
+            roomControlbar.setCameraState(state: .joined)
+        }
     }
     public func willReceivedVideoData(_ liveManager: DBYLiveManager!, userId uid: String!) {
-        unowned let weakSelf = self
+        if uid == authinfo?.teacherId {
+            return
+        }
+        let videoView = createVideoView(uid: uid)
+        liveManager.setStudentView(videoView.video, withUserId: uid)
         liveManager.getUserInfo(uid) { (dict) in
             guard let userInfo = dict as? [String: Any] else {
                 return
@@ -942,13 +1037,32 @@ extension DBYLiveController: DBYLiveManagerDelegate {
             guard let userName = userInfo["userName"] as? String else {
                 return
             }
-            if weakSelf.videoView.userId == uid {
-                weakSelf.videoView.setUserName(name: userName)
-            }
+            videoView.setUserName(name: userName)
         }
     }
     public func willInterruptVideoData(_ liveManager: DBYLiveManager!, userId uid: String!) {
-        
+        let videoView = videoDict.removeValue(forKey: uid)
+        videoView?.removeFromSuperview()
+    }
+    public func liveManager(_ manager: DBYLiveManager!, thumbupWithCount count: Int, userName: String!) {
+        if userName.count < 1 {
+            courseInfoView.setThumbCount(count: count)
+            return
+        }
+        print("\(userName ?? "")为教师点了\(count)个赞");
+        let dict = [
+            "type": "thumbup",
+            "name": "\(userName ?? "")为教师点了\(count)个赞"
+        ]
+        let count = allChatList.count
+        allChatList.append(dict)
+        let index = IndexPath(row:count, section:0)
+        chatListView.beginUpdates()
+        chatListView.insertRows(at: [index], with: .automatic)
+        chatListView.endUpdates()
+        if count > 0 {
+            chatListView.scrollToRow(at: index, at: .bottom, animated: true)
+        }
     }
 }
 extension DBYLiveController:DBYNetworkTipViewDelegate {
@@ -1003,6 +1117,17 @@ extension DBYLiveController: DBYChatBarDelegate {
     }
 }
 extension DBYLiveController: DBYRoomControlbarDelegate {
+    func roomControlBar(owner: DBYRoomControlbar, stateWillChange state: DBYRoomControlbar.CameraState) {
+        if state == .normal {
+            requestOpenCamera()
+        }
+        if state == .invite {
+            cancelOpenCamera()
+        }
+        if state == .joined {
+            closeCamera()
+        }
+    }
     func roomControlBar(owner: DBYRoomControlbar, didClickCameraRequest selected: Bool) {
         if selected {
             liveManager.requestToOpenCamera()
@@ -1059,15 +1184,22 @@ extension DBYLiveController: DBYVoteViewDelegate {
 //MARK: - DBYHangUpViewDelegate
 extension DBYLiveController: DBYHangUpViewDelegate {
     func hangUpViewShouldHangUp(owner: DBYHangUpView) {
+        let actionSheetView = DBYActionSheetView()
         let button1 = DBYActionButton(style: .confirm)
         let button2 = DBYActionButton(style: .cancel)
         
         button1.setTitle("确定", for: .normal)
         button2.setTitle("取消", for: .normal)
         
-        button1.addTarget(self, action: #selector(hangup), for: .touchUpInside)
-        button2.addTarget(self, action: #selector(hiddenActionSheet), for: .touchUpInside)
-        
+        unowned let weakSelf = self
+        button1.action = { btn in
+            weakSelf.hangUpView.dismiss()
+            weakSelf.liveManager.closeMicrophone()
+            actionSheetView.dismiss()
+        }
+        button2.action = { btn in
+            actionSheetView.dismiss()
+        }
         actionSheetView.show(title: "提示",
                              message: "你确定要挂断上麦么？",
                              actions: [button1, button2])

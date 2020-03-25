@@ -59,7 +59,7 @@ class DBYCommentCell: UITableViewCell {
     func setBubbleImage(_ image: UIImage?){
         bubbleView.image = image
     }
-    func setTextColor(_ color: UIColor) {
+    func setTextColor(_ color: UIColor?) {
         messageLab.textColor = color
     }
     @objc func longPress(gesture: UILongPressGestureRecognizer) {

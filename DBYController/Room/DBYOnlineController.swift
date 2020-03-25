@@ -327,9 +327,7 @@ extension DBYOnlineController: DBYTopBarDelegate {
     }
 }
 extension DBYOnlineController: DBYRoomControlbarDelegate {
-    func roomControlBarDidClickCameraRequest(owner: DBYRoomControlbar) {
-        
-    }
+    
     
     func roomControlBarDidSelected(owner: DBYRoomControlbar, index: Int) {
         scrollContainer.scroll(at: index)

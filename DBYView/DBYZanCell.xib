@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="axv-Y9-dEp" customClass="DBYZanCell" customModule="DBYSharedVideo" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+            <autoresizingMask key="autoresizingMask"/>
+            <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="axv-Y9-dEp" id="PPB-t0-eEh">
+                <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+                <autoresizingMask key="autoresizingMask"/>
+                <subviews>
+                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="avatar" translatesAutoresizingMaskIntoConstraints="NO" id="Kdn-Az-npc">
+                        <rect key="frame" x="12" y="4" width="36" height="36"/>
+                        <color key="tintColor" systemColor="systemOrangeColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstAttribute="height" constant="36" id="AXw-1q-oH5"/>
+                            <constraint firstAttribute="width" constant="36" id="XGx-Fn-7A1"/>
+                        </constraints>
+                    </imageView>
+                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6zH-Lz-3R5">
+                        <rect key="frame" x="56" y="13.5" width="35.5" height="17"/>
+                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                        <nil key="highlightedColor"/>
+                    </label>
+                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="thumb-icon" translatesAutoresizingMaskIntoConstraints="NO" id="C2t-IU-IjK">
+                        <rect key="frame" x="95.5" y="15" width="14" height="14"/>
+                        <color key="tintColor" systemColor="systemOrangeColor" red="1" green="0.58431372550000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    </imageView>
+                </subviews>
+                <constraints>
+                    <constraint firstAttribute="bottom" secondItem="Kdn-Az-npc" secondAttribute="bottom" constant="4" id="0Y0-k1-gXq"/>
+                    <constraint firstItem="Kdn-Az-npc" firstAttribute="leading" secondItem="PPB-t0-eEh" secondAttribute="leading" constant="12" id="4UH-Kh-VhY"/>
+                    <constraint firstItem="C2t-IU-IjK" firstAttribute="centerY" secondItem="6zH-Lz-3R5" secondAttribute="centerY" id="CeM-s8-TOm"/>
+                    <constraint firstItem="6zH-Lz-3R5" firstAttribute="leading" secondItem="Kdn-Az-npc" secondAttribute="trailing" constant="8" id="Dnf-Z8-mxD"/>
+                    <constraint firstItem="Kdn-Az-npc" firstAttribute="top" secondItem="PPB-t0-eEh" secondAttribute="top" constant="4" id="SIu-fT-H70"/>
+                    <constraint firstItem="C2t-IU-IjK" firstAttribute="leading" secondItem="6zH-Lz-3R5" secondAttribute="trailing" constant="4" id="SYQ-WZ-Z0c"/>
+                    <constraint firstItem="6zH-Lz-3R5" firstAttribute="centerY" secondItem="Kdn-Az-npc" secondAttribute="centerY" id="tcH-LY-Slj"/>
+                </constraints>
+            </tableViewCellContentView>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <connections>
+                <outlet property="titleLabel" destination="6zH-Lz-3R5" id="evD-0C-c1g"/>
+            </connections>
+            <point key="canvasLocation" x="81" y="-13"/>
+        </tableViewCell>
+    </objects>
+    <resources>
+        <image name="avatar" width="36" height="36"/>
+        <image name="thumb-icon" width="14" height="14"/>
+    </resources>
+</document>
