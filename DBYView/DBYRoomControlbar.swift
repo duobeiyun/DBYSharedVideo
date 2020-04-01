@@ -12,11 +12,6 @@ protocol DBYRoomControlbarDelegate: NSObjectProtocol {
     func roomControlBarDidSelected(owner: DBYRoomControlbar, index:Int)
     func roomControlBar(owner: DBYRoomControlbar, stateWillChange state: DBYRoomControlbar.CameraState)
 }
-extension DBYRoomControlbarDelegate {
-    func roomControlBar(owner: DBYRoomControlbar, stateWillChange state: DBYRoomControlbar.CameraState) {
-        
-    }
-}
 
 class DBYRoomControlbar: UIView {
     enum CameraState {

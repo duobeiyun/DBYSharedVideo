@@ -48,6 +48,7 @@ public class DBY1VNController: UIViewController {
     let fromIdentifier: String = "DBYCommentFromCell"
     let toIdentifier: String = "DBYCommentToCell"
     let zanCell = "DBYZanCell"
+    var originTransform:CGAffineTransform = CGAffineTransform(scaleX: 1, y: 1)
     
     @objc public var authinfo: DBYAuthInfo?
     
@@ -81,6 +82,7 @@ public class DBY1VNController: UIViewController {
         }
     }
     
+    lazy var videoDict = [String: DBYStudentVideoView]()
     //缓存高度字典
     lazy var cellHeightCache:[Int: CGFloat] = [Int: CGFloat]()
     
@@ -214,6 +216,8 @@ public class DBY1VNController: UIViewController {
         roomControlbar.backgroundColor = UIColor.white
         mainView.backgroundColor = UIColor.white
         
+        roomControlbar.delegate = self
+        scrollContainer.delegate = self
         scrollContainer.bounces = false
         scrollContainer.isPagingEnabled = true
         scrollContainer.backgroundColor = UIColor.clear
@@ -413,7 +417,36 @@ public class DBY1VNController: UIViewController {
         DBYSystemControl.shared.setBrightness(value: brightness + value)
         brightnessProgressView.setProgress(value: brightness + value)
     }
-    
+    func createVideoView(uid: String) -> DBYStudentVideoView {
+        let videoView = DBYStudentVideoView()
+        videoView.userId = uid
+        videoDict[uid] = videoView
+        view.addSubview(videoView)
+        videoView.frame = CGRect(x: mainViewFrame.minX, y: mainViewFrame.maxY, width: 170, height: 150)
+        let drag = UIPanGestureRecognizer(target: self,
+                                          action: #selector(dragVideoView(pan:)))
+        let pinch = UIPinchGestureRecognizer(target: self,
+                                             action: #selector(scaleVideoView(pinch:)))
+        
+        videoView.addGestureRecognizer(drag)
+        videoView.addGestureRecognizer(pinch)
+        
+        return videoView
+    }
+    func adjustVideoViewFrame(videoView: UIView?) {
+        let viewW = view.bounds.width
+        let halfW = viewW * 0.5
+        var rect = videoView?.frame ?? .zero
+        if rect.midX < 0 || rect.midX <= halfW {
+            rect.origin.x = 0
+        }
+        if rect.midX > halfW {
+            rect.origin.x = viewW - rect.width
+        }
+        UIView.animate(withDuration: 0.25) {
+            videoView?.frame = rect
+        }
+    }
     //MARK: - objc functions
     @objc func volumeChange(notification:Notification) {
         if let volume = notification.object as? CGFloat {
@@ -421,26 +454,32 @@ public class DBY1VNController: UIViewController {
             print("---\(volume)")
         }
     }
+    @objc func scaleVideoView(pinch:UIPinchGestureRecognizer) {
+        let scale = pinch.scale
+        
+        let videoView = pinch.view
+        
+        if pinch.state == .began {
+            videoView?.transform = originTransform
+        }
+        if pinch.state == .changed {
+            videoView?.transform = originTransform.scaledBy(x: scale, y: scale)
+        }
+        if pinch.state == .ended {
+            originTransform = CGAffineTransform(scaleX: scale, y: scale)
+            adjustVideoViewFrame(videoView: videoView)
+        }
+    }
     @objc func dragVideoView(pan:UIPanGestureRecognizer) {
         let videoView = pan.view
         let position = pan.location(in: view)
-        let viewW = view.bounds.width
-        let halfW = viewW * 0.5
+        
         switch pan.state {
         case .changed:
             videoView?.center = position
             break
         case .ended:
-            var rect = videoView?.frame ?? .zero
-            if rect.midX < 0 || rect.midX <= halfW {
-                rect.origin.x = 0
-            }
-            if rect.midX > halfW {
-                rect.origin.x = viewW - rect.width
-            }
-            UIView.animate(withDuration: 0.25) {
-                videoView?.frame = rect
-            }
+            adjustVideoViewFrame(videoView:videoView)
             break
         default:
             break
@@ -500,5 +539,36 @@ public class DBY1VNController: UIViewController {
     }
     @objc func playbackEnable(sender:UIButton) {
         sender.isSelected = !sender.isSelected
+    }
+    func requestOpenCamera() {
+    }
+    func cancelOpenCamera() {
+    }
+    func closeCamera() {
+    }
+}
+extension DBY1VNController: UIScrollViewDelegate {
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        if scrollView == scrollContainer {
+            let index = Int(scrollView.contentOffset.x / scrollContainerFrame.width)
+            roomControlbar.scroll(at: index)
+        }
+    }
+}
+extension DBY1VNController: DBYRoomControlbarDelegate {
+    func roomControlBar(owner: DBYRoomControlbar, stateWillChange state: DBYRoomControlbar.CameraState) {
+        if state == .normal {
+            requestOpenCamera()
+        }
+        if state == .invite {
+            cancelOpenCamera()
+        }
+        if state == .joined {
+            closeCamera()
+        }
+    }
+    
+    func roomControlBarDidSelected(owner: DBYRoomControlbar, index: Int) {
+        scrollContainer.scroll(at: index)
     }
 }

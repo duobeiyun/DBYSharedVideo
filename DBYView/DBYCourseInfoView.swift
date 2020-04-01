@@ -21,9 +21,11 @@ class DBYCourseInfoView: DBYNibView {
         teacherLabel.text = "主讲教师：" + name
     }
     func setUserCount(count: Int) {
-        userCountbutton.setTitle("\(count)", for: .normal)
+        userCountbutton.isHidden = false
+        userCountbutton.setTitle(" \(count)", for: .normal)
     }
     func setThumbCount(count: Int) {
-        thumbCountbutton.setTitle("\(count)", for: .normal)
+        thumbCountbutton.isHidden = false
+        thumbCountbutton.setTitle(" \(count)", for: .normal)
     }
 }

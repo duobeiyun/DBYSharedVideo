@@ -59,6 +59,7 @@ public class DBYOfflineController: DBYPlaybackController {
     override func setupStaticUI() {
         super.setupStaticUI()
         topBar.set(title)
+        courseInfoView.set(title: title)
     }
     override func setupLandscapeUI() {
         super.setupLandscapeUI()
@@ -137,6 +138,9 @@ extension DBYOfflineController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 extension DBYOfflineController: DBYOfflinePlayBackManagerDelegate {
+    public func offlinePlayBackManager(_ manager: DBYOfflinePlayBackManager!, thumbupWithCount count: Int) {
+        courseInfoView.setThumbCount(count: count)
+    }
     public func offlinePlayBackManager(_ manager: DBYOfflinePlayBackManager!, playStateIsPlaying isPlaying: Bool) {
         if isPlaying {
             bottomBar.set(state: .play)

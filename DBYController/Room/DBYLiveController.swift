@@ -30,7 +30,6 @@ public class DBYLiveController: DBY1VNController {
     let tipViewHeight:CGFloat = 38
     let forbiddenBtnHeight:CGFloat = 40
     
-    lazy var videoDict = [String: DBYStudentVideoView]()
     lazy var liveManager:DBYLiveManager = DBYLiveManager()
     
     lazy var chatBar = DBYChatBar()
@@ -95,7 +94,6 @@ public class DBYLiveController: DBY1VNController {
         chatListView.dataSource = self
         netTipView.delegate = self
         chatBar.delegate = self
-        roomControlbar.delegate = self
         messageTipView.delegate = self
         micListView.delegate = self
         hangUpView.delegate = self
@@ -103,7 +101,6 @@ public class DBYLiveController: DBY1VNController {
         bottomBar.delegate = self
         settingView.delegate = self
         videoTipView.delegate = self
-        scrollContainer.delegate = self
         
         if authinfo?.classType == .sharedVideo {
             liveManager.setSharedVideoView(mainView)
@@ -230,7 +227,7 @@ public class DBYLiveController: DBY1VNController {
         micListView.frame = micListViewFrame
         forbiddenButton.frame = forbiddenBtnFrame
         loadingView.frame = mainView.bounds
-        zanButton.frame = CGRect(x: 300, y: 600, width: 48, height: 48)
+        
         zanView.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
         zanView.center = view.center
         updateMicListViewFrame()
@@ -268,6 +265,7 @@ public class DBYLiveController: DBY1VNController {
                                    y: chatListViewFrame.maxY + normalMargin,
                                    width: chatListViewFrame.width - normalMargin * 2,
                                    height: forbiddenBtnHeight)
+        zanButton.frame = CGRect(x: size.width - 60, y: size.height - 160, width: 48, height: 48)
     }
     override func updateLandscapeFrame() {
         super.updateLandscapeFrame()
@@ -518,17 +516,6 @@ public class DBYLiveController: DBY1VNController {
         roomControlbar.scroll(at: 0)
         scrollContainer.scroll(at: 0)
     }
-    func createVideoView(uid: String) -> DBYStudentVideoView {
-        let videoView = DBYStudentVideoView()
-        videoView.userId = uid
-        videoDict[uid] = videoView
-        view.addSubview(videoView)
-        videoView.frame = CGRect(x: mainViewFrame.minX, y: mainViewFrame.maxY, width: 170, height: 150)
-        let drag = UIPanGestureRecognizer(target: self,
-                                          action: #selector(dragVideoView(pan:)))
-        videoView.addGestureRecognizer(drag)
-        return videoView
-    }
     func setQuestions(list: [[String:Any]]) {
         questions = list
         questionView.set(list: list)
@@ -598,7 +585,7 @@ public class DBYLiveController: DBY1VNController {
         }
     }
     
-    func requestOpenCamera() {
+    override func requestOpenCamera() {
         let actionSheetView = DBYActionSheetView()
         let button1 = DBYActionButton(style: .confirm)
         let button2 = DBYActionButton(style: .cancel)
@@ -619,7 +606,7 @@ public class DBYLiveController: DBY1VNController {
                              message: "是否要申请上台发言？",
                              actions: [button1, button2])
     }
-    func cancelOpenCamera() {
+    override func cancelOpenCamera() {
         let actionSheetView = DBYActionSheetView()
         let button1 = DBYActionButton(style: .confirm)
         let button2 = DBYActionButton(style: .cancel)
@@ -640,7 +627,7 @@ public class DBYLiveController: DBY1VNController {
                              message: "前方还有 \(inviteIndex) 人等待上台点击取消上台申请",
                              actions: [button1, button2])
     }
-    func closeCamera() {
+    override func closeCamera() {
         let actionSheetView = DBYActionSheetView()
         let button1 = DBYActionButton(style: .confirm)
         let button2 = DBYActionButton(style: .cancel)
@@ -770,11 +757,7 @@ public class DBYLiveController: DBY1VNController {
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         chatBar.endInput()
     }
-    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        if scrollView == scrollContainer {
-            let index = Int(scrollView.contentOffset.x / scrollContainerFrame.width)
-            roomControlbar.scroll(at: index)
-        }
+    public override func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         if scrollView == chatListView {
             let delta = scrollView.contentSize.height - scrollView.contentOffset.y
             showTip = delta > scrollView.bounds.height
@@ -782,6 +765,8 @@ public class DBYLiveController: DBY1VNController {
                 newMessageCount = 0
                 messageTipView.close()
             }
+        }else {
+            super.scrollViewDidEndDecelerating(scrollView)
         }
     }
 }
@@ -1116,29 +1101,7 @@ extension DBYLiveController: DBYChatBarDelegate {
         chatListView.frame = chatListViewFrame
     }
 }
-extension DBYLiveController: DBYRoomControlbarDelegate {
-    func roomControlBar(owner: DBYRoomControlbar, stateWillChange state: DBYRoomControlbar.CameraState) {
-        if state == .normal {
-            requestOpenCamera()
-        }
-        if state == .invite {
-            cancelOpenCamera()
-        }
-        if state == .joined {
-            closeCamera()
-        }
-    }
-    func roomControlBar(owner: DBYRoomControlbar, didClickCameraRequest selected: Bool) {
-        if selected {
-            liveManager.requestToOpenCamera()
-        }else {
-            liveManager.requestToCloseCamera()
-        }
-    }
-    
-    func roomControlBarDidSelected(owner: DBYRoomControlbar, index: Int) {
-        scrollContainer.scroll(at: index)
-    }
+extension DBYLiveController {
     
 }
 //MARK: - DBYMessageTipViewDelegate

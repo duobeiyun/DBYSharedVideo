@@ -263,6 +263,14 @@ extension DBYOnlineController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 extension DBYOnlineController:DBYOnlinePlayBackManagerDelegate {
+    public func playBackManager(_ manager: DBYOnlinePlayBackManager!, onlineWithuserId uid: String!, nickName: String!, userRole role: Int32) {
+        if role == 1 {
+            courseInfoView.setTeacherName(name: nickName)
+        }
+    }
+    public func playBackManager(_ manager: DBYOnlinePlayBackManager!, thumbupWithCount count: Int) {
+        courseInfoView.setThumbCount(count: count)
+    }
     public func playbackManager(_ manager: DBYOnlinePlayBackManager!, playStateChange isPlaying: Bool) {
         if isPlaying {
             bottomBar.set(state: .play)
@@ -324,13 +332,6 @@ extension DBYOnlineController: DBYTopBarDelegate {
     
     func settingButtonClick(owner: DBYTopBar) {
         settingClick()
-    }
-}
-extension DBYOnlineController: DBYRoomControlbarDelegate {
-    
-    
-    func roomControlBarDidSelected(owner: DBYRoomControlbar, index: Int) {
-        scrollContainer.scroll(at: index)
     }
 }
 //MARK: - DBYBottomBarDelegate

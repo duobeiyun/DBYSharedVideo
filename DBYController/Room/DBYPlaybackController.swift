@@ -37,6 +37,8 @@ public class DBYPlaybackController: DBY1VNController {
         super.viewDidLoad()
         
         startHiddenTimer()
+        roomControlbar.scroll(at: 0)
+        scrollContainer.scroll(at: 0)
     }
     override public func addSubviews() {
         super.addSubviews()
@@ -54,7 +56,10 @@ public class DBYPlaybackController: DBY1VNController {
         topBar.set(authinfo?.courseTitle)
         settingView.set(speeds: playRateTitles)
         roomControlbar.append(title: "互动")
+        roomControlbar.append(title: "课程信息")
         scrollContainer.append(view: chatContainer)
+        scrollContainer.append(view: courseInfoView)
+        courseInfoView.set(title: authinfo?.courseTitle)
     }
     
     override func setupPortraitUI() {
