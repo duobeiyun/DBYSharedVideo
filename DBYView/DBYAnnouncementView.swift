@@ -60,7 +60,7 @@ class DBYAnnouncementView: DBYNibView {
                       selector: #selector(updateMessage),
                       userInfo: nil,
                       repeats: true)
-        RunLoop.current.add(timer!, forMode: RunLoop.Mode.default)
+        RunLoop.main.add(timer!, forMode: RunLoop.Mode.common)
     }
     func stopTimer() {
         timer?.invalidate()

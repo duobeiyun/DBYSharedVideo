@@ -34,6 +34,9 @@ class DBYHangUpView: DBYNibView {
     }
     override func setupUI() {
         contentView?.layer.insertSublayer(backgroundLayer, at: 0)
+        let drag = UIPanGestureRecognizer(target: self,
+        action: #selector(dragVideoView(pan:)))
+        addGestureRecognizer(drag)
     }
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -45,6 +48,32 @@ class DBYHangUpView: DBYNibView {
         backgroundLayer.strokeColor = DBYStyle.brown.cgColor
         backgroundLayer.path = path.cgPath
         backgroundLayer.frame = bounds
+    }
+    @objc func dragVideoView(pan:UIPanGestureRecognizer) {
+        let videoView = pan.view
+        let position = pan.location(in: superview)
+        
+        switch pan.state {
+        case .changed:
+            videoView?.center = position
+            break
+        case .ended:
+            adjustViewFrame()
+            break
+        default:
+            break
+        }
+    }
+    func adjustViewFrame() {
+        guard let view = superview else {
+            return
+        }
+        let viewW = view.bounds.width
+        var rect = frame
+        rect.origin.x = viewW - rect.width
+        UIView.animate(withDuration: 0.25) {
+            self.frame = rect
+        }
     }
     func setProgress(value: Float) {
         if value > 1 || value < 0 {

@@ -797,7 +797,7 @@ extension DBYLiveController: UITableViewDelegate, UITableViewDataSource {
             thumbCell.set(text: chatDict["name"] as? String)
             return thumbCell
         }
-        chatDict["size"] = tableView.bounds.size
+        chatDict["size"] = view.bounds.size
         let model = DBYCellModel.commentCellModel(dict: chatDict, roomConfig: roomConfig)
         
         cell = tableView.dequeueReusableCell(withIdentifier: model.identifier) as! DBYCommentCell

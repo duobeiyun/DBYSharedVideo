@@ -36,6 +36,9 @@ class DBYMicListView: DBYNibView {
     
     override func setupUI() {
         layer.insertSublayer(cornerLayer, at: 0)
+        let drag = UIPanGestureRecognizer(target: self,
+        action: #selector(dragVideoView(pan:)))
+        addGestureRecognizer(drag)
     }
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -49,6 +52,32 @@ class DBYMicListView: DBYNibView {
         cornerLayer.strokeColor = UIColor.white.cgColor
         cornerLayer.path = path.cgPath
         layer.insertSublayer(cornerLayer, at: 0)
+    }
+    @objc func dragVideoView(pan:UIPanGestureRecognizer) {
+        let videoView = pan.view
+        let position = pan.location(in: superview)
+        
+        switch pan.state {
+        case .changed:
+            videoView?.center = position
+            break
+        case .ended:
+            adjustViewFrame()
+            break
+        default:
+            break
+        }
+    }
+    func adjustViewFrame() {
+        guard let view = superview else {
+            return
+        }
+        let viewW = view.bounds.width
+        var rect = frame
+        rect.origin.x = viewW - rect.width
+        UIView.animate(withDuration: 0.25) {
+            self.frame = rect
+        }
     }
     func append(name: String) {
         names.append(name)
