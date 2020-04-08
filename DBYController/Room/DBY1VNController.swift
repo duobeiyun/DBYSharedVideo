@@ -463,10 +463,14 @@ public class DBY1VNController: UIViewController {
             videoView?.transform = originTransform
         }
         if pinch.state == .changed {
-            videoView?.transform = originTransform.scaledBy(x: scale, y: scale)
+            let transform = originTransform.scaledBy(x: scale, y: scale)
+            let scaleX = transform.a
+            if scaleX < 2.0 && scaleX > 1.0 {
+                videoView?.transform = transform
+            }
         }
         if pinch.state == .ended {
-            originTransform = CGAffineTransform(scaleX: scale, y: scale)
+            originTransform = videoView!.transform
             adjustVideoViewFrame(videoView: videoView)
         }
     }

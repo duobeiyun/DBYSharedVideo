@@ -7,7 +7,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DBYActionSheetView" customModule="新版大班" customModuleProvider="target">
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DBYActionSheetView" customModule="DBYSharedVideo" customModuleProvider="target">
             <connections>
                 <outlet property="cancelBtn" destination="RfL-yl-ngD" id="nVK-qh-NhY"/>
                 <outlet property="confirmBtn" destination="aEW-Dg-zRB" id="DwF-G2-cZb"/>
@@ -39,7 +39,7 @@
                             <color key="textColor" red="0.35044014449999999" green="0.227529496" blue="0.144643575" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <nil key="highlightedColor"/>
                         </label>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aEW-Dg-zRB" customClass="DBYButton" customModule="新版大班" customModuleProvider="target">
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="aEW-Dg-zRB" customClass="DBYButton" customModule="DBYSharedVideo" customModuleProvider="target">
                             <rect key="frame" x="16" y="78" width="153" height="29"/>
                             <fontDescription key="fontDescription" type="system" pointSize="14"/>
                             <state key="normal" title="确定">
@@ -49,7 +49,7 @@
                                 <action selector="confirmWithSender:" destination="-1" eventType="touchUpInside" id="QQI-sf-Bo4"/>
                             </connections>
                         </button>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RfL-yl-ngD" customClass="DBYButton" customModule="新版大班" customModuleProvider="target">
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RfL-yl-ngD" customClass="DBYButton" customModule="DBYSharedVideo" customModuleProvider="target">
                             <rect key="frame" x="16" y="115" width="153" height="29"/>
                             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <fontDescription key="fontDescription" type="system" pointSize="14"/>

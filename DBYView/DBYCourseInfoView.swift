@@ -25,7 +25,7 @@ class DBYCourseInfoView: DBYNibView {
         userCountbutton.setTitle(" \(count)", for: .normal)
     }
     func setThumbCount(count: Int) {
-        thumbCountbutton.isHidden = false
+//        thumbCountbutton.isHidden = false
         thumbCountbutton.setTitle(" \(count)", for: .normal)
     }
 }

@@ -156,7 +156,7 @@ public class DBYLiveController: DBY1VNController {
         view.addSubview(messageTipView)
         view.addSubview(micListView)
         view.addSubview(hangUpView)
-        view.addSubview(zanButton)
+//        view.addSubview(zanButton)
         view.addSubview(zanView)
     }
     override func addActions() {

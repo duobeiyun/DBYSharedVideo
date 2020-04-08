@@ -48,6 +48,7 @@ class DBYAnnouncementView: DBYNibView {
         self.messageLab.text = text
         let width = messageLab.text!.width(withMaxHeight: constHeight, font: messageLab.font)
         messgaeLabWidth.constant = width
+        messgaeLabLeft.constant = minLeft
         
         stopTimer()
         startTimer()
