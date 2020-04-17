@@ -40,10 +40,10 @@ class DBYRoomControlbar: UIView {
     override func layoutSubviews() {
         let videoButtonW:CGFloat = 100
         
-        videoButton.frame = CGRect(x: frame.width - videoButtonW, y: 0, width: videoButtonW, height: frame.height)
+        videoButton.frame = CGRect(x: frame.width - videoButtonW - 12, y: 4, width: videoButtonW, height: frame.height - 8)
     }
     func setupUI() {
-        barLayer.backgroundColor = DBYStyle.lightBlue.cgColor
+        barLayer.backgroundColor = DBYStyle.yellow.cgColor
         barLayer.cornerRadius = 2
         layer.addSublayer(barLayer)
         

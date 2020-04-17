@@ -20,16 +20,16 @@ class DBYVideoTipView: DBYNibView {
     weak var delegate: DBYVideoTipViewDelegate?
     var tipType:DBYTipType = .unknow
     
+    @IBOutlet weak var iconView: UIImageView!
+    @IBOutlet weak var label: UILabel!
     @IBOutlet weak var playBtn: DBYButton! {
         didSet {
             let radius = playBtn.bounds.height * 0.5
-            playBtn.setBackgroudnStyle(fillColor: DBYStyle.dark,
-                                       strokeColor: DBYStyle.yellow,
+            playBtn.setBackgroudnStyle(fillColor: DBYStyle.yellow,
+                                       strokeColor: DBYStyle.brown,
                                        radius: radius)
         }
     }
-    @IBOutlet weak var messageLab: UILabel!
-    @IBOutlet weak var imageView: UIImageView!
     @IBAction func click(sender: UIButton) {
         delegate?.buttonClick(owner: self, type: tipType)
     }
@@ -43,8 +43,7 @@ class DBYVideoTipView: DBYNibView {
         }
     }
     func set(title:String, message:String, icon:String) {
-        messageLab.text = message
-        playBtn.setTitle(title, for: .normal)
-        imageView.image = UIImage(name: icon)
+        label.text = title
+        //iconView.image = UIImage(name: icon)
     }
 }

@@ -27,7 +27,7 @@ public class DBYLiveController: DBY1VNController {
     
     let btnWidth: CGFloat = 60
     let btnHeight: CGFloat = 30
-    let tipViewHeight:CGFloat = 38
+    let tipViewHeight:CGFloat = 32
     let forbiddenBtnHeight:CGFloat = 40
     
     lazy var liveManager:DBYLiveManager = DBYLiveManager()
@@ -282,6 +282,10 @@ public class DBYLiveController: DBY1VNController {
                                    y: 0,
                                    width: scrollContainerWidth,
                                    height: size.height)
+        chatBarFrame = CGRect(x: 0,
+                              y: size.height,
+                              width: size.width,
+                              height: 48)
         announcementViewFrame = CGRect(x: size.width - scrollContainerWidth,
                                        y: 0,
                                        width: scrollContainerWidth,
@@ -602,6 +606,7 @@ public class DBYLiveController: DBY1VNController {
         button2.action = { btn in
             actionSheetView.dismiss()
         }
+        actionSheetView.setBackground(image: UIImage(name: "open_camera_bg"))
         actionSheetView.show(title: "申请上台",
                              message: "是否要申请上台发言？",
                              actions: [button1, button2])
@@ -623,6 +628,7 @@ public class DBYLiveController: DBY1VNController {
         button2.action = { btn in
             actionSheetView.dismiss()
         }
+        actionSheetView.setBackground(image: UIImage(name: "open_camera_bg"))
         actionSheetView.show(title: "上台信息",
                              message: "前方还有 \(inviteIndex) 人等待上台点击取消上台申请",
                              actions: [button1, button2])
@@ -644,6 +650,7 @@ public class DBYLiveController: DBY1VNController {
         button2.action = { btn in
             actionSheetView.dismiss()
         }
+        actionSheetView.setBackground(image: UIImage(name: "open_camera_bg"))
         actionSheetView.show(title: "确认退出上台",
                              message: "你确认要退出上台？",
                              actions: [button1, button2])
@@ -936,7 +943,7 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         let name = userInfo["userName"] ?? ""
         switch type {
         case .audioInvite:
-            message = name + "邀请你上麦"
+            message = "教师 " + name + "邀请你上麦"
             tipType = .invite
         case .audioInviteEnd:
             message = "上麦结束"
@@ -1163,6 +1170,7 @@ extension DBYLiveController: DBYHangUpViewDelegate {
         button2.action = { btn in
             actionSheetView.dismiss()
         }
+        actionSheetView.setBackground(image: UIImage(name: "open_mic_bg"))
         actionSheetView.show(title: "提示",
                              message: "你确定要挂断上麦么？",
                              actions: [button1, button2])

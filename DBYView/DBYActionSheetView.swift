@@ -112,7 +112,9 @@ class DBYActionSheetView: DBYView {
         messageLab.numberOfLines = 0
         
         titleLab.font = DBYStyle.font14
+        titleLab.textColor = DBYStyle.brown
         messageLab.font = DBYStyle.font14
+        messageLab.textColor = DBYStyle.brown
         
         addSubview(container)
         container.addSubview(background)

@@ -165,8 +165,8 @@ public class DBYOnlineController: DBYPlaybackController {
         if isPortrait() {
             playbackManager.stopPlay { (code, message) in
                 print("code:\(code), message:\(message ?? "")")
+                super.goBack()
             }
-            super.goBack()
         }else {
             toPortrait()
         }

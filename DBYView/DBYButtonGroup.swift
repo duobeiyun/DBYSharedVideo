@@ -14,7 +14,7 @@ protocol DBYButtonGroupDelegate: NSObjectProtocol {
 class DBYButtonGroup: UIView {
     weak var delegate:DBYButtonGroupDelegate?
     var normalColor:UIColor = DBYStyle.middleGray
-    var selectedColor:UIColor = DBYStyle.blue
+    var selectedColor:UIColor = DBYStyle.yellow
     lazy var buttons:[UIButton] = [UIButton]()
     var columns = 5
     
