@@ -32,9 +32,6 @@ class DBYMessageTipView: DBYView {
                    NSAttributedString.Key.foregroundColor: DBYStyle.brown]
         let attStr = NSAttributedString(string: "接 受", attributes: att)
         btn.setAttributedTitle(attStr, for: .normal)
-        btn.setBackgroudnStyle(fillColor: DBYStyle.yellow,
-                               strokeColor: DBYStyle.brown,
-                               radius: btnHeight * 0.5)
         btn.setTitleColor(DBYStyle.brown, for: .normal)
         return btn
     }()
@@ -44,9 +41,6 @@ class DBYMessageTipView: DBYView {
                    NSAttributedString.Key.foregroundColor: DBYStyle.brown]
         let attStr = NSAttributedString(string: "拒 绝", attributes: att)
         btn.setAttributedTitle(attStr, for: .normal)
-        btn.setBackgroudnStyle(fillColor: UIColor.white,
-                               strokeColor: DBYStyle.brown,
-                               radius: btnHeight * 0.5)
         btn.setTitleColor(DBYStyle.brown, for: .normal)
         return btn
     }()
@@ -57,9 +51,9 @@ class DBYMessageTipView: DBYView {
     }()
     lazy var tapGesture:UITapGestureRecognizer = UITapGestureRecognizer()
     
-    let margin: CGFloat = 4
+    let hMargin: CGFloat = 8
+    let vMargin: CGFloat = 4
     let btnWidth: CGFloat = 60
-    let btnHeight: CGFloat = 30
     
     var corners: UIRectCorner = .allCorners
     var tipType:DBYMessageTipType = .unknow
@@ -70,24 +64,34 @@ class DBYMessageTipView: DBYView {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        iconView.frame = CGRect(x: margin,
-                                y: margin,
-                                width: btnHeight,
-                                height: btnHeight)
-        messageLab.frame = CGRect(x: iconView.frame.maxX + margin,
-                                  y: margin,
+        let iconHeight: CGFloat = bounds.height - vMargin * 2
+        let btnHeight: CGFloat = bounds.height - vMargin * 2
+        iconView.frame = CGRect(x: 0,
+                                y: vMargin,
+                                width: iconHeight,
+                                height: iconHeight)
+        messageLab.frame = CGRect(x: iconView.frame.maxX + hMargin,
+                                  y: vMargin,
                                   width: messageLabWidth,
-                                  height: btnHeight)
-        closeBtn.frame = CGRect(x: bounds.width - btnHeight - margin,
-                                y: margin,
+                                  height: iconHeight)
+        closeBtn.frame = CGRect(x: bounds.width - btnHeight - hMargin,
+                                y: vMargin,
                                 width: btnHeight,
                                 height: btnHeight)
-        refuseBtn.frame = CGRect(x: bounds.width - btnWidth - margin,
-                                y: margin,
-                                width: btnWidth,
-                                height: btnHeight)
-        acceptBtn.frame = refuseBtn.frame.offsetBy(dx: -btnWidth - margin, dy: 0)
+        refuseBtn.frame = CGRect(x: bounds.width - btnWidth - hMargin,
+                                 y: vMargin,
+                                 width: btnWidth,
+                                 height: btnHeight)
+        acceptBtn.frame = refuseBtn.frame.offsetBy(dx: -btnWidth - hMargin, dy: 0)
         gradient.frame = bounds
+        
+        acceptBtn.setBackgroudnStyle(fillColor: DBYStyle.yellow,
+                                     strokeColor: DBYStyle.brown,
+                                     radius: btnHeight * 0.5)
+        
+        refuseBtn.setBackgroudnStyle(fillColor: UIColor.white,
+                                     strokeColor: DBYStyle.brown,
+                                     radius: btnHeight * 0.5)
         
         let radius = bounds.height * 0.5
         let radii = CGSize(width: radius, height: radius)
@@ -138,7 +142,8 @@ class DBYMessageTipView: DBYView {
         closeBtn.removeFromSuperview()
         removeGestureRecognizer(tapGesture)
         
-        messageLabWidth = message.width(withMaxHeight: btnHeight,
+        let contentHeight: CGFloat = bounds.height - vMargin * 2
+        messageLabWidth = message.width(withMaxHeight: contentHeight,
                                         font: UIFont.systemFont(ofSize: 12))
         
         switch type {
@@ -167,14 +172,15 @@ class DBYMessageTipView: DBYView {
         }
     }
     func getContentWidth() -> CGFloat {
+        let contentHeight: CGFloat = bounds.height - vMargin * 2
         var constWidth:CGFloat = 0
         switch tipType {
         case .close:
-            constWidth = (btnHeight + 8) * 2
+            constWidth = (contentHeight + hMargin) * 2
         case .invite:
-            constWidth = (btnWidth + 8) * 2 + btnHeight
+            constWidth = btnWidth * 2 + hMargin * 4 + contentHeight
         case .click:
-            constWidth = btnHeight + 8 * 3
+            constWidth = contentHeight + hMargin * 3
             break
         default:
             break

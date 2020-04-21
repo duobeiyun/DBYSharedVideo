@@ -12,7 +12,7 @@ protocol DBYVoteViewCellDelegate: NSObjectProtocol {
     func voteViewCell(cell: UITableViewCell, didVotedAt index: Int)
 }
 class DBYVoteViewCell: UITableViewCell {
-    enum Style {
+    enum State {
         case enable
         case disable
         case selected
@@ -21,7 +21,9 @@ class DBYVoteViewCell: UITableViewCell {
     var indexPath: IndexPath?
     var voteEnable: Bool = true
     var progress:CGFloat = 0
-    var style:Style = .enable
+    var state:State = .enable
+    var contenColor:UIColor? = DBYStyle.lightGray
+    var borderColor:UIColor? = DBYStyle.lightGray
     
     weak var delegate: DBYVoteViewCellDelegate?
     
@@ -45,7 +47,7 @@ class DBYVoteViewCell: UITableViewCell {
         }
     }
     @IBAction func vote(sender: UIButton) {
-        if style != .enable {
+        if state != .enable {
             return
         }
         guard let index = indexPath?.row else {
@@ -62,6 +64,9 @@ class DBYVoteViewCell: UITableViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         
+        backgroundLayer.fillColor = contenColor?.cgColor
+        backgroundLayer.strokeColor = borderColor?.cgColor
+        
         let rect = CGRect(x: 12, y: 2,
                           width: bounds.width - 24,
                           height: bounds.height - 4)
@@ -70,14 +75,16 @@ class DBYVoteViewCell: UITableViewCell {
         backgroundLayer.path = path.cgPath
         
         let radius = voteBtn.bounds.height * 0.5
-        if style == .disable {
+        if state == .disable {
             voteBtn.setBackgroudnStyle(fillColor: DBYStyle.middleGray,
                                        strokeColor: DBYStyle.brown,
                                        radius: radius)
+            voteBtn.setTitleColor(UIColor.white, for: .normal)
         }else {
             voteBtn.setBackgroudnStyle(fillColor: DBYStyle.yellow,
                                        strokeColor: DBYStyle.brown,
                                        radius: radius)
+            voteBtn.setTitleColor(DBYStyle.brown, for: .normal)
         }
         let width = bounds.width - 46 - 76 - 8
         let y = (bounds.height - progressHeight) * 0.5
@@ -92,15 +99,14 @@ class DBYVoteViewCell: UITableViewCell {
     }
     
     func setupUI() {
+        backgroundColor = UIColor.clear
+        
         countLab.font = UIFont.systemFont(ofSize: 14)
         countLab.textColor = UIColor.white
         
         gradientLayer.cornerRadius = progressHeight * 0.5
         gradientLayer.startPoint = CGPoint(x: 0, y: 1)
         gradientLayer.endPoint = CGPoint(x: 1, y: 1)
-        
-        backgroundLayer.fillColor = UIColor.clear.cgColor
-        backgroundLayer.strokeColor = DBYStyle.middleGray.cgColor
         
         layer.insertSublayer(gradientLayer, at: 0)
         layer.insertSublayer(backgroundLayer, at: 0)

@@ -9,6 +9,7 @@ import UIKit
 
 class DBYVideoView: UIView {
     var imageHolder:UIImageView?
+    var loadingDelegate:DBYVideoTipViewDelegate?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -33,10 +34,17 @@ class DBYVideoView: UIView {
     func setImageHolder(image:UIImage?) {
         imageHolder?.image = image
     }
-    func loadingBegain() {
-        
+    func startLoading() {
+        let loadingView = DBYVideoLoadingView()
+        addSubview(loadingView)
+        loadingView.frame = bounds
+        loadingView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     }
-    func loadingEnd() {
-        
+    func stopLoading() {
+        for subview in subviews {
+            if subview.isKind(of: DBYVideoLoadingView.self) {
+                subview.removeFromSuperview()
+            }
+        }
     }
 }

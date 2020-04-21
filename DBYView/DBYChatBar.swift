@@ -22,8 +22,8 @@ class DBYChatBar: DBYNibView {
     lazy var emojiImageDict = [String:String]()
     lazy var emojis = [String]()
 
-    let emojiViewH_V: CGFloat = 335
-    let emojiViewH_H: CGFloat = 280
+    let emojiViewH_V: CGFloat = 200
+    let emojiViewH_H: CGFloat = 120
     
     var emojiView:DBYEmojiView?
     weak var delegate:DBYChatBarDelegate?

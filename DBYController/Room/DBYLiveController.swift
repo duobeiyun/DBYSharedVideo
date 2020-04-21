@@ -28,7 +28,7 @@ public class DBYLiveController: DBY1VNController {
     let btnWidth: CGFloat = 60
     let btnHeight: CGFloat = 30
     let tipViewHeight:CGFloat = 32
-    let forbiddenBtnHeight:CGFloat = 40
+    let forbiddenBtnHeight:CGFloat = 32
     
     lazy var liveManager:DBYLiveManager = DBYLiveManager()
     
@@ -74,7 +74,6 @@ public class DBYLiveController: DBY1VNController {
     }()
     
     lazy var inputVC = DBYInputController()
-    lazy var loadingView = DBYVideoLoadingView()
     lazy var watermarkView = DBYWatermarkView()
     lazy var marqueeView = DBYMarqueeView()
     lazy var questionView = DBYChatListView()
@@ -131,6 +130,7 @@ public class DBYLiveController: DBY1VNController {
         let oneTap = UITapGestureRecognizer(target: self,
                                             action: #selector(viewTap(tap:)))
         chatListView.addGestureRecognizer(oneTap)
+        mainView.startLoading()
         enterRoom()
     }
     public override func didReceiveMemoryWarning() {
@@ -149,7 +149,6 @@ public class DBYLiveController: DBY1VNController {
         chatContainer.addSubview(inputButton)
         chatContainer.addSubview(announcementView)
         
-        mainView.addSubview(loadingView)
         mainView.addSubview(marqueeView)
         mainView.addSubview(watermarkView)
         
@@ -201,6 +200,7 @@ public class DBYLiveController: DBY1VNController {
                                            strokeColor: UIColor.white,
                                            radius: forbiddenBtnHeight * 0.5)
         forbiddenButton.setImage(UIImage(name: "forbidden-white"), for: .normal)
+        voteView.setTheme(.dark)
     }
     override func setupPortraitUI() {
         super.setupPortraitUI()
@@ -216,6 +216,7 @@ public class DBYLiveController: DBY1VNController {
                                            strokeColor: DBYStyle.brown,
                                            radius: 4)
         forbiddenButton.setImage(UIImage(name: "forbidden-light"), for: .normal)
+        voteView.setTheme(.light)
     }
     override func updateFrame() {
         super.updateFrame()
@@ -226,7 +227,6 @@ public class DBYLiveController: DBY1VNController {
         messageTipView.frame = smallPopViewFrame
         micListView.frame = micListViewFrame
         forbiddenButton.frame = forbiddenBtnFrame
-        loadingView.frame = mainView.bounds
         
         zanView.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
         zanView.center = view.center
@@ -575,7 +575,6 @@ public class DBYLiveController: DBY1VNController {
             }
         }
         let count = allChatList.count
-        chatListView.reloadData()
         
         if showTip {
             newMessageCount += array.count
@@ -583,8 +582,8 @@ public class DBYLiveController: DBY1VNController {
             let message = "\(newMessageCount)条新消息"
             showMessageTipView(image: image, message: message, type: .click)
             return
-        }
-        if count > 0 {
+        }else if count > 0 {
+            chatListView.reloadData()
             chatListView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: true)
         }
     }
@@ -764,16 +763,15 @@ public class DBYLiveController: DBY1VNController {
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         chatBar.endInput()
     }
-    public override func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if scrollView == chatListView {
             let delta = scrollView.contentSize.height - scrollView.contentOffset.y
             showTip = delta > scrollView.bounds.height
+            print(showTip)
             if !showTip {
                 newMessageCount = 0
                 messageTipView.close()
             }
-        }else {
-            super.scrollViewDidEndDecelerating(scrollView)
         }
     }
 }
@@ -819,6 +817,9 @@ extension DBYLiveController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 extension DBYLiveController: DBYLiveManagerDelegate {
+    public func clientOnline(_ liveManager: DBYLiveManager!, userId uid: String!, nickName: String!, userRole role: Int32) {
+        mainView.stopLoading()
+    }
     public func liveManagerClassOver(_ manager: DBYLiveManager!) {
         DBYGlobalMessage.shared().showText(.LM_ClassOver)
     }

@@ -11,6 +11,16 @@ import UIKit
 protocol DBYVoteViewDelegate: NSObjectProtocol {
     func voteView(voteView: DBYVoteView, didVotedAt index: Int)
 }
+class DBYBoxLabel: UILabel {
+    lazy var margin:UIEdgeInsets = UIEdgeInsets()
+    convenience init(margin: UIEdgeInsets) {
+        self.init(frame:.zero)
+        self.margin = margin
+    }
+    override func drawText(in rect: CGRect) {
+        super.drawText(in: rect.inset(by: margin))
+    }
+}
 class DBYVoteView: UIView {
     let icons: [String] = [
         "icon-a",
@@ -48,8 +58,9 @@ class DBYVoteView: UIView {
         t.estimatedRowHeight = estimatedRowHeight
         return t
     }()
-    lazy var tipLab: UILabel = {
-        let l = UILabel()
+    lazy var tipLab: DBYBoxLabel = {
+        let l = DBYBoxLabel(margin: UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16))
+        
         l.font = UIFont.systemFont(ofSize: 12)
         l.textColor = DBYStyle.darkGray
         l.text = "正在答题中"
@@ -78,14 +89,30 @@ class DBYVoteView: UIView {
     }
     override func layoutSubviews() {
         super.layoutSubviews()
-        tipLab.frame = CGRect(x: 12,
+        tipLab.frame = CGRect(x: 0,
                               y: 0,
-                              width: bounds.width - 24,
+                              width: bounds.width,
                               height: 40)
         tableView.frame = CGRect(x: 0,
                                  y: 40,
                                  width: bounds.width,
                                  height: bounds.height - 20)
+    }
+    override func setTheme(_ theme: DBYViewTheme) {
+        super.setTheme(theme)
+        if theme == .dark {
+            tipLab.textColor = DBYStyle.lightGray
+            tipLab.backgroundColor = DBYStyle.lightAlpha
+            backgroundColor = DBYStyle.lightAlpha
+            tableView.backgroundColor = DBYStyle.lightAlpha
+        }
+        if theme == .light {
+            tipLab.textColor = DBYStyle.darkGray
+            tipLab.backgroundColor = DBYStyle.lightGray
+            backgroundColor = DBYStyle.lightGray
+            tableView.backgroundColor = DBYStyle.lightGray
+        }
+        tableView.reloadData()
     }
     func setVotes(votes: [String]) {
         countDict.removeAll()
@@ -122,16 +149,22 @@ extension DBYVoteView: UITableViewDataSource {
         let iconName = icons[indexPath.row]
         let count = countDict[indexPath.row] ?? 0
         let colors = gradientColors[indexPath.row]
+        cell.contenColor = tableView.backgroundColor
+        if theme == .light {
+            cell.borderColor = DBYStyle.middleGray
+        }else {
+            cell.borderColor = UIColor.clear
+        }
         cell.showVoteName(iconName: iconName, voteName: voteName)
         cell.showProgress(count: count, colors: colors, totalCount: totalCount)
         cell.indexPath = indexPath
         cell.delegate = self
         if selectedIndex == -1 {
-            cell.style = .enable
+            cell.state = .enable
         }else if selectedIndex == indexPath.row {
-            cell.style = .selected
+            cell.state = .selected
         }else {
-            cell.style = .disable
+            cell.state = .disable
         }
         return cell
     }

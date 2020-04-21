@@ -105,11 +105,11 @@ public class DBYOnlineController: DBYPlaybackController {
     }
     override func setupLandscapeUI() {
         super.setupLandscapeUI()
-        
+        topBar.set(type: .landscape)
     }
     override func setupPortraitUI() {
         super.setupPortraitUI()
-        
+        topBar.set(type: .portrait)
     }
     override func updateFrame() {
         super.updateFrame()
@@ -130,7 +130,7 @@ public class DBYOnlineController: DBYPlaybackController {
         super.changeEnded()
         
         playbackManager.seekToTime(with: bottomBar.currentValue, completeHandler: {message in
-            self.indicator.stopAnimating()
+            self.mainView.stopLoading()
         })
     }
     //MARK: - private functions
@@ -375,13 +375,13 @@ extension DBYOnlineController: DBYBottomBarDelegate {
         startHiddenTimer()
         beginInteractive = false
         timeTipLab.isHidden = true
-        indicator.isHidden = false
-        indicator.startAnimating()
+        
+        mainView.startLoading()
         playbackManager.seekToTime(with: TimeInterval(value), completeHandler: { message in
             if let msg = message {
                 DBYGlobalMessage.shared().showText(msg)
             }
-            self.indicator.stopAnimating()
+            self.mainView.stopLoading()
             self.bottomBar.set(state: .play)
         })
     }

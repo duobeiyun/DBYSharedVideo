@@ -80,7 +80,7 @@ class DBYActionButton: UIButton {
 class DBYActionSheetView: DBYView {
     let largeMargin:CGFloat = 24
     let smallMargin:CGFloat = 12
-    let containerW:CGFloat = 200
+    let containerW:CGFloat = 220
     var containerH:CGFloat = 170
     let btnHeight:CGFloat = 30
     
@@ -99,10 +99,6 @@ class DBYActionSheetView: DBYView {
         container = UIView()
         container.backgroundColor = UIColor.white
         container.layer.cornerRadius = 12
-        container.layer.shadowOpacity = 1
-        container.layer.shadowColor = DBYStyle.brown.cgColor
-        container.layer.shadowOffset = CGSize(width: 4, height: 4)
-        
         titleLab = UILabel()
         messageLab = UILabel()
         
@@ -127,13 +123,16 @@ class DBYActionSheetView: DBYView {
         background.frame = container.bounds
         
         let maxW = containerW - smallMargin * 2
-        titleLab.frame = CGRect(x: smallMargin, y: smallMargin, width: maxW, height: btnHeight)
+        titleLab.frame = CGRect(x: smallMargin, y: smallMargin, width: maxW, height: 20)
         let message = messageLab.text ?? ""
         let messageH = message.height(withMaxWidth: maxW, font: DBYStyle.font14)
-        messageLab.frame = CGRect(x: smallMargin, y: smallMargin * 2 + btnHeight, width: maxW, height: messageH)
+        messageLab.frame = CGRect(x: smallMargin, y: smallMargin * 2 + 20, width: maxW, height: messageH)
     }
     public func setBackground(image: UIImage?) {
         background.image = image
+        if image != nil {
+            container.backgroundColor = UIColor.clear
+        }
     }
     public func show(title: String, message: String, actions:[DBYActionButton]) {
         titleLab.text = title
