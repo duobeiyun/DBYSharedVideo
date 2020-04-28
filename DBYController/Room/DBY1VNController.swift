@@ -173,12 +173,12 @@ public class DBY1VNController: UIViewController {
     }
     override public func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         startHiddenTimer()
-        unowned let weakSelf = self
+        weak var weakSelf = self
         coordinator.animate(alongsideTransition: { (context) in
-            weakSelf.setupOrientationUI()
-            weakSelf.updateFrame()
-            weakSelf.cellHeightCache.removeAll()
-            weakSelf.chatListView.reloadData()
+            weakSelf?.setupOrientationUI()
+            weakSelf?.updateFrame()
+            weakSelf?.cellHeightCache.removeAll()
+            weakSelf?.chatListView.reloadData()
         }) { (context) in
 
         }

@@ -368,11 +368,11 @@ public class DBYLiveController: DBY1VNController {
     }
     
     @objc func enterRoom() {
-        unowned let weakSelf = self
+        weak var weakSelf = self
         liveManager.enterRoom(withAuthJson: authinfo?.authinfoString, completeHandler: { (message, type) in
-            weakSelf.bottomBar.set(state: .play)
-            if let reachability = weakSelf.internetReachability {
-                weakSelf.dealWith(reachability: reachability)
+            weakSelf?.bottomBar.set(state: .play)
+            if let reachability = weakSelf?.internetReachability {
+                weakSelf?.dealWith(reachability: reachability)
             }
         })
     }
@@ -596,11 +596,10 @@ public class DBYLiveController: DBY1VNController {
         button1.setTitle("申请上台", for: .normal)
         button2.setTitle("取消", for: .normal)
         
-        unowned let weakSelf = self
-        button1.action = { btn in
+        button1.action = {[weak self] btn in
             actionSheetView.dismiss()
-            weakSelf.liveManager.requestToOpenCamera()
-            weakSelf.roomControlbar.setCameraState(state: .invite)
+            self?.liveManager.requestToOpenCamera()
+            self?.roomControlbar.setCameraState(state: .invite)
         }
         button2.action = { btn in
             actionSheetView.dismiss()
@@ -618,11 +617,10 @@ public class DBYLiveController: DBY1VNController {
         button1.setTitle("取消上台", for: .normal)
         button2.setTitle("取消", for: .normal)
         
-        unowned let weakSelf = self
-        button1.action = { btn in
+        button1.action = {[weak self] btn in
             actionSheetView.dismiss()
-            weakSelf.roomControlbar.setCameraState(state: .normal)
-            weakSelf.liveManager.requestToCloseCamera()
+            self?.roomControlbar.setCameraState(state: .normal)
+            self?.liveManager.requestToCloseCamera()
         }
         button2.action = { btn in
             actionSheetView.dismiss()
@@ -640,11 +638,10 @@ public class DBYLiveController: DBY1VNController {
         button1.setTitle("确认退出", for: .normal)
         button2.setTitle("取消", for: .normal)
         
-        unowned let weakSelf = self
-        button1.action = { btn in
+        button1.action = {[weak self] btn in
             actionSheetView.dismiss()
-            weakSelf.roomControlbar.setCameraState(state: .normal)
-            weakSelf.liveManager.requestToCloseCamera()
+            self?.roomControlbar.setCameraState(state: .normal)
+            self?.liveManager.requestToCloseCamera()
         }
         button2.action = { btn in
             actionSheetView.dismiss()
@@ -676,9 +673,9 @@ public class DBYLiveController: DBY1VNController {
     @objc func showChatBar() {
         inputVC.modalPresentationStyle = .custom
         inputVC.modalTransitionStyle = .crossDissolve
-        unowned let weakSelf = self
-        inputVC.sendTextBlock = {text in
-            weakSelf.send(message: text)
+
+        inputVC.sendTextBlock = {[weak self] text in
+            self?.send(message: text)
         }
         present(inputVC, animated: true, completion: nil)
     }
@@ -919,14 +916,14 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         button1.setTitle("重新登录", for: .normal)
         button2.setTitle("退出登录", for: .normal)
         
-        unowned let weakSelf = self
+        weak var weakSelf = self
         button1.action = { btn in
             actionSheetView.dismiss()
-            weakSelf.enterRoom()
+            weakSelf?.enterRoom()
         }
         button2.action = { btn in
             actionSheetView.dismiss()
-            weakSelf.exitRoom()
+            weakSelf?.exitRoom()
         }
         
         actionSheetView.show(title: "提示",
@@ -1119,10 +1116,10 @@ extension DBYLiveController: DBYMessageTipViewDelegate {
         let message = "正在接通中"
         
         showMessageTipView(image: loading, message: message, type: .close)
-        liveManager.accept {[unowned self] (finished) in
+        liveManager.accept {[weak self] (finished) in
             if !finished {
                 let image = UIImage(name: "mic")
-                self.showMessageTipView(image: image,
+                self?.showMessageTipView(image: image,
                                         message: "已经达到最大上麦人数",
                                         type: .close)
             }
@@ -1162,10 +1159,10 @@ extension DBYLiveController: DBYHangUpViewDelegate {
         button1.setTitle("确定", for: .normal)
         button2.setTitle("取消", for: .normal)
         
-        unowned let weakSelf = self
+        weak var weakSelf = self
         button1.action = { btn in
-            weakSelf.hangUpView.dismiss()
-            weakSelf.liveManager.closeMicrophone()
+            weakSelf?.hangUpView.dismiss()
+            weakSelf?.liveManager.closeMicrophone()
             actionSheetView.dismiss()
         }
         button2.action = { btn in

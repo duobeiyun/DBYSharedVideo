@@ -23,7 +23,7 @@ public class DBYOfflineController: DBYPlaybackController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         
-        unowned let weakSelf = self
+        weak var weakSelf = self
         
         chatListView.delegate = self
         chatListView.dataSource = self
@@ -48,9 +48,9 @@ public class DBYOfflineController: DBYPlaybackController {
                 DBYGlobalMessage.shared().showText(message!)
                 return
             }
-            let totalTime = weakSelf.offlineManager.lessonLength()
-            weakSelf.bottomBar.set(totalTime: totalTime)
-            weakSelf.offlineManager.seek(toTime: 10)
+            let totalTime = weakSelf?.offlineManager.lessonLength() ?? 0
+            weakSelf?.bottomBar.set(totalTime: totalTime)
+            weakSelf?.offlineManager.seek(toTime: 10)
         }
     }
     override public func viewDidDisappear(_ animated: Bool) {

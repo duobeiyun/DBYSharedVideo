@@ -24,7 +24,7 @@
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="lrw-LO-kHy">
                     <rect key="frame" x="114.5" y="368" width="185" height="160"/>
                     <subviews>
-                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="mic-round-rect" translatesAutoresizingMaskIntoConstraints="NO" id="ko7-v9-LPe">
+                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="open_mic_bg" translatesAutoresizingMaskIntoConstraints="NO" id="ko7-v9-LPe">
                             <rect key="frame" x="0.0" y="0.0" width="185" height="160"/>
                         </imageView>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="提示" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="U8C-Lq-EoX">
@@ -51,7 +51,6 @@
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RfL-yl-ngD" customClass="DBYButton" customModule="DBYSharedVideo" customModuleProvider="target">
                             <rect key="frame" x="16" y="115" width="153" height="29"/>
-                            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <fontDescription key="fontDescription" type="system" pointSize="14"/>
                             <state key="normal" title="取消">
                                 <color key="titleColor" red="0.35044014449999999" green="0.227529496" blue="0.144643575" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -93,6 +92,6 @@
         </view>
     </objects>
     <resources>
-        <image name="mic-round-rect" width="185" height="138"/>
+        <image name="open_mic_bg" width="185" height="138"/>
     </resources>
 </document>

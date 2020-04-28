@@ -25,7 +25,8 @@ public class DBYOnlineController: DBYPlaybackController {
         bottomBar.delegate = self
         settingView.delegate = self
         
-        unowned let weakSelf = self
+        weak var weakSelf = self
+        
         if authinfo?.classType == .sharedVideo {
             playbackManager.setSharedVideoView(mainView)
         }else {
@@ -38,10 +39,11 @@ public class DBYOnlineController: DBYPlaybackController {
                 DBYGlobalMessage.shared().showText(message!)
             }
             var lines = [String]()
-            for i in 0..<weakSelf.playbackManager.linesCount() {
+            let count = weakSelf?.playbackManager.linesCount() ?? 0
+            for i in 0..<count {
                 lines.append("线路\(i)")
             }
-            weakSelf.settingView.set(lines: lines)
+            weakSelf?.settingView.set(lines: lines)
         }
         
         if let reachability = internetReachability {
@@ -77,17 +79,17 @@ public class DBYOnlineController: DBYPlaybackController {
         let commandCenter = MPRemoteCommandCenter.shared()
         
         // Add handler for Play Command
-        commandCenter.playCommand.addTarget { [unowned self] event in
-            if self.playbackManager.isPlaying {
-                self.playbackManager.pausePlay()
+        commandCenter.playCommand.addTarget { [weak self] event in
+            if let playing = self?.playbackManager.isPlaying, playing {
+                self?.playbackManager.pausePlay()
                 return .success
             }
             return .commandFailed
         }
         // Add handler for Pause Command
-        commandCenter.pauseCommand.addTarget { [unowned self] event in
-           if self.playbackManager.isPlaying == false {
-                self.playbackManager.resumePlay()
+        commandCenter.pauseCommand.addTarget { [weak self] event in
+           if self?.playbackManager.isPlaying == false {
+                self?.playbackManager.resumePlay()
                 return .success
             }
             return .commandFailed
@@ -398,9 +400,9 @@ extension DBYOnlineController: DBYSettingViewDelegate {
             }
         }
         if indexPath.section == 2 {
-            unowned let weakSelf = self
+            weak var weakSelf = self
             playbackManager.changePlaybackLine(with: Int32(indexPath.item)) { (message) in
-                weakSelf.settingView.set(speeds: weakSelf.playRateTitles)
+                weakSelf?.settingView.set(speeds: weakSelf?.playRateTitles ?? [])
             }
         }
     }
