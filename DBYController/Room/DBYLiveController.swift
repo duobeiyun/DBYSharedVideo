@@ -764,7 +764,6 @@ public class DBYLiveController: DBY1VNController {
         if scrollView == chatListView {
             let delta = scrollView.contentSize.height - scrollView.contentOffset.y
             showTip = delta > scrollView.bounds.height
-            print(showTip)
             if !showTip {
                 newMessageCount = 0
                 messageTipView.close()
@@ -1091,10 +1090,6 @@ extension DBYLiveController: DBYChatBarDelegate {
         UIView.animate(withDuration: duration, animations: {
             self.chatBar.frame = frame
             self.chatListView.frame = frame2
-            let count = self.allChatList.count
-            if count > 0 {
-                self.chatListView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: false)
-            }
         })
     }
     
