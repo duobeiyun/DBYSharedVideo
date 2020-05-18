@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import WebKit
 import DBYSDK_dylib
 
 public class DBYLiveController: DBY1VNController {
@@ -31,7 +32,6 @@ public class DBYLiveController: DBY1VNController {
     let forbiddenBtnHeight:CGFloat = 32
     
     lazy var liveManager:DBYLiveManager = DBYLiveManager()
-    
     lazy var chatBar = DBYChatBar()
     lazy var voteView:DBYVoteView = DBYVoteView()
     lazy var announcementView = DBYAnnouncementView()
@@ -507,7 +507,7 @@ public class DBYLiveController: DBY1VNController {
         for model in extends {
             roomControlbar.append(title: model.title ?? "")
             if model.type == .diy {
-                let webview = UIWebView()
+                let webview = WKWebView()
                 webview.backgroundColor = UIColor.white
                 webview.loadHTMLString(model.content ?? "", baseURL: nil)
                 scrollContainer.append(view: webview)
@@ -574,6 +574,7 @@ public class DBYLiveController: DBY1VNController {
                 allChatList.removeFirst()
             }
         }
+        chatListView.reloadData()
         let count = allChatList.count
         
         if showTip {
@@ -581,9 +582,7 @@ public class DBYLiveController: DBY1VNController {
             let image = UIImage(name: "message-tip")
             let message = "\(newMessageCount)条新消息"
             showMessageTipView(image: image, message: message, type: .click)
-            return
         }else if count > 0 {
-            chatListView.reloadData()
             chatListView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: true)
         }
     }
@@ -756,7 +755,7 @@ public class DBYLiveController: DBY1VNController {
         hiddenScrollContainer()
     }
     
-//MARK: - scrollView
+    //MARK: - scrollView
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         chatBar.endInput()
     }
@@ -1069,7 +1068,6 @@ extension DBYLiveController: DBYChatBarDelegate {
         
     }
     func chatBar(owner: DBYChatBar, send message: String) {
-        chatBar.endInput()
         send(message: message)
     }
     
@@ -1091,6 +1089,10 @@ extension DBYLiveController: DBYChatBarDelegate {
             self.chatBar.frame = frame
             self.chatListView.frame = frame2
         })
+        let count = self.allChatList.count
+        if count > 0 {
+            self.chatListView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: false)
+        }
     }
     
     func chatBarWillDismissInputView(duration: TimeInterval) {

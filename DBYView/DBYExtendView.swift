@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import WebKit
 
 class DBYExtendView: DBYView {
     lazy var label:UILabel = UILabel()
@@ -18,7 +19,7 @@ class DBYExtendView: DBYView {
         label.frame = bounds
     }
     func set(content: String?) {
-        let webview = UIWebView()
+        let webview = WKWebView()
         webview.loadHTMLString(content ?? "", baseURL: nil)
         label.text = content
     }
