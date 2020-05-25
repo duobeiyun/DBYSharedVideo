@@ -12,6 +12,7 @@ protocol DBYChatBarDelegate: NSObjectProtocol {
     func chatBarDidBecomeActive(owner: DBYChatBar)
     func chatBar(owner: DBYChatBar, selectEmojiAt index: Int)
     func chatBar(owner: DBYChatBar, send message: String)
+    func chatBar(owner: DBYChatBar, buttonClickWith target:UIButton)
     func chatBarWillShowInputView(rect: CGRect, duration: TimeInterval)
     func chatBarWillDismissInputView(duration: TimeInterval)
 }
@@ -36,10 +37,9 @@ class DBYChatBar: DBYNibView {
     }
     
     @IBAction func send(_ sender: UIButton) {
-        if textField.hasText {
-            delegate?.chatBar(owner: self, send: textField.text!)
-            textField.text = nil
-        }
+        sender.isSelected = !sender.isSelected
+        delegate?.chatBar(owner: self, buttonClickWith: sender)
+        textField.text = nil
     }
     
     deinit {

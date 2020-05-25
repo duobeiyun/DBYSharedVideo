@@ -37,8 +37,7 @@ public class DBYPlaybackController: DBY1VNController {
         super.viewDidLoad()
         
         startHiddenTimer()
-        roomControlbar.scroll(at: 0)
-        scrollContainer.scroll(at: 0)
+        segmentedView.scrollToIndex(index: 0)
     }
     override public func addSubviews() {
         super.addSubviews()
@@ -55,11 +54,37 @@ public class DBYPlaybackController: DBY1VNController {
         super.setupStaticUI()
         topBar.set(authinfo?.courseTitle)
         settingView.set(speeds: playRateTitles)
-        roomControlbar.append(title: "互动")
-        roomControlbar.append(title: "课程信息")
-        scrollContainer.append(view: chatContainer)
-        scrollContainer.append(view: courseInfoView)
         courseInfoView.set(title: authinfo?.courseTitle)
+        
+        var models = [DBYSegmentedModel]()
+        var titleOffset:CGFloat = 0
+        let dicts:[[String:Any]] = [
+            [
+                "title":"互动",
+                "view":chatContainer
+            ],[
+                "title":"课程信息",
+                "view":courseInfoView
+            ]
+        ]
+        for dict in dicts {
+            let model = DBYSegmentedModel()
+            let title = dict["title"] as! String
+            let l = UILabel()
+            l.text = title
+            l.font = UIFont(name: "Helvetica", size: 14)
+            l.textAlignment = .center
+            let v = dict["view"] as! UIView
+            
+            let titleWidth = title.width(withMaxHeight: 44, font: l.font) * 2
+            
+            model.displayWidth = 60
+            model.label = l
+            model.view = v
+            models.append(model)
+            titleOffset += titleWidth
+        }
+        segmentedView.appendData(models: models)
     }
     
     override func setupPortraitUI() {
@@ -81,14 +106,14 @@ public class DBYPlaybackController: DBY1VNController {
         
         let size = view.bounds.size
         
-        scrollContainerFrame = CGRect(x: 0,
-                                      y: roomControlbarFrame.maxY,
+        segmentedViewFrame = CGRect(x: 0,
+                                      y: mainViewFrame.maxY,
                                       width: size.width,
-                                      height: size.height - roomControlbarFrame.maxY)
+                                      height: size.height - mainViewFrame.maxY)
         chatListViewFrame = CGRect(x: 0,
                                    y: 0,
-                                   width: scrollContainerFrame.width,
-                                   height: scrollContainerFrame.height)
+                                   width: segmentedViewFrame.width,
+                                   height: segmentedViewFrame.height)
     }
     override func updateLandscapeFrame() {
         super.updateLandscapeFrame()
@@ -96,14 +121,14 @@ public class DBYPlaybackController: DBY1VNController {
         let size = view.bounds.size
         let chatContainerWidth = size.width * 0.5
         
-        scrollContainerFrame = CGRect(x: size.width,
+        segmentedViewFrame = CGRect(x: size.width,
                                       y: 0,
                                       width: chatContainerWidth,
                                       height: size.height)
         chatListViewFrame = CGRect(x: 0,
                                    y: 0,
-                                   width: scrollContainerFrame.width,
-                                   height: scrollContainerFrame.height)
+                                   width: segmentedViewFrame.width,
+                                   height: segmentedViewFrame.height)
     }
     @objc override func goBack() {
         super.goBack()

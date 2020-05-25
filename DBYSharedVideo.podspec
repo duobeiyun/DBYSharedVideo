@@ -23,6 +23,7 @@ DBYSharedVideo主要是封装了直播和回放的界面，方便开发者快速
   s.resources = "**/*.xib", "Assets.xcassets"
   s.dependency "DBYSDK_dylib"
   s.dependency "SDWebImage"
+  s.dependency "SnapKit"
   
   s.info_plist = {
     "CFBundleIdentifier" => "com.duobei.DBYSharedVideo",

@@ -54,8 +54,7 @@ public class DBY1VNController: UIViewController {
     
     var mainViewFrame: CGRect = .zero
     var chatListViewFrame: CGRect = .zero
-    var roomControlbarFrame: CGRect = .zero
-    var scrollContainerFrame: CGRect = .zero
+    var segmentedViewFrame: CGRect = .zero
     var smallPopViewFrame: CGRect = .zero
     var largePopViewFrame: CGRect = .zero
     
@@ -90,10 +89,9 @@ public class DBY1VNController: UIViewController {
     lazy var chatContainer = UIView()
     lazy var courseInfoView = DBYCourseInfoView()
     lazy var videoTipView = DBYVideoTipView()
-    lazy var roomControlbar = DBYRoomControlbar()
+    lazy var segmentedView = DBYSegmentedView()
     lazy var volumeProgressView = DBYProgressView()
     lazy var brightnessProgressView = DBYProgressView()
-    lazy var scrollContainer = DBYScrollView()
     lazy var settingView = DBYSettingView()
     lazy var chatListView: UITableView = {
         let t = UITableView(frame: .zero, style: .plain)
@@ -194,8 +192,7 @@ public class DBY1VNController: UIViewController {
         view.addSubview(brightnessProgressView)
         view.addSubview(topBar)
         view.addSubview(bottomBar)
-        view.addSubview(scrollContainer)
-        view.addSubview(roomControlbar)
+        view.addSubview(segmentedView)
         view.addSubview(settingView)
     }
     func addActions() {
@@ -213,16 +210,10 @@ public class DBY1VNController: UIViewController {
         view.backgroundColor = UIColor.white
         
         chatContainer.backgroundColor = UIColor.clear
-        roomControlbar.backgroundColor = UIColor.white
         mainView.backgroundColor = UIColor.white
-        
-        roomControlbar.delegate = self
-        scrollContainer.delegate = self
-        scrollContainer.bounces = false
-        scrollContainer.isPagingEnabled = true
-        scrollContainer.backgroundColor = UIColor.clear
-        scrollContainer.showsHorizontalScrollIndicator = false
-        scrollContainer.showsVerticalScrollIndicator = false
+        segmentedView.barColor = DBYStyle.yellow
+        segmentedView.hilightColor = DBYStyle.darkGray
+        segmentedView.defaultColor = DBYStyle.middleGray
         
         if #available(iOS 11.0, *) {
             chatListView.insetsContentViewsToSafeArea = false
@@ -249,14 +240,10 @@ public class DBY1VNController: UIViewController {
         settingView.isHidden = true
     }
     func setupPortraitUI() {
-        scrollContainer.isScrollEnabled = true
-        roomControlbar.isHidden = false
         chatListView.isHidden = false
         chatListView.backgroundColor = DBYStyle.lightGray
     }
     func setupLandscapeUI() {
-        scrollContainer.isScrollEnabled = false
-        roomControlbar.isHidden = true
         chatListView.backgroundColor = DBYStyle.darkAlpha
     }
     func updateFrame() {
@@ -299,8 +286,7 @@ public class DBY1VNController: UIViewController {
                                               y: mainViewFrame.midY - progressHeight * 0.5,
                                               width: progressWidth,
                                               height: progressHeight)
-        roomControlbar.frame = roomControlbarFrame
-        scrollContainer.frame = scrollContainerFrame
+        segmentedView.frame = segmentedViewFrame
         videoTipView.frame = mainView.bounds
         netTipView.frame = mainView.bounds
         settingView.frame = largePopViewFrame
@@ -313,10 +299,6 @@ public class DBY1VNController: UIViewController {
                                y: iphoneXTop,
                                width: size.width,
                                height: size.width * 0.56)
-        roomControlbarFrame = CGRect(x: 0,
-                                     y: mainViewFrame.maxY,
-                                     width: mainViewFrame.width,
-                                     height: roomControlbarHeight)
         largePopViewFrame = CGRect(x: 0,
                                    y: largePopViewHeight,
                                    width: size.width,
@@ -447,6 +429,13 @@ public class DBY1VNController: UIViewController {
             videoView?.frame = rect
         }
     }
+    func segmentedTitleLabel(title: String) -> UILabel {
+        let l = UILabel()
+        l.text = title
+        l.font = UIFont(name: "Helvetica", size: 12)
+        l.textAlignment = .center
+        return l
+    }
     //MARK: - objc functions
     @objc func volumeChange(notification:Notification) {
         if let volume = notification.object as? CGFloat {
@@ -551,28 +540,16 @@ public class DBY1VNController: UIViewController {
     func closeCamera() {
     }
 }
-extension DBY1VNController: UIScrollViewDelegate {
-    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        if scrollView == scrollContainer {
-            let index = Int(scrollView.contentOffset.x / scrollContainerFrame.width)
-            roomControlbar.scroll(at: index)
-        }
-    }
-}
-extension DBY1VNController: DBYRoomControlbarDelegate {
-    func roomControlBar(owner: DBYRoomControlbar, stateWillChange state: DBYRoomControlbar.CameraState) {
-        if state == .normal {
-            requestOpenCamera()
-        }
-        if state == .invite {
-            cancelOpenCamera()
-        }
-        if state == .joined {
-            closeCamera()
-        }
-    }
-    
-    func roomControlBarDidSelected(owner: DBYRoomControlbar, index: Int) {
-        scrollContainer.scroll(at: index)
-    }
-}
+//extension DBY1VNController: DBYRoomControlbarDelegate {
+//    func roomControlBar(owner: DBYRoomControlbar, stateWillChange state: DBYRoomControlbar.CameraState) {
+//        if state == .normal {
+//            requestOpenCamera()
+//        }
+//        if state == .invite {
+//            cancelOpenCamera()
+//        }
+//        if state == .joined {
+//            closeCamera()
+//        }
+//    }
+//}

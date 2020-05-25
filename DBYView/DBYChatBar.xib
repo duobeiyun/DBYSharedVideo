@@ -7,7 +7,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DBYChatBar" customModule="新版大班" customModuleProvider="target">
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DBYChatBar" customModule="DBYSharedVideo" customModuleProvider="target">
             <connections>
                 <outlet property="emojiBtn" destination="0aq-Sy-7tM" id="6I8-7B-kIO"/>
                 <outlet property="textField" destination="qw3-Wb-JYk" id="0ed-Gu-Vwd"/>
@@ -43,7 +43,7 @@
                     <constraints>
                         <constraint firstAttribute="width" constant="40" id="r2Y-Ox-t7O"/>
                     </constraints>
-                    <state key="normal" title="发送">
+                    <state key="normal" image="interaction">
                         <color key="titleColor" systemColor="systemGrayColor" red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </state>
                     <connections>
@@ -74,5 +74,6 @@
     <resources>
         <image name="chat-emoji" width="24" height="24"/>
         <image name="chat-keyboard" width="20" height="20"/>
+        <image name="interaction" width="48" height="48"/>
     </resources>
 </document>

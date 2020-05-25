@@ -33,6 +33,7 @@ public class DBYLiveController: DBY1VNController {
     
     lazy var liveManager:DBYLiveManager = DBYLiveManager()
     lazy var chatBar = DBYChatBar()
+    lazy var interactionView = DBYInteractionView()
     lazy var voteView:DBYVoteView = DBYVoteView()
     lazy var announcementView = DBYAnnouncementView()
     lazy var messageTipView = DBYMessageTipView()
@@ -100,6 +101,7 @@ public class DBYLiveController: DBY1VNController {
         bottomBar.delegate = self
         settingView.delegate = self
         videoTipView.delegate = self
+        interactionView.delegate = self
         
         if authinfo?.classType == .sharedVideo {
             liveManager.setSharedVideoView(mainView)
@@ -169,10 +171,29 @@ public class DBYLiveController: DBY1VNController {
         
         topBar.set(authinfo?.courseTitle)
         settingView.set(buttons: [audioBtn])
-        roomControlbar.append(title: "讨论")
-        roomControlbar.append(title: "课程信息")
-        scrollContainer.append(view: chatContainer)
-        scrollContainer.append(view: courseInfoView)
+        
+        var models = [DBYSegmentedModel]()
+        let dicts:[[String:Any]] = [
+            [
+                "title":"讨论",
+                "view":chatContainer
+            ],[
+                "title":"课程信息",
+                "view":courseInfoView
+            ]
+        ]
+        for dict in dicts {
+            let model = DBYSegmentedModel()
+            let title = dict["title"] as! String
+            let label = segmentedTitleLabel(title: title)
+            let v = dict["view"] as! UIView
+            model.displayWidth = 60
+            model.label = label
+            model.view = v
+            models.append(model)
+        }
+        segmentedView.appendData(models: models)
+        
         chatBar.emojiImageDict = emojiImageDict
         chatBar.backgroundColor = UIColor.white
         hangUpView.isHidden = true
@@ -237,15 +258,15 @@ public class DBYLiveController: DBY1VNController {
         let size = view.bounds.size
         let chatBarHeight =  48 + iphoneXBottom
         
-        scrollContainerFrame = CGRect(x: 0,
-                                    y: roomControlbarFrame.maxY,
+        segmentedViewFrame = CGRect(x: 0,
+                                    y: mainViewFrame.maxY,
                                     width: size.width,
-                                    height: size.height - roomControlbarFrame.maxY)
+                                    height: size.height - mainViewFrame.maxY)
         chatListViewFrame = CGRect(x: 0,
                                    y: 0,
                                    width: size.width,
-                                   height: scrollContainerFrame.height - chatBarHeight)
-        announcementViewFrame = CGRect(x: roomControlbarFrame.minX,
+                                   height: segmentedViewFrame.height - segmentedView.titleViewHeight - chatBarHeight)
+        announcementViewFrame = CGRect(x: mainViewFrame.minX,
                                        y: 0,
                                        width: size.width,
                                        height: 40)
@@ -254,7 +275,7 @@ public class DBYLiveController: DBY1VNController {
                               width: size.width,
                               height: chatBarHeight)
         hangUpViewFrame = CGRect(x: size.width - 140,
-                                 y: roomControlbarFrame.maxY + 72,
+                                 y: mainViewFrame.maxY + 116,
                                  width: 140,
                                  height: tipViewHeight)
         smallPopViewFrame = CGRect(x: normalMargin * 2,
@@ -274,7 +295,7 @@ public class DBYLiveController: DBY1VNController {
         let buttonWidth:CGFloat = 160
         let scrollContainerWidth = size.width * 0.5
         
-        scrollContainerFrame = CGRect(x: size.width,
+        segmentedViewFrame = CGRect(x: size.width,
                                     y: 0,
                                     width: scrollContainerWidth,
                                     height: size.height)
@@ -394,14 +415,20 @@ public class DBYLiveController: DBY1VNController {
     }
     func showChatView() {
         showScrollContainer()
-        scrollContainer.scroll(at: 0)
+        segmentedView.scrollToIndex(index: 0)
     }
     func showVoteView(title:String, votes:[String]) {
         voteView.setVotes(votes: votes)
         voteView.delegate = self
         bottomBar.showVoteButton()
-        roomControlbar.append(title: "答题")
-        scrollContainer.append(view: voteView)
+        
+        let model = DBYSegmentedModel()
+        let title = "答题"
+        let label = segmentedTitleLabel(title: title)
+        model.displayWidth = 60
+        model.label = label
+        model.view = voteView
+        segmentedView.appendData(models: [model])
     }
     func hiddenVoteView() {
         if voteView.delegate == nil {
@@ -409,19 +436,17 @@ public class DBYLiveController: DBY1VNController {
         }
         voteView.delegate = nil
         bottomBar.hiddenVoteButton()
-        roomControlbar.removeLast()
-        scrollContainer.removeLast()
+        segmentedView.removeLastData()
     }
     func showVoteView() {
-        showScrollContainer()
-        scrollContainer.scrollAtLast()
+        segmentedView.scrollToIndex(index: 0)
     }
     func showScrollContainer() {
-        let offsetX:CGFloat = -scrollContainerFrame.width
-        scrollContainer.frame = scrollContainerFrame.offsetBy(dx: offsetX, dy: 0)
+        let offsetX:CGFloat = -segmentedViewFrame.width
+        segmentedView.frame = segmentedViewFrame.offsetBy(dx: offsetX, dy: 0)
     }
     func hiddenScrollContainer() {
-        scrollContainer.frame = scrollContainerFrame
+        segmentedView.frame = segmentedViewFrame
     }
     func showMessageTipView(image: UIImage?, message: String, type: DBYMessageTipType) {
         messageTipView.show(icon: image, message: message, type: type)
@@ -447,7 +472,7 @@ public class DBYLiveController: DBY1VNController {
         let width = 50 + messageLabWidth
         let x = view.bounds.width - width
         micListViewFrame = CGRect(x: x,
-                                  y: scrollContainerFrame.minY + tipViewHeight,
+                                  y: segmentedViewFrame.minY + tipViewHeight,
                                   width: width,
                                   height: tipViewHeight)
         
@@ -485,7 +510,7 @@ public class DBYLiveController: DBY1VNController {
         if disable {
             return
         }
-        roomControlbar.showVideoButton()
+        
     }
     func showMarqueeView() {
         guard let mq = roomConfig?.marquee else {
@@ -504,21 +529,26 @@ public class DBYLiveController: DBY1VNController {
         guard let extends = roomConfig?.extends else {
             return
         }
-        for model in extends {
-            roomControlbar.append(title: model.title ?? "")
-            if model.type == .diy {
+        for extend in extends {
+            let model = DBYSegmentedModel()
+            let title = extend.title ?? ""
+            let label = segmentedTitleLabel(title: title)
+            
+            if extend.type == .diy {
                 let webview = WKWebView()
                 webview.backgroundColor = UIColor.white
-                webview.loadHTMLString(model.content ?? "", baseURL: nil)
-                scrollContainer.append(view: webview)
+                webview.loadHTMLString(extend.content ?? "", baseURL: nil)
+                model.view = webview
             }
-            if model.type == .qa {
+            if extend.type == .qa {
                 questionView.backgroundColor = UIColor.white
-                scrollContainer.append(view: questionView)
+                model.view = questionView
             }
+            model.displayWidth = 60
+            model.label = label
+            segmentedView.appendData(models: [model])
         }
-        roomControlbar.scroll(at: 0)
-        scrollContainer.scroll(at: 0)
+        segmentedView.scrollToIndex(index: 0)
     }
     func setQuestions(list: [[String:Any]]) {
         questions = list
@@ -597,8 +627,6 @@ public class DBYLiveController: DBY1VNController {
         
         button1.action = {[weak self] btn in
             actionSheetView.dismiss()
-            self?.liveManager.requestToOpenCamera()
-            self?.roomControlbar.setCameraState(state: .invite)
         }
         button2.action = { btn in
             actionSheetView.dismiss()
@@ -618,8 +646,6 @@ public class DBYLiveController: DBY1VNController {
         
         button1.action = {[weak self] btn in
             actionSheetView.dismiss()
-            self?.roomControlbar.setCameraState(state: .normal)
-            self?.liveManager.requestToCloseCamera()
         }
         button2.action = { btn in
             actionSheetView.dismiss()
@@ -639,8 +665,6 @@ public class DBYLiveController: DBY1VNController {
         
         button1.action = {[weak self] btn in
             actionSheetView.dismiss()
-            self?.roomControlbar.setCameraState(state: .normal)
-            self?.liveManager.requestToCloseCamera()
         }
         button2.action = { btn in
             actionSheetView.dismiss()
@@ -814,6 +838,8 @@ extension DBYLiveController: UITableViewDelegate, UITableViewDataSource {
 extension DBYLiveController: DBYLiveManagerDelegate {
     public func clientOnline(_ liveManager: DBYLiveManager!, userId uid: String!, nickName: String!, userRole role: Int32) {
         mainView.stopLoading()
+        interactionView.userId = uid
+        
     }
     public func liveManagerClassOver(_ manager: DBYLiveManager!) {
         DBYGlobalMessage.shared().showText(.LM_ClassOver)
@@ -933,34 +959,6 @@ extension DBYLiveController: DBYLiveManagerDelegate {
             DBYGlobalMessage.shared().showText(message ?? "")
         })
     }
-    public func liveManager(_ manager: DBYLiveManager!, receivedMessage type: DBYMessageType, withUserInfo userInfo: [String : String]! = [:]) {
-        var message:String = ""
-        var tipType:DBYMessageTipType = .unknow
-        let name = userInfo["userName"] ?? ""
-        switch type {
-        case .audioInvite:
-            message = "教师 " + name + "邀请你上麦"
-            tipType = .invite
-        case .audioInviteEnd:
-            message = "上麦结束"
-            tipType = .close
-            hangUpView.isHidden = true
-        case .audioInviteTimeout:
-            message = "上麦超时"
-            tipType = .close
-            hangUpView.isHidden = true
-        case .audioKickedOut:
-            message = "被踢出上麦"
-            tipType = .close
-            hangUpView.isHidden = true
-        default:
-            break;
-        }
-        let image = UIImage(name: "mic")
-        showMessageTipView(image: image,
-                           message: message,
-                           type: tipType)
-    }
     public func liveManager(_ manager: DBYLiveManager!, denyChatStatusChange isDeny: Bool) {
         forbiddenButton.isHidden = !isDeny
         chatBar.isHidden = isDeny
@@ -1001,16 +999,8 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         let videoView = videoDict.removeValue(forKey: uid)
         videoView?.removeFromSuperview()
     }
-    public func liveManager(_ manager: DBYLiveManager!, cameraStateChange state: DBYCameraState) {
-        if state == .normal {
-            roomControlbar.setCameraState(state: .normal)
-        }
-        if state == .invite {
-            roomControlbar.setCameraState(state: .invite)
-        }
-        if state == .joined {
-            roomControlbar.setCameraState(state: .joined)
-        }
+    public func liveManager(_ manager: DBYLiveManager!, interActionListChange list: [DBYInteractionModel]!, type: DBYInteractionType) {
+        self.interactionView.set(models: list, for: type)
     }
     public func willReceivedVideoData(_ liveManager: DBYLiveManager!, userId uid: String!) {
         if uid == authinfo?.teacherId {
@@ -1070,7 +1060,23 @@ extension DBYLiveController: DBYChatBarDelegate {
     func chatBar(owner: DBYChatBar, send message: String) {
         send(message: message)
     }
-    
+    func chatBar(owner: DBYChatBar, buttonClickWith target: UIButton) {
+        if target.isSelected {
+            interactionView.frame = segmentedViewFrame
+            interactionView.switchType(.audio)
+            view.addSubview(interactionView)
+            liveManager.getInteractionList(.audio) {[weak self] (list) in
+                if let models = list {
+                    self?.interactionView.set(models: models, for: .audio)
+                }
+            }
+            liveManager.getInteractionList(.video) {[weak self] (list) in
+                if let models = list {
+                    self?.interactionView.set(models: models, for: .video)
+                }
+            }
+        }
+    }
     func chatBarWillShowInputView(rect: CGRect, duration: TimeInterval) {
         if isLandscape() {
             return
@@ -1113,20 +1119,13 @@ extension DBYLiveController: DBYMessageTipViewDelegate {
         let message = "正在接通中"
         
         showMessageTipView(image: loading, message: message, type: .close)
-        liveManager.accept {[weak self] (finished) in
-            if !finished {
-                let image = UIImage(name: "mic")
-                self?.showMessageTipView(image: image,
-                                        message: "已经达到最大上麦人数",
-                                        type: .close)
-            }
+        liveManager.accept(.audio) { (result) in
+            
         }
     }
     
     func messageTipViewRefuseInvite(owner: DBYMessageTipView) {
-        liveManager.refuse { (finished) in
-            
-        }
+        
     }
     func messageTipViewDidClick(owner: DBYMessageTipView) {
         newMessageCount = 0
@@ -1159,7 +1158,6 @@ extension DBYLiveController: DBYHangUpViewDelegate {
         weak var weakSelf = self
         button1.action = { btn in
             weakSelf?.hangUpView.dismiss()
-            weakSelf?.liveManager.closeMicrophone()
             actionSheetView.dismiss()
         }
         button2.action = { btn in
@@ -1254,4 +1252,65 @@ extension DBYLiveController: DBYCommentCellDelegate {
         let name:String = chatDict["userName"] as? String ?? ""
         chatBar.append(text: "@" + name)
     }
+}
+//MARK: - DBYInteractionViewDelegate
+extension DBYLiveController: DBYInteractionViewDelegate {
+    func closeInteraction(owner: DBYInteractionView, type: DBYInteractionType) {
+        owner.removeFromSuperview()
+    }
+    
+    func interactionAlert(owner: DBYInteractionView, message: String) {
+        let image = UIImage(name: "mic")
+        showMessageTipView(image: image,
+                           message: message,
+                           type: .close)
+    }
+    
+    func requestInteraction(owner: DBYInteractionView, state: DBYInteractionState, type: DBYInteractionType) {
+        liveManager.request(type, state: state) { (result) in
+            print("requestInteraction", result)
+        }
+    }
+    
+    func receiveInteraction(owner: DBYInteractionView, state: DBYInteractionState, type: DBYInteractionType, model: DBYInteractionModel?) {
+        if state == .inqueue && owner.superview == nil, let userInfo = model {
+            var name:String = ""
+            var message:String = ""
+            if type == .audio {
+                name = "mic-small"
+                message = userInfo.fromeUserName + "邀请你上麦"
+            }
+            if type == .video {
+                name = "camera-request-icon"
+                message = userInfo.fromeUserName + "邀请你上台"
+            }
+            let image = UIImage(name: name)
+            showMessageTipView(image: image, message: message, type: .invite)
+        }
+        if state == .joined && type == .video {
+            liveManager.openCam(true) { (message) in
+                
+            }
+        }
+        if state == .quit && type == .video {
+            liveManager.openCam(false) { (message) in
+                
+            }
+        }
+        if state == .joined && type == .audio {
+            liveManager.openMic(true) { (message) in
+                
+            }
+        }
+        if state == .quit && type == .audio {
+            liveManager.openMic(false) { (message) in
+                
+            }
+        }
+    }
+    
+    func switchInteraction(owner: DBYInteractionView, type: DBYInteractionType) {
+        
+    }
+    
 }

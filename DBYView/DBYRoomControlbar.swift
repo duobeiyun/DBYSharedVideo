@@ -10,16 +10,9 @@ import UIKit
 
 protocol DBYRoomControlbarDelegate: NSObjectProtocol {
     func roomControlBarDidSelected(owner: DBYRoomControlbar, index:Int)
-    func roomControlBar(owner: DBYRoomControlbar, stateWillChange state: DBYRoomControlbar.CameraState)
 }
 
 class DBYRoomControlbar: UIView {
-    enum CameraState {
-        case normal
-        case invite
-        case joined
-    }
-    var state:CameraState = .normal
     var btnMargin:CGFloat = 20
     var selectedButton:UIButton?
     weak var delegate:DBYRoomControlbarDelegate?
@@ -27,7 +20,6 @@ class DBYRoomControlbar: UIView {
     lazy var buttons:[UIButton] = [UIButton]()
     lazy var barLayer:CAShapeLayer = CAShapeLayer()
     var barAnimation:CAAnimationGroup?
-    lazy var videoButton = UIButton(type: .custom)
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -37,11 +29,7 @@ class DBYRoomControlbar: UIView {
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
-    override func layoutSubviews() {
-        let videoButtonW:CGFloat = 100
-        
-        videoButton.frame = CGRect(x: frame.width - videoButtonW - 12, y: 4, width: videoButtonW, height: frame.height - 8)
-    }
+    
     func setupUI() {
         barLayer.backgroundColor = DBYStyle.yellow.cgColor
         barLayer.cornerRadius = 2
@@ -50,26 +38,6 @@ class DBYRoomControlbar: UIView {
         layer.shadowOpacity = 1
         layer.shadowColor = DBYStyle.middleGray.cgColor
         layer.shadowOffset = CGSize(width: 0, height: 4)
-    }
-    func setCameraState(state: CameraState) {
-        self.state = state
-        switch state {
-        case .normal:
-            videoButton.layer.backgroundColor = UIColor.white.cgColor
-            videoButton.layer.cornerRadius = 0
-            videoButton.setTitle(" 申请上台", for: .normal)
-            break
-        case .invite:
-            videoButton.layer.backgroundColor = DBYStyle.yellow.cgColor
-            videoButton.layer.cornerRadius = 4
-            videoButton.setTitle(" 准备上台中", for: .normal)
-            break
-        case .joined:
-            videoButton.layer.backgroundColor = DBYStyle.yellow.cgColor
-            videoButton.layer.cornerRadius = 4
-            videoButton.setTitle(" 退出上台", for: .normal)
-            break
-        }
     }
     func append(title: String) {
         for button in buttons {
@@ -110,23 +78,6 @@ class DBYRoomControlbar: UIView {
             return
         }
         setSelected(btn: last)
-    }
-    func showVideoButton() {
-        videoButton.setImage(UIImage(name: "camera-request-icon"), for: .normal)
-        videoButton.titleLabel?.font = DBYStyle.font12
-        videoButton.setTitleColor(DBYStyle.brown, for: .normal)
-        
-        videoButton.setTitle(" 申请上台", for: .normal)
-        
-        videoButton.addTarget(self, action: #selector(cameraRequest), for: .touchUpInside)
-        addSubview(videoButton)
-    }
-    func removeVideoButton() {
-        videoButton.removeFromSuperview()
-    }
-    //请求上台
-    @objc func cameraRequest(sender: UIButton) {
-        delegate?.roomControlBar(owner: self, stateWillChange: state)
     }
     @objc func click(btn: UIButton) {
         setSelected(btn: btn)

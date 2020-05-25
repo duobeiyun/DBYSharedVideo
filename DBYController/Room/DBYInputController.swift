@@ -79,6 +79,10 @@ class DBYInputController: UIViewController {
     }
 }
 extension DBYInputController: DBYChatBarDelegate {
+    func chatBar(owner: DBYChatBar, buttonClickWith target: UIButton) {
+        
+    }
+    
     func chatBarDidBecomeActive(owner: DBYChatBar) {
         
     }
