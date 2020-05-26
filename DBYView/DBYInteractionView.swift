@@ -32,16 +32,15 @@ class DBYInteractionView: DBYNibView {
     private lazy var audioList:[DBYInteractionModel] = [DBYInteractionModel]()
     private lazy var videoList:[DBYInteractionModel] = [DBYInteractionModel]()
     
+    //用于更新数据
     var type: DBYInteractionType = .audio
+    //用于切换
+    var tmpType: DBYInteractionType = .audio
+    var state: DBYInteractionState = .normal
     
     var userId:String?
     var userName:String?
     var userRole:Int = 0
-    
-    var stateDict:[DBYInteractionType:DBYInteractionState] = [
-        .audio: .normal,
-        .video: .normal
-    ]
     
     let btnHeight:CGFloat = 30
     let cellId = "DBYInteractionCell"
@@ -66,23 +65,14 @@ class DBYInteractionView: DBYNibView {
         delegate?.closeInteraction(owner: self, type: type)
     }
     @IBAction func applyAction(sender: UIButton) {
-        let state = stateDict[type]
-        if stateDict[.audio] != .normal && type == .video {
-            delegate?.interactionAlert(owner: self, message: "正在上麦操作")
-            return
-        }
-        if stateDict[.video] != .normal && type == .audio {
-            delegate?.interactionAlert(owner: self, message: "正在上台操作")
-            return
-        }
         if state == .normal {
-            delegate?.requestInteraction(owner: self, state: .inqueue, type: type)
+            delegate?.requestInteraction(owner: self, state: .inqueue, type: tmpType)
         }
         if state == .inqueue {
-            delegate?.requestInteraction(owner: self, state: .abort, type: type)
+            delegate?.requestInteraction(owner: self, state: .abort, type: tmpType)
         }
         if state == .joined {
-            delegate?.requestInteraction(owner: self, state: .quit, type: type)
+            delegate?.requestInteraction(owner: self, state: .quit, type: tmpType)
         }
     }
     
@@ -103,16 +93,17 @@ class DBYInteractionView: DBYNibView {
         videoButton.setTitleColor(.white, for: .normal)
         applyButton.setBackgroudnStyle(fillColor: DBYStyle.yellow, strokeColor: DBYStyle.brown, radius: 20)
     }
-    //不更新数据
+    //本地触发
     func switchType(_ type: DBYInteractionType) {
         self.type = type
         
-        updateContent()
-        updateButton()
+        updateContent(type:type)
+        if state == .normal {
+            updateButton()
+        }
     }
-    //更新数据
+    //消息触发
     func set(models:[DBYInteractionModel], for type:DBYInteractionType) {
-        self.type = type
         self.models = models
         
         if type == .audio {
@@ -121,31 +112,33 @@ class DBYInteractionView: DBYNibView {
         if type == .video {
             self.videoList = models
         }
-        updateContent()
+        updateContent(type:type)
         updateButton()
     }
     func updateButton() {
-        let state = stateDict[type]
-        if state == .normal && type == .audio {
+        let arr = ["normal", "inqueue", "joined"]
+        print("---",arr[Int(state.rawValue)], type.rawValue)
+        
+        if state == .normal && tmpType == .audio {
             applyButton.setTitle("申请语音上麦", for: .normal)
         }
-        if state == .inqueue && type == .audio {
+        if state == .inqueue && tmpType == .audio {
             applyButton.setTitle("正在申请上麦，点击取消", for: .normal)
         }
-        if state == .joined && type == .audio {
+        if state == .joined && tmpType == .audio {
             applyButton.setTitle("正在上麦中，点击挂断", for: .normal)
         }
-        if state == .normal && type == .video {
+        if state == .normal && tmpType == .video {
             applyButton.setTitle("申请视频上台", for: .normal)
         }
-        if state == .inqueue && type == .video {
+        if state == .inqueue && tmpType == .video {
             applyButton.setTitle("正在申请上台，点击取消", for: .normal)
         }
-        if state == .joined && type == .video {
+        if state == .joined && tmpType == .video {
             applyButton.setTitle("正在上台中，点击挂断", for: .normal)
         }
     }
-    func updateContent() {
+    func updateContent(type: DBYInteractionType) {
         var count = 0
         var userModel:DBYInteractionModel?
         var typeValue = ""
@@ -166,30 +159,32 @@ class DBYInteractionView: DBYNibView {
                 userModel = model
             }
         }
-        let state = stateDict[type]
-        //被邀请上台或上麦
-        if userModel != nil && userModel?.state == .inqueue {
-            delegate?.receiveInteraction(owner: self, state: .inqueue, type: type, model: userModel)
-            stateDict[type] = .inqueue
-        }
-        //上台或上麦中
-        if userModel != nil && userModel?.state == .joined {
-            delegate?.receiveInteraction(owner: self, state: .joined, type: type, model: userModel)
-            stateDict[type] = .joined
-        }
-        //被取消上台或上麦
-        if userModel == nil && state == .joined {
-            delegate?.receiveInteraction(owner: self, state: .quit, type: type, model: userModel)
-            stateDict[type] = .normal
-        }
-        //被取消上台或上麦邀请
-        if userModel == nil && state == .inqueue {
-            delegate?.receiveInteraction(owner: self, state: .abort, type: type, model: nil)
-            stateDict[type] = .normal
-        }
-        
         label.text = "\(count)人正在" + typeValue
         tableView.reloadData()
+        
+        //被邀请上台或上麦
+        if userModel != nil && userModel?.state == .inqueue && state == .normal {
+            delegate?.receiveInteraction(owner: self, state: .inqueue, type: type, model: userModel)
+            state = .inqueue
+        }else
+        //上台或上麦
+        if userModel != nil && userModel?.state == .joined  && state == .inqueue {
+            delegate?.receiveInteraction(owner: self, state: .joined, type: type, model: userModel)
+            state = .joined
+        }else
+        //被取消上台或上麦
+        if userModel == nil && state == .joined && tmpType == type {
+            delegate?.receiveInteraction(owner: self, state: .quit, type: type, model: userModel)
+            state = .normal
+        }else
+        //被取消上台或上麦邀请
+        if userModel == nil && state == .inqueue && tmpType == type {
+            delegate?.receiveInteraction(owner: self, state: .abort, type: type, model: nil)
+            state = .normal
+        }
+        if state == .normal {
+            tmpType = self.type
+        }
     }
 }
 extension DBYInteractionView: UITableViewDelegate {

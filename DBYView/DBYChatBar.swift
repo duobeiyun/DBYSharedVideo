@@ -31,15 +31,14 @@ class DBYChatBar: DBYNibView {
     
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var emojiBtn: UIButton!
+    @IBOutlet weak var interactionButton: UIButton!
     
     @IBAction func showEmoji(_ sender: UIButton) {
         showEmojiView()
     }
     
     @IBAction func send(_ sender: UIButton) {
-        sender.isSelected = !sender.isSelected
         delegate?.chatBar(owner: self, buttonClickWith: sender)
-        textField.text = nil
     }
     
     deinit {
@@ -64,7 +63,7 @@ class DBYChatBar: DBYNibView {
         super.layoutSubviews()
         
         let roundHeight:CGFloat = 40
-        let roundWidth:CGFloat = bounds.width - 16
+        let roundWidth:CGFloat = bounds.width - 64
         let rect = CGRect(x: 8,
                           y: 4,
                           width: roundWidth,

@@ -209,7 +209,7 @@ extension DBYOnlineController: UITableViewDelegate, UITableViewDataSource {
         if count > 0 {
             chatListView.backgroundView = nil
         }else {
-            let chatTipView = DBYTipView(image: UIImage(name: "icon-empty-status-1"), message: "聊天消息为空")
+            let chatTipView = DBYEmptyView(image: UIImage(name: "icon-empty-status-1"), message: "聊天消息为空")
             chatListView.backgroundView = chatTipView
         }
         return count

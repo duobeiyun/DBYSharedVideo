@@ -432,6 +432,7 @@ public class DBY1VNController: UIViewController {
     func segmentedTitleLabel(title: String) -> UILabel {
         let l = UILabel()
         l.text = title
+        l.textColor = DBYStyle.middleGray
         l.font = UIFont(name: "Helvetica", size: 12)
         l.textAlignment = .center
         return l

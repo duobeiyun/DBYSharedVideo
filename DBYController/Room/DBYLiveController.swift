@@ -16,6 +16,8 @@ public class DBYLiveController: DBY1VNController {
     var micListViewFrame: CGRect = .zero
     var forbiddenBtnFrame: CGRect = .zero
     var announcementViewFrame: CGRect = .zero
+    var tipViewSafeSize: CGSize = .zero
+    var tipViewPosition: DBYTipView.Position = [.bottom, .center]
     
     var announcement:String?
     var isHandsup:Bool = false
@@ -36,7 +38,6 @@ public class DBYLiveController: DBY1VNController {
     lazy var interactionView = DBYInteractionView()
     lazy var voteView:DBYVoteView = DBYVoteView()
     lazy var announcementView = DBYAnnouncementView()
-    lazy var messageTipView = DBYMessageTipView()
     lazy var micListView = DBYMicListView()
     lazy var hangUpView = DBYHangUpView()
     lazy var forbiddenButton = DBYButton()
@@ -94,7 +95,6 @@ public class DBYLiveController: DBY1VNController {
         chatListView.dataSource = self
         netTipView.delegate = self
         chatBar.delegate = self
-        messageTipView.delegate = self
         micListView.delegate = self
         hangUpView.delegate = self
         topBar.delegate = self
@@ -154,7 +154,6 @@ public class DBYLiveController: DBY1VNController {
         mainView.addSubview(marqueeView)
         mainView.addSubview(watermarkView)
         
-        view.addSubview(messageTipView)
         view.addSubview(micListView)
         view.addSubview(hangUpView)
 //        view.addSubview(zanButton)
@@ -197,7 +196,6 @@ public class DBYLiveController: DBY1VNController {
         chatBar.emojiImageDict = emojiImageDict
         chatBar.backgroundColor = UIColor.white
         hangUpView.isHidden = true
-        messageTipView.isHidden = true
         forbiddenButton.isHidden = true
         micListView.isHidden = true
         let volume = DBYSystemControl.shared.getVolume()
@@ -214,7 +212,6 @@ public class DBYLiveController: DBY1VNController {
         announcementView.isHidden = true
         topBar.set(type: .landscape)
         chatBar.endInput()
-        messageTipView.set(corners: [.topLeft, .bottomLeft])
         bottomBar.set(type: .liveLandscape)
         forbiddenButton.setTitleColor(UIColor.white, for: .normal)
         forbiddenButton.setBackgroudnStyle(fillColor: DBYStyle.darkGray,
@@ -231,7 +228,6 @@ public class DBYLiveController: DBY1VNController {
         announcementView.isHidden = (announcement?.count ?? 0) <= 0
         topBar.set(type: .portrait)
         bottomBar.set(type: .live)
-        messageTipView.set(corners: [.allCorners])
         forbiddenButton.setTitleColor(DBYStyle.brown, for: .normal)
         forbiddenButton.setBackgroudnStyle(fillColor: UIColor.white,
                                            strokeColor: DBYStyle.brown,
@@ -245,7 +241,6 @@ public class DBYLiveController: DBY1VNController {
         chatBar.frame = chatBarFrame
         hangUpView.frame = hangUpViewFrame
         announcementView.frame = announcementViewFrame
-        messageTipView.frame = smallPopViewFrame
         micListView.frame = micListViewFrame
         forbiddenButton.frame = forbiddenBtnFrame
         
@@ -258,6 +253,8 @@ public class DBYLiveController: DBY1VNController {
         let size = view.bounds.size
         let chatBarHeight =  48 + iphoneXBottom
         
+        tipViewSafeSize = CGSize(width: 0, height: chatBarHeight + normalMargin * 2)
+        tipViewPosition = [.bottom, .center]
         segmentedViewFrame = CGRect(x: 0,
                                     y: mainViewFrame.maxY,
                                     width: size.width,
@@ -294,7 +291,8 @@ public class DBYLiveController: DBY1VNController {
         let tipViewWidth = size.width * 0.4
         let buttonWidth:CGFloat = 160
         let scrollContainerWidth = size.width * 0.5
-        
+        tipViewSafeSize = CGSize(width: 0, height: 100)
+        tipViewPosition = [.right, .center]
         segmentedViewFrame = CGRect(x: size.width,
                                     y: 0,
                                     width: scrollContainerWidth,
@@ -448,25 +446,6 @@ public class DBYLiveController: DBY1VNController {
     func hiddenScrollContainer() {
         segmentedView.frame = segmentedViewFrame
     }
-    func showMessageTipView(image: UIImage?, message: String, type: DBYMessageTipType) {
-        messageTipView.show(icon: image, message: message, type: type)
-        let tipViewWidth = messageTipView.getContentWidth()
-        
-        var x:CGFloat = 0
-        if isPortrait() {
-            x = smallPopViewFrame.minX + (smallPopViewFrame.width - tipViewWidth) * 0.5
-        }
-        if isLandscape() {
-            x = smallPopViewFrame.minX + (smallPopViewFrame.width - tipViewWidth)
-        }
-        let showFrame = CGRect(x: x,
-                               y: smallPopViewFrame.minY,
-                               width: tipViewWidth,
-                               height: smallPopViewFrame.height)
-        
-        messageTipView.frame = showFrame
-        chatBar.endInput()
-    }
     func updateMicListViewFrame() {
         let messageLabWidth = micListView.getMessageWidth()
         let width = 50 + messageLabWidth
@@ -611,68 +590,11 @@ public class DBYLiveController: DBY1VNController {
             newMessageCount += array.count
             let image = UIImage(name: "message-tip")
             let message = "\(newMessageCount)条新消息"
-            showMessageTipView(image: image, message: message, type: .click)
+            //TODO: - 增加新消息提示
+//            showMessageTipView(image: image, message: message, type: .click)
         }else if count > 0 {
             chatListView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: true)
         }
-    }
-    
-    override func requestOpenCamera() {
-        let actionSheetView = DBYActionSheetView()
-        let button1 = DBYActionButton(style: .confirm)
-        let button2 = DBYActionButton(style: .cancel)
-        
-        button1.setTitle("申请上台", for: .normal)
-        button2.setTitle("取消", for: .normal)
-        
-        button1.action = {[weak self] btn in
-            actionSheetView.dismiss()
-        }
-        button2.action = { btn in
-            actionSheetView.dismiss()
-        }
-        actionSheetView.setBackground(image: UIImage(name: "open_camera_bg"))
-        actionSheetView.show(title: "申请上台",
-                             message: "是否要申请上台发言？",
-                             actions: [button1, button2])
-    }
-    override func cancelOpenCamera() {
-        let actionSheetView = DBYActionSheetView()
-        let button1 = DBYActionButton(style: .confirm)
-        let button2 = DBYActionButton(style: .cancel)
-        
-        button1.setTitle("取消上台", for: .normal)
-        button2.setTitle("取消", for: .normal)
-        
-        button1.action = {[weak self] btn in
-            actionSheetView.dismiss()
-        }
-        button2.action = { btn in
-            actionSheetView.dismiss()
-        }
-        actionSheetView.setBackground(image: UIImage(name: "open_camera_bg"))
-        actionSheetView.show(title: "上台信息",
-                             message: "前方还有 \(inviteIndex) 人等待上台点击取消上台申请",
-                             actions: [button1, button2])
-    }
-    override func closeCamera() {
-        let actionSheetView = DBYActionSheetView()
-        let button1 = DBYActionButton(style: .confirm)
-        let button2 = DBYActionButton(style: .cancel)
-        
-        button1.setTitle("确认退出", for: .normal)
-        button2.setTitle("取消", for: .normal)
-        
-        button1.action = {[weak self] btn in
-            actionSheetView.dismiss()
-        }
-        button2.action = { btn in
-            actionSheetView.dismiss()
-        }
-        actionSheetView.setBackground(image: UIImage(name: "open_camera_bg"))
-        actionSheetView.show(title: "确认退出上台",
-                             message: "你确认要退出上台？",
-                             actions: [button1, button2])
     }
     //MARK: - objc functions
     
@@ -789,7 +711,6 @@ public class DBYLiveController: DBY1VNController {
             showTip = delta > scrollView.bounds.height
             if !showTip {
                 newMessageCount = 0
-                messageTipView.close()
             }
         }
     }
@@ -801,7 +722,7 @@ extension DBYLiveController: UITableViewDelegate, UITableViewDataSource {
         if count > 0 {
             chatListView.backgroundView = nil
         }else {
-            let chatTipView = DBYTipView(image: UIImage(name: "icon-empty-status-1"), message: "聊天消息为空")
+            let chatTipView = DBYEmptyView(image: UIImage(name: "icon-empty-status-1"), message: "聊天消息为空")
             chatListView.backgroundView = chatTipView
         }
         return count
@@ -839,7 +760,16 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     public func clientOnline(_ liveManager: DBYLiveManager!, userId uid: String!, nickName: String!, userRole role: Int32) {
         mainView.stopLoading()
         interactionView.userId = uid
-        
+        liveManager.getInteractionList(.audio) {[weak self] (list) in
+            if let models = list {
+                self?.interactionView.set(models: models, for: .audio)
+            }
+        }
+        liveManager.getInteractionList(.video) {[weak self] (list) in
+            if let models = list {
+                self?.interactionView.set(models: models, for: .video)
+            }
+        }
     }
     public func liveManagerClassOver(_ manager: DBYLiveManager!) {
         DBYGlobalMessage.shared().showText(.LM_ClassOver)
@@ -981,15 +911,6 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     public func liveManager(_ manager: DBYLiveManager!, removedQuestion questionId: String!) {
         removeQustion(questionId: questionId)
     }
-    public func liveManager(_ manager: DBYLiveManager!, cameraRequest index: UInt) {
-        inviteIndex = Int(index)
-        print("前方还有 \(index) 人正在等待上台。")
-        let message = "前方还有 \(index) 人正在等待上台。"
-        let image = UIImage(name: "camera-request-icon")
-        showMessageTipView(image: image,
-                           message: message,
-                           type: .close)
-    }
     public func initVideoRecorder(_ liveManager: DBYLiveManager!, userId uid: String!) {
         let videoView = createVideoView(uid: uid)
         liveManager.setLocalVideoView(videoView.video)
@@ -1061,21 +982,9 @@ extension DBYLiveController: DBYChatBarDelegate {
         send(message: message)
     }
     func chatBar(owner: DBYChatBar, buttonClickWith target: UIButton) {
-        if target.isSelected {
-            interactionView.frame = segmentedViewFrame
-            interactionView.switchType(.audio)
-            view.addSubview(interactionView)
-            liveManager.getInteractionList(.audio) {[weak self] (list) in
-                if let models = list {
-                    self?.interactionView.set(models: models, for: .audio)
-                }
-            }
-            liveManager.getInteractionList(.video) {[weak self] (list) in
-                if let models = list {
-                    self?.interactionView.set(models: models, for: .video)
-                }
-            }
-        }
+        interactionView.frame = segmentedViewFrame
+        interactionView.switchType(.audio)
+        view.addSubview(interactionView)
     }
     func chatBarWillShowInputView(rect: CGRect, duration: TimeInterval) {
         if isLandscape() {
@@ -1111,33 +1020,6 @@ extension DBYLiveController: DBYChatBarDelegate {
 }
 extension DBYLiveController {
     
-}
-//MARK: - DBYMessageTipViewDelegate
-extension DBYLiveController: DBYMessageTipViewDelegate {
-    func messageTipViewAcceptInvite(owner: DBYMessageTipView) {
-        let loading = UIImage(name: "icon-loading")
-        let message = "正在接通中"
-        
-        showMessageTipView(image: loading, message: message, type: .close)
-        liveManager.accept(.audio) { (result) in
-            
-        }
-    }
-    
-    func messageTipViewRefuseInvite(owner: DBYMessageTipView) {
-        
-    }
-    func messageTipViewDidClick(owner: DBYMessageTipView) {
-        newMessageCount = 0
-        chatListView.reloadData()
-        let count = allChatList.count
-        if count > 0 {
-            chatListView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: true)
-        }
-    }
-    func messageTipViewWillDismiss(owner: DBYMessageTipView) {
-        
-    }
 }
 //MARK: - DBYVoteViewDelegate
 extension DBYLiveController: DBYVoteViewDelegate {
@@ -1257,13 +1139,21 @@ extension DBYLiveController: DBYCommentCellDelegate {
 extension DBYLiveController: DBYInteractionViewDelegate {
     func closeInteraction(owner: DBYInteractionView, type: DBYInteractionType) {
         owner.removeFromSuperview()
+        if owner.state == .normal {
+            chatBar.interactionButton.isSelected = false
+        }else {
+            chatBar.interactionButton.isSelected = true
+        }
     }
     
     func interactionAlert(owner: DBYInteractionView, message: String) {
-        let image = UIImage(name: "mic")
-        showMessageTipView(image: image,
-                           message: message,
-                           type: .close)
+        let icon = UIImage(name: "mic")
+        
+        let tipView = DBYTipView.show(icon: icon, message: message, type: .close, position: tipViewPosition)
+        if let p = tipView as? DBYTipViewProtocol {
+            p.setSafeSize(size: tipViewSafeSize)
+        }
+        tipView?.dismiss(after: 3)
     }
     
     func requestInteraction(owner: DBYInteractionView, state: DBYInteractionState, type: DBYInteractionType) {
@@ -1274,6 +1164,9 @@ extension DBYLiveController: DBYInteractionViewDelegate {
     
     func receiveInteraction(owner: DBYInteractionView, state: DBYInteractionState, type: DBYInteractionType, model: DBYInteractionModel?) {
         if state == .inqueue && owner.superview == nil, let userInfo = model {
+            if userInfo.fromeUserId == userInfo.userId {
+                return
+            }
             var name:String = ""
             var message:String = ""
             if type == .audio {
@@ -1285,7 +1178,28 @@ extension DBYLiveController: DBYInteractionViewDelegate {
                 message = userInfo.fromeUserName + "邀请你上台"
             }
             let image = UIImage(name: name)
-            showMessageTipView(image: image, message: message, type: .invite)
+            
+            let tipView = DBYTipView.show(icon: image, message: message, type: .invite, position: tipViewPosition)
+            if let p = tipView as? DBYTipViewProtocol {
+                p.setSafeSize(size: tipViewSafeSize)
+            }
+            guard let inviteView = tipView as? DBYTipInviteView else {
+                return
+            }
+            weak var weakView = inviteView
+            weak var weakSelf = self
+            inviteView.acceptBlock = {
+                weakView?.removeFromSuperview()
+                weakSelf?.liveManager.accept(type, completion: { (result) in
+                    
+                })
+            }
+            inviteView.refuseBlock = {
+                weakView?.removeFromSuperview()
+                weakSelf?.liveManager.request(type, state: .abort, completion: { (result) in
+                    
+                })
+            }
         }
         if state == .joined && type == .video {
             liveManager.openCam(true) { (message) in

@@ -56,7 +56,7 @@ class DBYMessageTipView: DBYView {
     let btnWidth: CGFloat = 60
     
     var corners: UIRectCorner = .allCorners
-    var tipType:DBYMessageTipType = .unknow
+    var tipType: DBYMessageTipType = .unknow
     var timer: Timer?
     weak var delegate:DBYMessageTipViewDelegate?
     var messageLabWidth: CGFloat = 0
@@ -188,14 +188,7 @@ class DBYMessageTipView: DBYView {
         return messageLabWidth + constWidth
     }
     func startHiddenTimer() {
-        let date:Date = Date(timeIntervalSinceNow: 5)
-        timer = Timer(fireAt: date,
-                      interval: 0,
-                      target: self,
-                      selector: #selector(dismiss),
-                      userInfo: nil,
-                      repeats: false)
-        RunLoop.current.add(timer!, forMode: RunLoop.Mode.default)
+        
     }
     func stopHiddenTimer() {
         timer?.invalidate()

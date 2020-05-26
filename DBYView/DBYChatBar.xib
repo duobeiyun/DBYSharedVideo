@@ -10,12 +10,13 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DBYChatBar" customModule="DBYSharedVideo" customModuleProvider="target">
             <connections>
                 <outlet property="emojiBtn" destination="0aq-Sy-7tM" id="6I8-7B-kIO"/>
+                <outlet property="interactionButton" destination="8pq-1J-JEa" id="ZeV-Uz-ELP"/>
                 <outlet property="textField" destination="qw3-Wb-JYk" id="0ed-Gu-Vwd"/>
             </connections>
         </placeholder>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <view contentMode="scaleToFill" id="Cpp-r5-mok">
-            <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
+            <rect key="frame" x="0.0" y="0.0" width="414" height="50"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <subviews>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0aq-Sy-7tM">
@@ -31,7 +32,7 @@
                     </connections>
                 </button>
                 <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="快来和大家一起参与讨论吧" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="qw3-Wb-JYk">
-                    <rect key="frame" x="44" y="4" width="298" height="40"/>
+                    <rect key="frame" x="44" y="4" width="306" height="40"/>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                     <textInputTraits key="textInputTraits" returnKeyType="send"/>
                     <connections>
@@ -39,13 +40,15 @@
                     </connections>
                 </textField>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8pq-1J-JEa">
-                    <rect key="frame" x="358" y="4" width="40" height="40"/>
+                    <rect key="frame" x="358" y="2" width="48" height="48"/>
                     <constraints>
-                        <constraint firstAttribute="width" constant="40" id="r2Y-Ox-t7O"/>
+                        <constraint firstAttribute="height" constant="48" id="4B2-Xf-YuU"/>
+                        <constraint firstAttribute="width" constant="48" id="r2Y-Ox-t7O"/>
                     </constraints>
                     <state key="normal" image="interaction">
                         <color key="titleColor" systemColor="systemGrayColor" red="0.5568627451" green="0.5568627451" blue="0.57647058819999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </state>
+                    <state key="selected" image="interaction-highlight"/>
                     <connections>
                         <action selector="send:" destination="-1" eventType="touchUpInside" id="T9v-9T-z0S"/>
                     </connections>
@@ -53,13 +56,11 @@
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <constraints>
-                <constraint firstItem="8pq-1J-JEa" firstAttribute="height" secondItem="0aq-Sy-7tM" secondAttribute="height" id="Hqt-Ih-1Ty"/>
-                <constraint firstItem="8pq-1J-JEa" firstAttribute="top" secondItem="qw3-Wb-JYk" secondAttribute="top" id="Iwy-MZ-rtq"/>
-                <constraint firstAttribute="trailing" secondItem="8pq-1J-JEa" secondAttribute="trailing" constant="16" id="Sg9-yd-sZo"/>
+                <constraint firstItem="8pq-1J-JEa" firstAttribute="top" secondItem="Cpp-r5-mok" secondAttribute="top" constant="2" id="KdJ-Cd-v9z"/>
+                <constraint firstAttribute="trailing" secondItem="8pq-1J-JEa" secondAttribute="trailing" constant="8" id="Sg9-yd-sZo"/>
                 <constraint firstItem="qw3-Wb-JYk" firstAttribute="height" secondItem="0aq-Sy-7tM" secondAttribute="height" id="XYM-23-vp9"/>
-                <constraint firstItem="8pq-1J-JEa" firstAttribute="leading" secondItem="qw3-Wb-JYk" secondAttribute="trailing" constant="16" id="aAV-gS-yXu"/>
+                <constraint firstItem="8pq-1J-JEa" firstAttribute="leading" secondItem="qw3-Wb-JYk" secondAttribute="trailing" constant="8" id="aAV-gS-yXu"/>
                 <constraint firstItem="0aq-Sy-7tM" firstAttribute="leading" secondItem="Cpp-r5-mok" secondAttribute="leading" constant="4" id="eFq-dC-D43"/>
-                <constraint firstItem="8pq-1J-JEa" firstAttribute="bottom" secondItem="qw3-Wb-JYk" secondAttribute="bottom" id="euQ-AP-Ykf"/>
                 <constraint firstItem="qw3-Wb-JYk" firstAttribute="top" secondItem="0aq-Sy-7tM" secondAttribute="top" id="ezk-2P-j9O"/>
                 <constraint firstItem="qw3-Wb-JYk" firstAttribute="bottom" secondItem="0aq-Sy-7tM" secondAttribute="bottom" id="gm4-pV-jF2"/>
                 <constraint firstItem="0aq-Sy-7tM" firstAttribute="top" secondItem="Cpp-r5-mok" secondAttribute="top" constant="4" id="kbE-MJ-iGV"/>
@@ -68,12 +69,13 @@
             <nil key="simulatedTopBarMetrics"/>
             <nil key="simulatedBottomBarMetrics"/>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
-            <point key="canvasLocation" x="-401.44927536231887" y="82.366071428571431"/>
+            <point key="canvasLocation" x="-401.44927536231887" y="84.375"/>
         </view>
     </objects>
     <resources>
         <image name="chat-emoji" width="24" height="24"/>
         <image name="chat-keyboard" width="20" height="20"/>
         <image name="interaction" width="48" height="48"/>
+        <image name="interaction-highlight" width="48" height="48"/>
     </resources>
 </document>

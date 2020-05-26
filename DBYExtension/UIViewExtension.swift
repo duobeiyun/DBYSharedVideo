@@ -27,4 +27,21 @@ extension UIView {
     @objc func setTheme(_ theme:DBYViewTheme) {
         self.theme = theme
     }
+    ///after seconds
+    func dismiss(after: Int) {
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + DispatchTimeInterval.seconds(after)) {
+            self.removeFromSuperview()
+        }
+    }
+    func dismiss(animation: Bool) {
+        if !animation {
+            self.removeFromSuperview()
+            return
+        }
+        UIView.animate(withDuration: 0.25, animations: {
+            self.alpha = 0;
+        }) { (finished) in
+            self.removeFromSuperview()
+        }
+    }
 }

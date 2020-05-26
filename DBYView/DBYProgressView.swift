@@ -55,7 +55,7 @@ class DBYProgressView: DBYNibView {
         timer = Timer(fireAt: date,
                       interval: 0,
                       target: self,
-                      selector: #selector(dismiss),
+                      selector: #selector(hidden),
                       userInfo: nil,
                       repeats: false)
         RunLoop.current.add(timer!, forMode: RunLoop.Mode.default)
@@ -65,7 +65,7 @@ class DBYProgressView: DBYNibView {
         timer = nil
     }
     
-    @objc func dismiss() {
+    @objc func hidden() {
         UIView.animate(withDuration: 0.25) {
             self.isHidden = true
         }

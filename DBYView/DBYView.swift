@@ -16,10 +16,12 @@ class DBYView: UIView {
         super.init(frame: frame)
         setupUI()
     }
-    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        setupUI()
+    }
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        setupUI()
     }
     override func layoutSubviews() {
         super.layoutSubviews()
