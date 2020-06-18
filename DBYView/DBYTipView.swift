@@ -10,8 +10,7 @@ import UIKit
 protocol DBYTipViewProtocol {
     func show(icon:UIImage?, message: String?)
     func setPosition(position: DBYTipView.Position)
-    func contentSize() -> CGSize
-    func setSafeSize(size: CGSize)
+    func setContentOffset(size: CGSize)
 }
 class DBYTipBaseView: DBYView {
     lazy var gradient = CAGradientLayer()
@@ -19,7 +18,8 @@ class DBYTipBaseView: DBYView {
     var corners: UIRectCorner = .allCorners
     var position: DBYTipView.Position = .center
     var offset: CGSize = .zero
-    var margin:CGFloat = 8
+    var margin: CGFloat = 8
+    var type: DBYTipView.TipType = .normal
     
     override func setupUI() {
         super.setupUI()
@@ -46,20 +46,10 @@ class DBYTipBaseView: DBYView {
             p.setPosition(position: position)
         }
     }
-}
-class DBYTipNormalView: DBYTipBaseView, DBYTipViewProtocol {
-    @IBOutlet weak var iconView: UIImageView!
-    @IBOutlet weak var messageLabel: UILabel!
-    
     func contentSize() -> CGSize {
-        let height = bounds.size.height
-        var minWidth = messageLabel.text?.width(withMaxHeight: height, font: messageLabel.font) ?? 0
-        minWidth += 64
-        return CGSize(width: minWidth, height: height)
+        return .zero
     }
-    func setPosition(position: DBYTipView.Position) {
-        self.position = position
-        let contentSize = self.contentSize()
+    func updateFrame(contentSize:CGSize) {
         let window = UIApplication.shared.delegate?.window
         let windowSize = window??.bounds.size ?? .zero
         var x:CGFloat = 0
@@ -82,11 +72,61 @@ class DBYTipNormalView: DBYTipBaseView, DBYTipViewProtocol {
         }
         frame = CGRect(x: x - offset.width, y: y - offset.height, width: contentSize.width, height: contentSize.height)
     }
+}
+class DBYTipNormalView: DBYTipBaseView, DBYTipViewProtocol {
+    @IBOutlet weak var iconView: UIImageView!
+    @IBOutlet weak var messageLabel: UILabel!
+    
+    override func contentSize() -> CGSize {
+        let height = bounds.size.height
+        var minWidth = messageLabel.text?.width(withMaxHeight: height, font: messageLabel.font) ?? 0
+        minWidth += 64
+        return CGSize(width: minWidth, height: height)
+    }
+    func setPosition(position: DBYTipView.Position) {
+        self.position = position
+        let size = self.contentSize()
+        updateFrame(contentSize: size)
+    }
     func show(icon:UIImage?, message: String?) {
         iconView.image = icon
         messageLabel.text = message
     }
-    func setSafeSize(size: CGSize) {
+    func setContentOffset(size: CGSize) {
+        offset = size
+        frame = frame.offsetBy(dx: size.width, dy: size.height)
+    }
+}
+class DBYTipClickView: DBYTipBaseView, DBYTipViewProtocol {
+    @IBOutlet weak var iconView: UIImageView!
+    @IBOutlet weak var messageLabel: UILabel!
+    
+    var clickBlock:(()->())?
+    
+    override func setupUI() {
+        super.setupUI()
+        let tap = UITapGestureRecognizer(target: self, action: #selector(click(ges:)))
+        addGestureRecognizer(tap)
+    }
+    @objc func click(ges: UITapGestureRecognizer) {
+        clickBlock?()
+    }
+    override func contentSize() -> CGSize {
+        let height = bounds.size.height
+        var minWidth = messageLabel.text?.width(withMaxHeight: height, font: messageLabel.font) ?? 0
+        minWidth += 64
+        return CGSize(width: minWidth, height: height)
+    }
+    func setPosition(position: DBYTipView.Position) {
+        self.position = position
+        let size = self.contentSize()
+        updateFrame(contentSize: size)
+    }
+    func show(icon:UIImage?, message: String?) {
+        iconView.image = icon
+        messageLabel.text = message
+    }
+    func setContentOffset(size: CGSize) {
         offset = size
         frame = frame.offsetBy(dx: size.width, dy: size.height)
     }
@@ -96,7 +136,7 @@ class DBYTipCloseView: DBYTipBaseView, DBYTipViewProtocol {
     @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var closeButton: UIButton!
     
-    func contentSize() -> CGSize {
+    override func contentSize() -> CGSize {
         let height = bounds.size.height
         var minWidth = messageLabel.text?.width(withMaxHeight: height, font: messageLabel.font) ?? 0
         minWidth += 102
@@ -105,33 +145,13 @@ class DBYTipCloseView: DBYTipBaseView, DBYTipViewProtocol {
     func setPosition(position: DBYTipView.Position) {
         self.position = position
         let contentSize = self.contentSize()
-        let window = UIApplication.shared.delegate?.window
-        let windowSize = window??.bounds.size ?? .zero
-        var x:CGFloat = 0
-        var y:CGFloat = 0
-        if position.contains(.center) {
-            x = (windowSize.width - contentSize.width) * 0.5
-            y = (windowSize.height - contentSize.height) * 0.5
-        }
-        if position.contains(.left) {
-            x = 0
-        }
-        if position.contains(.right) {
-            x = windowSize.width - contentSize.width
-        }
-        if position.contains(.bottom) {
-            y = windowSize.height - contentSize.height - margin
-        }
-        if position.contains(.top) {
-            y = contentSize.height + margin
-        }
-        frame = CGRect(x: x - offset.width, y: y - offset.height, width: contentSize.width, height: contentSize.height)
+        updateFrame(contentSize: contentSize)
     }
     func show(icon:UIImage?, message: String?) {
         iconView.image = icon
         messageLabel.text = message
     }
-    func setSafeSize(size: CGSize) {
+    func setContentOffset(size: CGSize) {
         offset = size
         frame = frame.offsetBy(dx: size.width, dy: size.height)
     }
@@ -172,7 +192,7 @@ class DBYTipInviteView: DBYTipBaseView, DBYTipViewProtocol {
                                      strokeColor: DBYStyle.brown,
                                      radius: btnHeight * 0.5)
     }
-    func contentSize() -> CGSize {
+    override func contentSize() -> CGSize {
         let height = bounds.size.height
         var minWidth = messageLabel.text?.width(withMaxHeight: height, font: messageLabel.font) ?? 0
         minWidth += 200
@@ -181,33 +201,13 @@ class DBYTipInviteView: DBYTipBaseView, DBYTipViewProtocol {
     func setPosition(position: DBYTipView.Position) {
         self.position = position
         let contentSize = self.contentSize()
-        let window = UIApplication.shared.delegate?.window
-        let windowSize = window??.bounds.size ?? .zero
-        var x:CGFloat = 0
-        var y:CGFloat = 0
-        if position.contains(.center) {
-            x = (windowSize.width - contentSize.width) * 0.5
-            y = (windowSize.height - contentSize.height) * 0.5
-        }
-        if position.contains(.left) {
-            x = 0
-        }
-        if position.contains(.right) {
-            x = windowSize.width - contentSize.width
-        }
-        if position.contains(.bottom) {
-            y = windowSize.height - contentSize.height - margin
-        }
-        if position.contains(.top) {
-            y = contentSize.height + margin
-        }
-        frame = CGRect(x: x - offset.width, y: y - offset.height, width: contentSize.width, height: contentSize.height)
+        updateFrame(contentSize: contentSize)
     }
     func show(icon:UIImage?, message: String?) {
         iconView.image = icon
         messageLabel.text = message
     }
-    func setSafeSize(size: CGSize) {
+    func setContentOffset(size: CGSize) {
         offset = size
         frame = frame.offsetBy(dx: size.width, dy: size.height)
     }
@@ -236,15 +236,6 @@ class DBYTipView: DBYView {
         let views = nib.instantiate(withOwner: nil, options: nil) as? [UIView]
         return views
     }
-    var normalView: UIView?
-    var closeView: UIView?
-    var inviteView: UIView?
-    var position: Position = [.bottom, .center]
-    
-    var tipLab: UILabel!
-    var imageView: UIImageView!
-    
-    static let margin:CGFloat = 8
     
     class func show(icon: UIImage?, message: String, type: TipType, position:Position) -> UIView? {
         let views = loadViewsFromNib(name: "DBYTipView")
@@ -258,14 +249,18 @@ class DBYTipView: DBYView {
         if type == .invite {
             typeView = views?[2]
         }
+        if type == .click {
+            typeView = views?[3]
+        }
         
         if let p = typeView as? DBYTipViewProtocol {
             p.show(icon: icon, message: message)
             p.setPosition(position: position)
         }
-        guard let view = typeView else {
+        guard let view = typeView as? DBYTipBaseView else {
             return typeView
         }
+        view.type = type
         
         let window = UIApplication.shared.delegate?.window
         window??.addSubview(view)
@@ -277,6 +272,16 @@ class DBYTipView: DBYView {
             for subview in subviews {
                 if let _ = subview as? DBYTipViewProtocol {
                     subview.removeFromSuperview()
+                }
+            }
+        }
+    }
+    class func removeSubviews(type: DBYTipView.TipType) {
+        let window = UIApplication.shared.delegate?.window
+        if let subviews = window??.subviews {
+            for subview in subviews {
+                if let tipView = subview as? DBYTipBaseView, tipView.type == type {
+                    tipView.removeFromSuperview()
                 }
             }
         }

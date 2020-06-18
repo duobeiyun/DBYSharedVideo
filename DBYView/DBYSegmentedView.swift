@@ -26,6 +26,7 @@ class DBYSegmentedTitleView: UIScrollView {
     }
     var hilightColor: UIColor = .lightGray
     var defaultColor: UIColor = .lightGray
+    var indexChanged: ((Int)->())?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -101,6 +102,7 @@ class DBYSegmentedTitleView: UIScrollView {
         if index >= models.count {
             return
         }
+        indexChanged?(index)
         let preModel = models[selectedIndex]
         preModel.label?.textColor = defaultColor
         selectedIndex = index
@@ -202,6 +204,9 @@ class DBYSegmentedView: UIView {
         addSubview(titleView)
         addSubview(containerView)
         
+        titleView.indexChanged = { [weak self] index in
+            self?.containerView.scrollToIndex(index: index)
+        }
         titleView.snp.makeConstraints { (make) in
             make.left.top.right.equalTo(0)
             make.height.equalTo(titleViewHeight)

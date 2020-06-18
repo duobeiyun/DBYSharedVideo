@@ -590,8 +590,24 @@ public class DBYLiveController: DBY1VNController {
             newMessageCount += array.count
             let image = UIImage(name: "message-tip")
             let message = "\(newMessageCount)条新消息"
-            //TODO: - 增加新消息提示
-//            showMessageTipView(image: image, message: message, type: .click)
+            DBYTipView.removeSubviews(type: .click)
+            let tipView = DBYTipView.show(icon: image, message: message, type: .click, position: tipViewPosition)
+            if let p = tipView as? DBYTipViewProtocol {
+                p.setContentOffset(size: tipViewSafeSize)
+            }
+            guard let clickView = tipView as? DBYTipClickView else {
+                return
+            }
+            weak var weakView = clickView
+            weak var weakSelf = self
+            clickView.clickBlock = {
+                weakView?.removeFromSuperview()
+                weakSelf?.newMessageCount = 0
+                let count = weakSelf?.allChatList.count ?? 1
+                if count > 0 {
+                    weakSelf?.chatListView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: true)
+                }
+            }
         }else if count > 0 {
             chatListView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: true)
         }
@@ -711,6 +727,7 @@ public class DBYLiveController: DBY1VNController {
             showTip = delta > scrollView.bounds.height
             if !showTip {
                 newMessageCount = 0
+                DBYTipView.removeSubviews(type: .click)
             }
         }
     }
@@ -1008,6 +1025,7 @@ extension DBYLiveController: DBYChatBarDelegate {
         if count > 0 {
             self.chatListView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: false)
         }
+        DBYTipView.removeSubviews(type: .click)
     }
     
     func chatBarWillDismissInputView(duration: TimeInterval) {
@@ -1151,7 +1169,7 @@ extension DBYLiveController: DBYInteractionViewDelegate {
         
         let tipView = DBYTipView.show(icon: icon, message: message, type: .close, position: tipViewPosition)
         if let p = tipView as? DBYTipViewProtocol {
-            p.setSafeSize(size: tipViewSafeSize)
+            p.setContentOffset(size: tipViewSafeSize)
         }
         tipView?.dismiss(after: 3)
     }
@@ -1181,7 +1199,7 @@ extension DBYLiveController: DBYInteractionViewDelegate {
             
             let tipView = DBYTipView.show(icon: image, message: message, type: .invite, position: tipViewPosition)
             if let p = tipView as? DBYTipViewProtocol {
-                p.setSafeSize(size: tipViewSafeSize)
+                p.setContentOffset(size: tipViewSafeSize)
             }
             guard let inviteView = tipView as? DBYTipInviteView else {
                 return
