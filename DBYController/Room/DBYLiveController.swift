@@ -585,7 +585,6 @@ public class DBYLiveController: DBY1VNController {
         }
         chatListView.reloadData()
         let count = allChatList.count
-        
         if showTip {
             newMessageCount += array.count
             let image = UIImage(name: "message-tip")
@@ -603,6 +602,7 @@ public class DBYLiveController: DBY1VNController {
             clickView.clickBlock = {
                 weakView?.removeFromSuperview()
                 weakSelf?.newMessageCount = 0
+                weakSelf?.showTip = false
                 let count = weakSelf?.allChatList.count ?? 1
                 if count > 0 {
                     weakSelf?.chatListView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: true)
@@ -721,14 +721,22 @@ public class DBYLiveController: DBY1VNController {
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         chatBar.endInput()
     }
-    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        stoppedScrolling(scrollView: scrollView)
+    }
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        stoppedScrolling(scrollView: scrollView)
+    }
+    func stoppedScrolling(scrollView: UIScrollView) {
         if scrollView == chatListView {
             let delta = scrollView.contentSize.height - scrollView.contentOffset.y
-            showTip = delta > scrollView.bounds.height
+            //浮点数可能不准，+1减少误差
+            showTip = delta > chatListViewFrame.height + 1
             if !showTip {
                 newMessageCount = 0
                 DBYTipView.removeSubviews(type: .click)
             }
+            print("---", delta, showTip)
         }
     }
 }
