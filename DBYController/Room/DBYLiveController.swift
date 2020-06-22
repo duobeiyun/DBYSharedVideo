@@ -759,10 +759,18 @@ public class DBYLiveController: DBY1VNController {
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         chatBar.endInput()
     }
-    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    public override func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        super.scrollViewDidEndDecelerating(scrollView)
+        stoppedScrolling(scrollView: scrollView)
+    }
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        stoppedScrolling(scrollView: scrollView)
+    }
+    func stoppedScrolling(scrollView: UIScrollView) {
         if scrollView == chatListView {
             let delta = scrollView.contentSize.height - scrollView.contentOffset.y
-            showTip = delta > scrollView.bounds.height
+            //浮点数可能不准，+1减少误差
+            showTip = delta > chatListViewFrame.height + 1
             if !showTip {
                 newMessageCount = 0
                 messageTipView.close()
@@ -1130,6 +1138,7 @@ extension DBYLiveController: DBYMessageTipViewDelegate {
     }
     func messageTipViewDidClick(owner: DBYMessageTipView) {
         newMessageCount = 0
+        showTip = false
         chatListView.reloadData()
         let count = allChatList.count
         if count > 0 {
