@@ -169,12 +169,15 @@ public class DBY1VNController: UIViewController {
         setupStaticUI()
         internetReachability?.startNotifier()
     }
+    public override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        updateFrame()
+    }
     override public func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         startHiddenTimer()
         weak var weakSelf = self
         coordinator.animate(alongsideTransition: { (context) in
             weakSelf?.setupOrientationUI()
-            weakSelf?.updateFrame()
             weakSelf?.cellHeightCache.removeAll()
             weakSelf?.chatListView.reloadData()
         }) { (context) in
@@ -182,7 +185,7 @@ public class DBY1VNController: UIViewController {
         }
     }
     deinit {
-        print("---deinit")
+        print("---deinit", type(of: self))
         NotificationCenter.default.removeObserver(self)
     }
     //MARK: - private functions
@@ -441,7 +444,6 @@ public class DBY1VNController: UIViewController {
     @objc func volumeChange(notification:Notification) {
         if let volume = notification.object as? CGFloat {
             volumeProgressView.setProgress(value: volume)
-            print("---\(volume)")
         }
     }
     @objc func scaleVideoView(pinch:UIPinchGestureRecognizer) {

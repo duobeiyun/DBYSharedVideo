@@ -135,21 +135,14 @@ class DBYSegmentedTitleView: UIScrollView {
     }
 }
 class DBYSegmentedContainerView: UICollectionView {
-    var flowLayout:UICollectionViewFlowLayout!
     convenience init() {
         let layout = UICollectionViewFlowLayout()
-        layout.minimumLineSpacing = 0
-        layout.minimumInteritemSpacing = 0
         layout.scrollDirection = .horizontal
         self.init(frame:.zero, collectionViewLayout:layout)
-        self.flowLayout = layout
+        
         backgroundColor = UIColor.white
         showsVerticalScrollIndicator = false
         showsHorizontalScrollIndicator = false
-    }
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        flowLayout.itemSize = bounds.size
     }
     public func scrollToIndex(index: Int) {
         let offset = CGPoint(x: CGFloat(index) * bounds.width, y: 0)
@@ -157,29 +150,29 @@ class DBYSegmentedContainerView: UICollectionView {
     }
 }
 class DBYSegmentedView: UIView {
-    var titleView:DBYSegmentedTitleView!
-    var containerView:DBYSegmentedContainerView!
+    var titleView:DBYSegmentedTitleView?
+    var containerView:DBYSegmentedContainerView?
     lazy var dataSource:[DBYSegmentedModel] = [DBYSegmentedModel]()
     let cellIdentifier = "DBYSegmentedViewCell"
     public var barColor: UIColor = .yellow {
         didSet {
-            titleView.barColor = barColor
+            titleView?.barColor = barColor
         }
     }
     public var hilightColor: UIColor = .lightGray {
         didSet {
-            titleView.hilightColor = hilightColor
+            titleView?.hilightColor = hilightColor
         }
     }
     public var defaultColor: UIColor = .lightGray {
         didSet {
-            titleView.defaultColor = defaultColor
+            titleView?.defaultColor = defaultColor
         }
     }
     override var backgroundColor: UIColor? {
         didSet {
-            titleView.backgroundColor = backgroundColor
-            containerView.backgroundColor = backgroundColor
+            titleView?.backgroundColor = backgroundColor
+            containerView?.backgroundColor = backgroundColor
         }
     }
     var titleViewHeight:CGFloat = 44
@@ -196,59 +189,77 @@ class DBYSegmentedView: UIView {
     func setupUI() {
         titleView = DBYSegmentedTitleView()
         containerView = DBYSegmentedContainerView()
-        containerView.delegate = self
-        containerView.dataSource = self
-        containerView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: cellIdentifier)
-        containerView.isPagingEnabled = true
-        
-        addSubview(titleView)
-        addSubview(containerView)
-        
-        titleView.indexChanged = { [weak self] index in
-            self?.containerView.scrollToIndex(index: index)
+        containerView?.delegate = self
+        containerView?.delegate = self
+        containerView?.dataSource = self
+        containerView?.register(UICollectionViewCell.self, forCellWithReuseIdentifier: cellIdentifier)
+        containerView?.isPagingEnabled = true
+        if #available(iOS 10.0, *) {
+            containerView?.isPrefetchingEnabled = false
         }
-        titleView.snp.makeConstraints { (make) in
+        if #available(iOS 11.0, *) {
+            containerView?.contentInsetAdjustmentBehavior = .never
+        }
+        
+        addSubview(titleView!)
+        addSubview(containerView!)
+        
+        titleView?.indexChanged = { [weak self] index in
+            self?.containerView?.scrollToIndex(index: index)
+        }
+        titleView?.snp.makeConstraints { (make) in
             make.left.top.right.equalTo(0)
             make.height.equalTo(titleViewHeight)
         }
-        containerView.snp.makeConstraints { (make) in
+        containerView?.snp.makeConstraints { (make) in
             make.top.equalTo(titleViewHeight)
             make.left.bottom.right.equalTo(0)
         }
     }
     public func appendData(models: [DBYSegmentedModel]) {
         dataSource += models
-        containerView.reloadData()
-        titleView.appendModels(models: models)
+        containerView?.reloadData()
+        titleView?.appendModels(models: models)
     }
     public func removeLastData() {
-        titleView.removeLastModel()
+        titleView?.removeLastModel()
         dataSource.removeLast()
-        containerView.reloadData()
+        containerView?.reloadData()
     }
     public func removeData(at index: Int) {
-        titleView.removeModel(at: index)
+        titleView?.removeModel(at: index)
         dataSource.remove(at: index)
-        containerView.reloadData()
+        containerView?.reloadData()
     }
     public func scrollToIndex(index: Int) {
         if index >= dataSource.count {
             return
         }
-        containerView.scrollToIndex(index: index)
-        titleView.scrollToIndex(index: index)
+        containerView?.scrollToIndex(index: index)
+        titleView?.scrollToIndex(index: index)
     }
 }
 extension DBYSegmentedView: UIScrollViewDelegate {
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         if scrollView == containerView {
-            let index = Int(scrollView.contentOffset.x / containerView.bounds.width)
-            titleView.scrollToIndex(index: index)
+            let index = Int(scrollView.contentOffset.x / scrollView.bounds.width)
+            titleView?.scrollToIndex(index: index)
         }
     }
 }
-extension DBYSegmentedView: UICollectionViewDelegate {
-    
+extension DBYSegmentedView: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return collectionView.bounds.size
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
+        return .leastNormalMagnitude
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
+        return .leastNormalMagnitude
+    }
 }
 extension DBYSegmentedView: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -260,10 +271,7 @@ extension DBYSegmentedView: UICollectionViewDataSource {
         guard let view = dataSource[indexPath.item].view else {
             return cell
         }
-        for subView in cell.contentView.subviews {
-            subView.removeFromSuperview()
-        }
-        view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.removeFromSuperview()
         view.frame = cell.bounds
         cell.contentView.addSubview(view)
         

@@ -139,7 +139,7 @@ public class DBYLiveController: DBY1VNController {
         super.didReceiveMemoryWarning()
     }
     deinit {
-        print("---deinit")
+        print("---deinit", type(of: self))
         NotificationCenter.default.removeObserver(self)
     }
     override func addSubviews() {
@@ -154,10 +154,8 @@ public class DBYLiveController: DBY1VNController {
         mainView.addSubview(marqueeView)
         mainView.addSubview(watermarkView)
         
-        view.addSubview(micListView)
-        view.addSubview(hangUpView)
 //        view.addSubview(zanButton)
-        view.addSubview(zanView)
+//        view.addSubview(zanView)
     }
     override func addActions() {
         super.addActions()
@@ -195,15 +193,14 @@ public class DBYLiveController: DBY1VNController {
         
         chatBar.emojiImageDict = emojiImageDict
         chatBar.backgroundColor = UIColor.white
-        hangUpView.isHidden = true
         forbiddenButton.isHidden = true
-        micListView.isHidden = true
         let volume = DBYSystemControl.shared.getVolume()
         hangUpView.setProgress(value: volume)
         forbiddenButton.titleLabel?.font = UIFont.systemFont(ofSize: 15)
         forbiddenButton.setTitle(" 已开启全体禁言", for: .normal)
         zanButton.setImage(UIImage(name: "greate-icon"), for: .normal)
         courseInfoView.set(title: authinfo?.courseTitle)
+        interactionView.userId = authinfo?.userId
     }
     override func setupLandscapeUI() {
         super.setupLandscapeUI()
@@ -247,6 +244,11 @@ public class DBYLiveController: DBY1VNController {
         zanView.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
         zanView.center = view.center
         updateMicListViewFrame()
+        for sub in view.subviews {
+            if let p = sub as? DBYTipViewUIProtocol {
+                p.setPosition(position: tipViewPosition)
+            }
+        }
     }
     override func updatePortraitFrame() {
         super.updatePortraitFrame()
@@ -589,9 +591,14 @@ public class DBYLiveController: DBY1VNController {
             newMessageCount += array.count
             let image = UIImage(name: "message-tip")
             let message = "\(newMessageCount)条新消息"
-            DBYTipView.removeSubviews(type: .click)
-            let tipView = DBYTipView.show(icon: image, message: message, type: .click, position: tipViewPosition)
-            if let p = tipView as? DBYTipViewProtocol {
+            DBYTipView.removeTipViews(type: .click, on:view)
+            guard let tipView = DBYTipView.loadView(type: .click) else {
+                return
+            }
+            view.addSubview(tipView)
+            if let p = tipView as? DBYTipViewUIProtocol {
+                p.show(icon: image, message: message)
+                p.setPosition(position: tipViewPosition)
                 p.setContentOffset(size: tipViewSafeSize)
             }
             guard let clickView = tipView as? DBYTipClickView else {
@@ -734,9 +741,8 @@ public class DBYLiveController: DBY1VNController {
             showTip = delta > chatListViewFrame.height + 1
             if !showTip {
                 newMessageCount = 0
-                DBYTipView.removeSubviews(type: .click)
+                DBYTipView.removeTipViews(type: .click, on:view)
             }
-            print("---", delta, showTip)
         }
     }
 }
@@ -784,7 +790,7 @@ extension DBYLiveController: UITableViewDelegate, UITableViewDataSource {
 extension DBYLiveController: DBYLiveManagerDelegate {
     public func clientOnline(_ liveManager: DBYLiveManager!, userId uid: String!, nickName: String!, userRole role: Int32) {
         mainView.stopLoading()
-        interactionView.userId = uid
+        
         liveManager.getInteractionList(.audio) {[weak self] (list) in
             if let models = list {
                 self?.interactionView.set(models: models, for: .audio)
@@ -825,11 +831,6 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     }
     public func liveManager(_ manager: DBYLiveManager!, studentCanSpeak canSpeak: Bool) {
         micOpen = canSpeak
-        if canSpeak {
-            hangUpView.isHidden = false
-        }else {
-            hangUpView.isHidden = true
-        }
     }
     public func liveManagerTeacherDownHands(_ manager: DBYLiveManager!) {
         
@@ -1008,7 +1009,6 @@ extension DBYLiveController: DBYChatBarDelegate {
     }
     func chatBar(owner: DBYChatBar, buttonClickWith target: UIButton) {
         interactionView.frame = segmentedViewFrame
-        interactionView.switchType(.audio)
         view.addSubview(interactionView)
     }
     func chatBarWillShowInputView(rect: CGRect, duration: TimeInterval) {
@@ -1033,7 +1033,7 @@ extension DBYLiveController: DBYChatBarDelegate {
         if count > 0 {
             self.chatListView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: false)
         }
-        DBYTipView.removeSubviews(type: .click)
+        DBYTipView.removeTipViews(type: .click, on:view)
     }
     
     func chatBarWillDismissInputView(duration: TimeInterval) {
@@ -1065,6 +1065,9 @@ extension DBYLiveController: DBYHangUpViewDelegate {
         
         weak var weakSelf = self
         button1.action = { btn in
+            weakSelf?.liveManager.request(.audio, state: .quit, completion: { (result) in
+                
+            })
             weakSelf?.hangUpView.dismiss()
             actionSheetView.dismiss()
         }
@@ -1165,7 +1168,7 @@ extension DBYLiveController: DBYCommentCellDelegate {
 extension DBYLiveController: DBYInteractionViewDelegate {
     func closeInteraction(owner: DBYInteractionView, type: DBYInteractionType) {
         owner.removeFromSuperview()
-        if owner.state == .normal {
+        if owner.currentInfo.state == .normal {
             chatBar.interactionButton.isSelected = false
         }else {
             chatBar.interactionButton.isSelected = true
@@ -1174,12 +1177,16 @@ extension DBYLiveController: DBYInteractionViewDelegate {
     
     func interactionAlert(owner: DBYInteractionView, message: String) {
         let icon = UIImage(name: "mic")
-        
-        let tipView = DBYTipView.show(icon: icon, message: message, type: .close, position: tipViewPosition)
-        if let p = tipView as? DBYTipViewProtocol {
+        guard let tipView = DBYTipView.loadView(type: .click) else {
+            return
+        }
+        view.addSubview(tipView)
+        if let p = tipView as? DBYTipViewUIProtocol {
+            p.show(icon: icon, message: message)
+            p.setPosition(position: tipViewPosition)
             p.setContentOffset(size: tipViewSafeSize)
         }
-        tipView?.dismiss(after: 3)
+        tipView.dismiss(after: 3)
     }
     
     func requestInteraction(owner: DBYInteractionView, state: DBYInteractionState, type: DBYInteractionType) {
@@ -1189,26 +1196,34 @@ extension DBYLiveController: DBYInteractionViewDelegate {
     }
     
     func receiveInteraction(owner: DBYInteractionView, state: DBYInteractionState, type: DBYInteractionType, model: DBYInteractionModel?) {
-        if state == .inqueue && owner.superview == nil, let userInfo = model {
-            if userInfo.fromeUserId == userInfo.userId {
+        if state == .inqueue, let userInfo = model {
+            if userInfo.fromUserId == userInfo.userId {
                 return
             }
             var name:String = ""
             var message:String = ""
             if type == .audio {
                 name = "mic-small"
-                message = userInfo.fromeUserName + "邀请你上麦"
+                message = userInfo.fromUserName + "邀请你上麦"
             }
             if type == .video {
                 name = "camera-request-icon"
-                message = userInfo.fromeUserName + "邀请你上台"
+                message = userInfo.fromUserName + "邀请你上台"
             }
             let image = UIImage(name: name)
             
-            let tipView = DBYTipView.show(icon: image, message: message, type: .invite, position: tipViewPosition)
-            if let p = tipView as? DBYTipViewProtocol {
+            //加载tipview
+            guard let tipView = DBYTipView.loadView(type: .invite) else {
+                return
+            }
+            view.addSubview(tipView)
+            //设置ui
+            if let p = tipView as? DBYTipViewUIProtocol {
+                p.show(icon: image, message: message)
+                p.setPosition(position: tipViewPosition)
                 p.setContentOffset(size: tipViewSafeSize)
             }
+            //动作
             guard let inviteView = tipView as? DBYTipInviteView else {
                 return
             }
@@ -1227,6 +1242,9 @@ extension DBYLiveController: DBYInteractionViewDelegate {
                 })
             }
         }
+        if state == .abort {
+            DBYTipView.removeTipViews(type: .invite, on: view)
+        }
         if state == .joined && type == .video {
             liveManager.openCam(true) { (message) in
                 
@@ -1241,11 +1259,16 @@ extension DBYLiveController: DBYInteractionViewDelegate {
             liveManager.openMic(true) { (message) in
                 
             }
+            micListView.frame = micListViewFrame
+            hangUpView.frame = hangUpViewFrame
+            view.addSubview(hangUpView)
+            view.addSubview(micListView)
         }
         if state == .quit && type == .audio {
             liveManager.openMic(false) { (message) in
                 
             }
+            hangUpView.removeFromSuperview()
         }
     }
     

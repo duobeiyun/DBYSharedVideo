@@ -7,10 +7,13 @@
 //
 
 import UIKit
-protocol DBYTipViewProtocol {
+protocol DBYTipViewUIProtocol {
     func show(icon:UIImage?, message: String?)
     func setPosition(position: DBYTipView.Position)
     func setContentOffset(size: CGSize)
+}
+protocol DBYTipViewInviteable {
+    
 }
 class DBYTipBaseView: DBYView {
     lazy var gradient = CAGradientLayer()
@@ -34,6 +37,7 @@ class DBYTipBaseView: DBYView {
     }
     override func layoutSubviews() {
         super.layoutSubviews()
+        
         let radius = bounds.height * 0.5
         let radii = CGSize(width: radius, height: radius)
         let path = UIBezierPath(roundedRect: bounds,
@@ -42,16 +46,12 @@ class DBYTipBaseView: DBYView {
         cornerLayer.path = path.cgPath
         gradient.mask = cornerLayer
         gradient.frame = bounds
-        if let p = self as? DBYTipViewProtocol {
-            p.setPosition(position: position)
-        }
     }
     func contentSize() -> CGSize {
         return .zero
     }
     func updateFrame(contentSize:CGSize) {
-        let window = UIApplication.shared.delegate?.window
-        let windowSize = window??.bounds.size ?? .zero
+        let windowSize = superview?.bounds.size ?? .zero
         var x:CGFloat = 0
         var y:CGFloat = 0
         if position.contains(.center) {
@@ -73,7 +73,7 @@ class DBYTipBaseView: DBYView {
         frame = CGRect(x: x - offset.width, y: y - offset.height, width: contentSize.width, height: contentSize.height)
     }
 }
-class DBYTipNormalView: DBYTipBaseView, DBYTipViewProtocol {
+class DBYTipNormalView: DBYTipBaseView, DBYTipViewUIProtocol {
     @IBOutlet weak var iconView: UIImageView!
     @IBOutlet weak var messageLabel: UILabel!
     
@@ -97,7 +97,7 @@ class DBYTipNormalView: DBYTipBaseView, DBYTipViewProtocol {
         frame = frame.offsetBy(dx: size.width, dy: size.height)
     }
 }
-class DBYTipClickView: DBYTipBaseView, DBYTipViewProtocol {
+class DBYTipClickView: DBYTipBaseView, DBYTipViewUIProtocol {
     @IBOutlet weak var iconView: UIImageView!
     @IBOutlet weak var messageLabel: UILabel!
     
@@ -131,7 +131,7 @@ class DBYTipClickView: DBYTipBaseView, DBYTipViewProtocol {
         frame = frame.offsetBy(dx: size.width, dy: size.height)
     }
 }
-class DBYTipCloseView: DBYTipBaseView, DBYTipViewProtocol {
+class DBYTipCloseView: DBYTipBaseView, DBYTipViewUIProtocol {
     @IBOutlet weak var iconView: UIImageView!
     @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var closeButton: UIButton!
@@ -156,7 +156,7 @@ class DBYTipCloseView: DBYTipBaseView, DBYTipViewProtocol {
         frame = frame.offsetBy(dx: size.width, dy: size.height)
     }
 }
-class DBYTipInviteView: DBYTipBaseView, DBYTipViewProtocol {
+class DBYTipInviteView: DBYTipBaseView, DBYTipViewUIProtocol {
     @IBOutlet weak var iconView: UIImageView!
     @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var acceptButton: DBYButton!
@@ -177,17 +177,17 @@ class DBYTipInviteView: DBYTipBaseView, DBYTipViewProtocol {
         let att = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12),
                    NSAttributedString.Key.foregroundColor: DBYStyle.brown]
         let attStr1 = NSAttributedString(string: "接 受", attributes: att)
-        
+
         acceptButton.setAttributedTitle(attStr1, for: .normal)
         acceptButton.setTitleColor(DBYStyle.brown, for: .normal)
         let attStr2 = NSAttributedString(string: "拒 绝", attributes: att)
         refuseButton.setAttributedTitle(attStr2, for: .normal)
         refuseButton.setTitleColor(DBYStyle.brown, for: .normal)
-        
+
         acceptButton.setBackgroudnStyle(fillColor: DBYStyle.yellow,
                                      strokeColor: DBYStyle.brown,
                                      radius: btnHeight * 0.5)
-        
+
         refuseButton.setBackgroudnStyle(fillColor: UIColor.white,
                                      strokeColor: DBYStyle.brown,
                                      radius: btnHeight * 0.5)
@@ -212,7 +212,7 @@ class DBYTipInviteView: DBYTipBaseView, DBYTipViewProtocol {
         frame = frame.offsetBy(dx: size.width, dy: size.height)
     }
 }
-class DBYTipView: DBYView {
+class DBYTipView {
     enum TipType: Int {
         case unknow
         case invite
@@ -236,8 +236,7 @@ class DBYTipView: DBYView {
         let views = nib.instantiate(withOwner: nil, options: nil) as? [UIView]
         return views
     }
-    
-    class func show(icon: UIImage?, message: String, type: TipType, position:Position) -> UIView? {
+    class func loadView(type: TipType) -> UIView? {
         let views = loadViewsFromNib(name: "DBYTipView")
         var typeView: UIView?
         if type == .normal {
@@ -253,36 +252,24 @@ class DBYTipView: DBYView {
             typeView = views?[3]
         }
         
-        if let p = typeView as? DBYTipViewProtocol {
-            p.show(icon: icon, message: message)
-            p.setPosition(position: position)
-        }
         guard let view = typeView as? DBYTipBaseView else {
             return typeView
         }
         view.type = type
-        
-        let window = UIApplication.shared.delegate?.window
-        window??.addSubview(view)
         return view
     }
-    class func removeAllSubviews() {
-        let window = UIApplication.shared.delegate?.window
-        if let subviews = window??.subviews {
-            for subview in subviews {
-                if let _ = subview as? DBYTipViewProtocol {
-                    subview.removeFromSuperview()
-                }
+    
+    class func removeTipViews(on view: UIView) {
+        for subview in view.subviews {
+            if let _ = subview as? DBYTipViewUIProtocol {
+                subview.removeFromSuperview()
             }
         }
     }
-    class func removeSubviews(type: DBYTipView.TipType) {
-        let window = UIApplication.shared.delegate?.window
-        if let subviews = window??.subviews {
-            for subview in subviews {
-                if let tipView = subview as? DBYTipBaseView, tipView.type == type {
-                    tipView.removeFromSuperview()
-                }
+    class func removeTipViews(type: DBYTipView.TipType, on view: UIView) {
+        for subview in view.subviews {
+            if let tipView = subview as? DBYTipBaseView, tipView.type == type {
+                tipView.removeFromSuperview()
             }
         }
     }
