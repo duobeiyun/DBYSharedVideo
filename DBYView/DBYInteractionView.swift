@@ -140,15 +140,13 @@ class DBYInteractionView: DBYNibView {
     }
     func updateContent(type: DBYInteractionType) {
         var count = 0
+        var inqueueCount = 0
         var userModel:DBYInteractionModel?
-        var typeValue = ""
         
         if type == .audio {
-            typeValue = "上麦"
             currentInfo = audioInfo
         }
         if type == .video {
-            typeValue = "上台"
             currentInfo = videoInfo
         }
         for model in currentInfo.models {
@@ -158,8 +156,16 @@ class DBYInteractionView: DBYNibView {
             if model.userId == userId {
                 userModel = model
             }
+            if model.state == .inqueue && userModel == nil {
+                inqueueCount += 1
+            }
         }
-        label.text = "\(count)人正在" + typeValue
+        if type == .audio {
+            label.text = "\(count)人正在上麦"
+        }
+        if type == .video {
+            label.text = "前方还有\(inqueueCount)人正在等待上台"
+        }
         tableView.reloadData()
         
         //被邀请上台或上麦
@@ -168,7 +174,7 @@ class DBYInteractionView: DBYNibView {
             currentInfo.state = .inqueue
         }else
         //上台或上麦
-        if userModel != nil && userModel?.state == .joined  && currentInfo.state == .inqueue {
+        if userModel != nil && userModel?.state == .joined {
             delegate?.receiveInteraction(owner: self, state: .joined, type: type, model: userModel)
             currentInfo.state = .joined
         }else

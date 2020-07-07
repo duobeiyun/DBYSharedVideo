@@ -36,7 +36,7 @@ public class DBYPlaybackController: DBY1VNController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         
-        startHiddenTimer()
+        mainView.startHiddenTimer()
         segmentedView.scrollToIndex(index: 0)
     }
     override public func addSubviews() {
@@ -52,7 +52,7 @@ public class DBYPlaybackController: DBY1VNController {
     }
     override func setupStaticUI() {
         super.setupStaticUI()
-        topBar.set(authinfo?.courseTitle)
+        mainView.topBar.set(authinfo?.courseTitle)
         settingView.set(speeds: playRateTitles)
         courseInfoView.set(title: authinfo?.courseTitle)
         
@@ -89,92 +89,26 @@ public class DBYPlaybackController: DBY1VNController {
     
     override func setupPortraitUI() {
         super.setupPortraitUI()
-        bottomBar.set(type: .playback)
+        mainView.bottomBar.set(type: .playback)
     }
     override func setupLandscapeUI() {
         super.setupLandscapeUI()
-        bottomBar.set(type: .playbackLandscape)
+        mainView.bottomBar.set(type: .playbackLandscape)
     }
-    override func updateFrame() {
-        super.updateFrame()
+    override func setViewStyle() {
+        super.setViewStyle()
         
-        timeTipLab.center = CGPoint(x: mainViewFrame.midX, y: mainViewFrame.midY)
-        indicator.center = CGPoint(x: mainViewFrame.midX, y: mainViewFrame.midY)
-    }
-    override func updatePortraitFrame() {
-        super.updatePortraitFrame()
-        
-        let size = view.bounds.size
-        
-        segmentedViewFrame = CGRect(x: 0,
-                                      y: mainViewFrame.maxY,
-                                      width: size.width,
-                                      height: size.height - mainViewFrame.maxY)
-        chatListViewFrame = CGRect(x: 0,
-                                   y: 0,
-                                   width: segmentedViewFrame.width,
-                                   height: segmentedViewFrame.height)
-    }
-    override func updateLandscapeFrame() {
-        super.updateLandscapeFrame()
-        
-        let size = view.bounds.size
-        let chatContainerWidth = size.width * 0.5
-        
-        segmentedViewFrame = CGRect(x: size.width,
-                                      y: 0,
-                                      width: chatContainerWidth,
-                                      height: size.height)
-        chatListViewFrame = CGRect(x: 0,
-                                   y: 0,
-                                   width: segmentedViewFrame.width,
-                                   height: segmentedViewFrame.height)
-    }
-    @objc override func goBack() {
-        super.goBack()
-        
-        stopHiddenTimer()
-    }
-    override func hiddenControlBar() {
-        if voiceTimer == nil {
-            return
-        }
-        if voiceTimer!.isValid == false {
-            return
-        }
-        super.hiddenControlBar()
-    }
-    override func showControlBar() {
-        super.showControlBar()
-    }
-    override func gestureControl(pan: UIPanGestureRecognizer) {
-        super.gestureControl(pan: pan)
-        switch pan.state {
-        case .began:
-            time = bottomBar.currentValue
-        case .changed:
-            let position = pan.location(in: mainView)
-            let offsetX = position.x - beganPosition.x
-            let offsetY = position.y - beganPosition.y
-            if abs(offsetX) < abs(offsetY) {
-                return
-            }
-            let progress = offsetX / mainViewFrame.width
-            changeProgress(value: progress)
-        case .ended:
-            changeEnded()
-        default:
-            break
-        }
+        timeTipLab.center = CGPoint(x: mainView.frame.midX, y: mainView.frame.midY)
+        indicator.center = CGPoint(x: mainView.frame.midX, y: mainView.frame.midY)
     }
     func changeProgress(value: CGFloat) {
-        let tempTime = time + bottomBar.maxValue * Double(value)
-        stopHiddenTimer()
+        let tempTime = time + mainView.bottomBar.maxValue * Double(value)
+        mainView.stopHiddenTimer()
         beginInteractive = true
         timeTipLab.isHidden = false
         timeTipLab.text = String.playTime(time:Int(tempTime))
         timeTipLab.sizeToFit()
-        bottomBar.set(time: tempTime)
+        mainView.bottomBar.set(time: tempTime)
     }
     func changeEnded() {
         beginInteractive = false

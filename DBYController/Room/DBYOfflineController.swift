@@ -25,10 +25,6 @@ public class DBYOfflineController: DBYPlaybackController {
         
         weak var weakSelf = self
         
-        chatListView.delegate = self
-        chatListView.dataSource = self
-        topBar.delegate = self
-        bottomBar.delegate = self
         settingView.delegate = self
         
         if authinfo?.classType == .sharedVideo {
@@ -49,7 +45,7 @@ public class DBYOfflineController: DBYPlaybackController {
                 return
             }
             let totalTime = weakSelf?.offlineManager.lessonLength() ?? 0
-            weakSelf?.bottomBar.set(totalTime: totalTime)
+            weakSelf?.mainView.bottomBar.set(totalTime: totalTime)
             weakSelf?.offlineManager.seek(toTime: 10)
         }
     }
@@ -58,7 +54,7 @@ public class DBYOfflineController: DBYPlaybackController {
     }
     override func setupStaticUI() {
         super.setupStaticUI()
-        topBar.set(title)
+        mainView.topBar.set(title)
         courseInfoView.set(title: title)
     }
     override func setupLandscapeUI() {
@@ -69,8 +65,8 @@ public class DBYOfflineController: DBYPlaybackController {
         super.setupPortraitUI()
         
     }
-    override func updateFrame() {
-        super.updateFrame()
+    override func setViewStyle() {
+        super.setViewStyle()
         
     }
     override func goBack() {
@@ -86,66 +82,20 @@ public class DBYOfflineController: DBYPlaybackController {
     }
     override func changeEnded() {
         super.changeEnded()
-        offlineManager.seek(toTime: bottomBar.currentValue)
+        offlineManager.seek(toTime: mainView.bottomBar.currentValue)
         indicator.stopAnimating()
     }
 }
 //MARK: - private functions
-extension DBYOfflineController: UITableViewDelegate, UITableViewDataSource {
-    // MARK: - tableView
-    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let count = chatInfoList.count
-        if count > 0 {
-            chatListView.backgroundView = nil
-        }else {
-            let chatTipView = DBYEmptyView(image: UIImage(name: "icon-empty-status-1"), message: "聊天消息为空")
-            chatListView.backgroundView = chatTipView
-        }
-        return chatInfoList.count
-    }
-   public  func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UITableView.automaticDimension //固定值
-    }
-    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell:DBYCommentCell = DBYCommentCell()
-        
-        if chatInfoList.count <= indexPath.row {
-            return cell
-        }
-        let chatInfo = chatInfoList[indexPath.row]
-        
-        let role:Int = Int(chatInfo.role)
-        let isOwner:Bool = false
-        let name:String = chatInfo.userName
-        let time:String? = Date(timeIntervalSince1970: chatInfo.recordTime).shortString()
-        let message:String = chatInfo.message
-        
-        if isOwner {
-            cell = tableView.dequeueReusableCell(withIdentifier: toIdentifier) as! DBYCommentCell
-        }else {
-            cell = tableView.dequeueReusableCell(withIdentifier: fromIdentifier) as! DBYCommentCell
-        }
-        let avatarUrl = ""
-        let badge:(String?, String?) = (nil, nil)
-        let width = cell.bounds.width - 100
-        let attMessage = beautifyMessage(message: message, maxWidth: width)
-        cell.setText(name: name,
-                     message: attMessage,
-                     avatarUrl: avatarUrl,
-                     badge: badge)
-        
-        return cell
-    }
-}
 extension DBYOfflineController: DBYOfflinePlayBackManagerDelegate {
     public func offlinePlayBackManager(_ manager: DBYOfflinePlayBackManager!, thumbupWithCount count: Int) {
         courseInfoView.setThumbCount(count: count)
     }
     public func offlinePlayBackManager(_ manager: DBYOfflinePlayBackManager!, playStateIsPlaying isPlaying: Bool) {
         if isPlaying {
-            bottomBar.set(state: .play)
+            mainView.bottomBar.set(state: .play)
         }else {
-            bottomBar.set(state: .pause)
+            mainView.bottomBar.set(state: .pause)
         }
     }
     public func offlinePlayBackManager(_ manager: DBYOfflinePlayBackManager!, hasVideo: Bool, in view: UIView!) {
@@ -160,11 +110,6 @@ extension DBYOfflineController: DBYOfflinePlayBackManagerDelegate {
                     chatInfoList.removeFirst()
                 }
             }
-            let count = chatInfoList.count
-            chatListView.reloadData()
-            if count > 0 {
-                chatListView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .none, animated: true)
-            }
         }
     }
     
@@ -176,11 +121,11 @@ extension DBYOfflineController: DBYOfflinePlayBackManagerDelegate {
         if beginInteractive {
             return
         }
-        bottomBar.set(time: time)
+        mainView.bottomBar.set(time: time)
     }
     public func offlinePlayBackManagerFinishedPlay(_ manager: DBYOfflinePlayBackManager!) {
-        bottomBar.set(time: 0)
-        bottomBar.set(state: .end)
+        mainView.bottomBar.set(time: 0)
+        mainView.bottomBar.set(state: .end)
     }
 }
 //MARK: - DBYTopBarDelegate
@@ -221,16 +166,16 @@ extension DBYOfflineController: DBYBottomBarDelegate {
     }
     
     func progressDidChange(owner: DBYBottomBar, value: Float) {
-        stopHiddenTimer()
+        mainView.stopHiddenTimer()
         beginInteractive = true
         timeTipLab.isHidden = false
         timeTipLab.text = String.playTime(time:Int(value))
         timeTipLab.sizeToFit()
-        bottomBar.set(time: TimeInterval(value))
+        mainView.bottomBar.set(time: TimeInterval(value))
     }
     
     func progressEndChange(owner: DBYBottomBar, value: Float) {
-        startHiddenTimer()
+        mainView.startHiddenTimer()
         beginInteractive = false
         timeTipLab.isHidden = true
         indicator.isHidden = false

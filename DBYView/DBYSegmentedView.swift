@@ -13,10 +13,16 @@ class DBYSegmentedModel: NSObject {
     var label: UILabel?
     var view: UIView?
 }
+protocol DBYSegmentedProtocol {
+    func removeModel(model: DBYSegmentedModel)
+    func appendModel(model: DBYSegmentedModel)
+    func appendModels(models: [DBYSegmentedModel])
+    func scrollToIndex(index: Int)
+}
 class DBYSegmentedTitleView: UIScrollView {
     lazy var models:[DBYSegmentedModel] = [DBYSegmentedModel]()
     lazy var barLayer:CAShapeLayer = CAShapeLayer()
-    var selectedIndex:Int = 0
+    var preModel:DBYSegmentedModel?
     var contentWidth:CGFloat = 0
     var barAnimation:CAAnimationGroup?
     var barColor: UIColor = .yellow {
@@ -49,14 +55,15 @@ class DBYSegmentedTitleView: UIScrollView {
     }
     override func layoutSubviews() {
         super.layoutSubviews()
-        let labelHeight = bounds.height
+        
         contentWidth = 0
         for model in models {
             if let label = model.label {
-                label.frame = CGRect(x: contentWidth, y: 0, width: model.displayWidth, height: labelHeight)
+                label.frame = CGRect(x: contentWidth, y: 0, width: model.displayWidth, height: bounds.height)
                 contentWidth += model.displayWidth
             }
         }
+        contentSize = CGSize(width: contentWidth, height: bounds.height)
     }
     @objc private func tap(ges: UITapGestureRecognizer) {
         let location = ges.location(in: self)
@@ -69,6 +76,7 @@ class DBYSegmentedTitleView: UIScrollView {
         if index < 0 {
             return
         }
+        indexChanged?(index)
         scrollToIndex(index: index)
     }
     private func removeModel(model: DBYSegmentedModel) {
@@ -91,22 +99,21 @@ class DBYSegmentedTitleView: UIScrollView {
         }
     }
     public func removeLastModel() {
-        let model = models.removeLast()
-        removeModel(model: model)
+        let index = models.count - 1
+        removeModel(at: index)
     }
     public func removeModel(at index: Int) {
         let model = models.remove(at: index)
         removeModel(model: model)
+        scrollToIndex(index: index - 1)
     }
     public func scrollToIndex(index: Int) {
         if index >= models.count {
             return
         }
-        indexChanged?(index)
-        let preModel = models[selectedIndex]
-        preModel.label?.textColor = defaultColor
-        selectedIndex = index
+        preModel?.label?.textColor = defaultColor
         let model = models[index]
+        preModel = model
         guard let label = model.label else {
             return
         }
@@ -134,26 +141,65 @@ class DBYSegmentedTitleView: UIScrollView {
         setContentOffset(offset, animated: true)
     }
 }
-class DBYSegmentedContainerView: UICollectionView {
-    convenience init() {
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .horizontal
-        self.init(frame:.zero, collectionViewLayout:layout)
-        
-        backgroundColor = UIColor.white
-        showsVerticalScrollIndicator = false
-        showsHorizontalScrollIndicator = false
+class DBYSegmentedContainerView: UIScrollView {
+    lazy var models:[DBYSegmentedModel] = [DBYSegmentedModel]()
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        var contentOffset:CGFloat = 0
+        for model in models {
+            if let view = model.view {
+                view.frame = CGRect(x: contentOffset, y: 0, width: bounds.width, height: bounds.height)
+                contentOffset += bounds.width
+            }
+        }
+        contentSize = CGSize(width: contentOffset, height: bounds.height)
+    }
+    private func removeModel(model: DBYSegmentedModel) {
+        if let view = model.view {
+            view.removeFromSuperview()
+        }
+    }
+    public func appendModel(model: DBYSegmentedModel) {
+        if models.contains(model) {
+            return
+        }
+        models.append(model)
+        if let view = model.view {
+            addSubview(view)
+        }
+    }
+    public func appendModels(models: [DBYSegmentedModel]) {
+        for model in models {
+            appendModel(model: model)
+        }
+    }
+    public func removeLastModel() {
+        let index = models.count - 1
+        removeModel(at: index)
+    }
+    public func removeModel(at index: Int) {
+        let model = models.remove(at: index)
+        removeModel(model: model)
+        scrollToIndex(index: index - 1)
     }
     public func scrollToIndex(index: Int) {
-        let offset = CGPoint(x: CGFloat(index) * bounds.width, y: 0)
-        setContentOffset(offset, animated: true)
+        if index >= models.count {
+            return
+        }
+        let offset = bounds.width * CGFloat(index)
+        setContentOffset(CGPoint(x: offset, y: 0), animated: true)
+    }
+    public func scrollToLast() {
+        let index = models.count
+        let offset = bounds.width * CGFloat(index)
+        setContentOffset(CGPoint(x: offset, y: 0), animated: true)
     }
 }
 class DBYSegmentedView: UIView {
     var titleView:DBYSegmentedTitleView?
     var containerView:DBYSegmentedContainerView?
-    lazy var dataSource:[DBYSegmentedModel] = [DBYSegmentedModel]()
-    let cellIdentifier = "DBYSegmentedViewCell"
+    
     public var barColor: UIColor = .yellow {
         didSet {
             titleView?.barColor = barColor
@@ -189,20 +235,13 @@ class DBYSegmentedView: UIView {
     func setupUI() {
         titleView = DBYSegmentedTitleView()
         containerView = DBYSegmentedContainerView()
-        containerView?.delegate = self
-        containerView?.delegate = self
-        containerView?.dataSource = self
-        containerView?.register(UICollectionViewCell.self, forCellWithReuseIdentifier: cellIdentifier)
-        containerView?.isPagingEnabled = true
-        if #available(iOS 10.0, *) {
-            containerView?.isPrefetchingEnabled = false
-        }
-        if #available(iOS 11.0, *) {
-            containerView?.contentInsetAdjustmentBehavior = .never
-        }
-        
+    
         addSubview(titleView!)
         addSubview(containerView!)
+        
+        containerView?.isPagingEnabled = true
+        titleView?.delegate = self
+        containerView?.delegate = self
         
         titleView?.indexChanged = { [weak self] index in
             self?.containerView?.scrollToIndex(index: index)
@@ -217,64 +256,37 @@ class DBYSegmentedView: UIView {
         }
     }
     public func appendData(models: [DBYSegmentedModel]) {
-        dataSource += models
-        containerView?.reloadData()
+        containerView?.appendModels(models: models)
         titleView?.appendModels(models: models)
     }
     public func removeLastData() {
         titleView?.removeLastModel()
-        dataSource.removeLast()
-        containerView?.reloadData()
+        containerView?.removeLastModel()
     }
     public func removeData(at index: Int) {
         titleView?.removeModel(at: index)
-        dataSource.remove(at: index)
-        containerView?.reloadData()
+        containerView?.removeModel(at: index)
     }
     public func scrollToIndex(index: Int) {
-        if index >= dataSource.count {
-            return
-        }
         containerView?.scrollToIndex(index: index)
         titleView?.scrollToIndex(index: index)
     }
 }
 extension DBYSegmentedView: UIScrollViewDelegate {
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        scrollViewDidEndScroll(scrollView)
+    }
+    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        scrollViewDidEndScroll(scrollView)
+    }
+    func scrollViewDidEndScroll(_ scrollView: UIScrollView) {
         if scrollView == containerView {
             let index = Int(scrollView.contentOffset.x / scrollView.bounds.width)
             titleView?.scrollToIndex(index: index)
         }
-    }
-}
-extension DBYSegmentedView: UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return collectionView.bounds.size
-    }
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-    }
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return .leastNormalMagnitude
-    }
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-        return .leastNormalMagnitude
-    }
-}
-extension DBYSegmentedView: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return dataSource.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellIdentifier, for: indexPath)
-        guard let view = dataSource[indexPath.item].view else {
-            return cell
+        if scrollView == titleView {
+            let index = Int(scrollView.contentOffset.x / scrollView.bounds.width)
+            containerView?.scrollToIndex(index: index)
         }
-        view.removeFromSuperview()
-        view.frame = cell.bounds
-        cell.contentView.addSubview(view)
-        
-        return cell
     }
 }

@@ -63,11 +63,11 @@ class DBYTopBar: DBYView {
         
         gradientLayer.frame = bounds
         leftBtn.frame = CGRect(x: 12,
-                               y: size.height - 12 - 24,
+                               y: 12,
                                width: titleWidth,
                                height: 24)
         rightBtn.frame = CGRect(x: size.width - 12 - 24,
-                                y: size.height - 12 - 24,
+                                y: 12,
                                 width: 24,
                                 height: 24)
     }

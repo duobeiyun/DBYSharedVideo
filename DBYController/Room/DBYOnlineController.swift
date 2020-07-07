@@ -18,11 +18,9 @@ public class DBYOnlineController: DBYPlaybackController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         
-        chatListView.delegate = self
-        chatListView.dataSource = self
         netTipView.delegate = self
-        topBar.delegate = self
-        bottomBar.delegate = self
+        mainView.topBarDelegate = self
+        mainView.bottomBarDelegate = self
         settingView.delegate = self
         
         weak var weakSelf = self
@@ -107,14 +105,14 @@ public class DBYOnlineController: DBYPlaybackController {
     }
     override func setupLandscapeUI() {
         super.setupLandscapeUI()
-        topBar.set(type: .landscape)
+        mainView.topBar.set(type: .landscape)
     }
     override func setupPortraitUI() {
         super.setupPortraitUI()
-        topBar.set(type: .portrait)
+        mainView.topBar.set(type: .portrait)
     }
-    override func updateFrame() {
-        super.updateFrame()
+    override func setViewStyle() {
+        super.setViewStyle()
         
     }
     
@@ -131,8 +129,8 @@ public class DBYOnlineController: DBYPlaybackController {
     override func changeEnded() {
         super.changeEnded()
         
-        playbackManager.seekToTime(with: bottomBar.currentValue, completeHandler: {message in
-            self.mainView.stopLoading()
+        playbackManager.seekToTime(with: mainView.bottomBar.currentValue, completeHandler: {message in
+            self.mainView.videoView.stopLoading()
         })
     }
     //MARK: - private functions
@@ -178,10 +176,7 @@ public class DBYOnlineController: DBYPlaybackController {
     }
     func clearChatMessage() {
         cellHeightCache.removeAll()
-        allChatList.removeAll()
-        DispatchQueue.main.async {
-            self.chatListView.reloadData()
-        }
+        chatListView.clearAll()
     }
     @objc func pauseApi() {
         if playbackBtn.isSelected {
@@ -202,68 +197,6 @@ public class DBYOnlineController: DBYPlaybackController {
         playbackManager.resumePlay()
     }
 }
-extension DBYOnlineController: UITableViewDelegate, UITableViewDataSource {
-    // MARK: - tableView
-    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let count = allChatList.count
-        if count > 0 {
-            chatListView.backgroundView = nil
-        }else {
-            let chatTipView = DBYEmptyView(image: UIImage(name: "icon-empty-status-1"), message: "聊天消息为空")
-            chatListView.backgroundView = chatTipView
-        }
-        return count
-    }
-    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UITableView.automaticDimension //固定值
-    }
-    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell:DBYCommentCell = DBYCommentCell()
-        
-        let chatList = allChatList
-        if chatList.count <= indexPath.row {
-            return cell
-        }
-        let chatDict = chatList[indexPath.row]
-        
-        let role:Int = chatDict["role"] as? Int ?? 0
-        let isOwner:Bool = chatDict["isOwner"] as? Bool ?? false
-        let name:String = chatDict["userName"] as? String ?? ""
-        let message:String = chatDict["message"] as? String ?? ""
-        
-        if isOwner {
-            cell = tableView.dequeueReusableCell(withIdentifier: toIdentifier) as! DBYCommentCell
-            if isPortrait() {
-                cell.setBubbleImage(UIImage(name: "chat-to-bubble"))
-            }else {
-                cell.setBubbleImage(UIImage(name: "chat-to-dark-bubble"))
-            }
-        }else {
-            cell = tableView.dequeueReusableCell(withIdentifier: fromIdentifier) as! DBYCommentCell
-            if isPortrait() {
-                cell.setBubbleImage(UIImage(name: "chat-from-bubble"))
-            }else {
-                cell.setBubbleImage(UIImage(name: "chat-from-dark-bubble"))
-            }
-        }
-        if isPortrait() {
-            cell.setTextColor(DBYStyle.dark)
-        }else {
-            cell.setTextColor(UIColor.white)
-        }
-        let avatarUrl = DBYUrlConfig.shared().staticUrl(withSourceName: roomConfig?.avatar ?? "")
-        let badge = badgeUrl(role: role, badgeDict: roomConfig?.badge)
-        let width = cell.bounds.width - 100
-        
-        let attMessage = beautifyMessage(message: message, maxWidth: width)
-        cell.setText(name: name,
-                     message: attMessage,
-                     avatarUrl: avatarUrl,
-                     badge: badge)
-        
-        return cell
-    }
-}
 extension DBYOnlineController:DBYOnlinePlayBackManagerDelegate {
     public func playBackManager(_ manager: DBYOnlinePlayBackManager!, onlineWithuserId uid: String!, nickName: String!, userRole role: Int32) {
         if role == 1 {
@@ -275,46 +208,32 @@ extension DBYOnlineController:DBYOnlinePlayBackManagerDelegate {
     }
     public func playbackManager(_ manager: DBYOnlinePlayBackManager!, playStateChange isPlaying: Bool) {
         if isPlaying {
-            bottomBar.set(state: .play)
+            mainView.bottomBar.set(state: .play)
         }else {
-            bottomBar.set(state: .pause)
+            mainView.bottomBar.set(state: .pause)
         }
     }
     public func playbackManager(_ manager: DBYOnlinePlayBackManager!, hasNewChatMessageWithChatArray newChatDictArray: [Any]!) {
         if let chatDicts = newChatDictArray as? [[String:Any]] {
-            allChatList += chatDicts
-            let maxCount = allChatList.count - 1000
-            if maxCount > 0 {
-                for _ in 0..<maxCount {
-                    allChatList.removeFirst()
-                }
-            }
-            let count = self.allChatList.count
-            self.chatListView.reloadData()
-            if count > 0 {
-                self.chatListView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .none, animated: true)
-            }
+            chatListView.appendChats(array: chatDicts)
         }
     }
     
     public func playBackManagerChatMessageShouldClear(_ manager: DBYOnlinePlayBackManager!) {
-        allChatList.removeAll()
-        DispatchQueue.main.async {
-            self.chatListView.reloadData()
-        }
+        chatListView.clearAll()
     }
     public func playBackManager(_ manager: DBYOnlinePlayBackManager!, totalTime time: TimeInterval) {
-        bottomBar.set(totalTime: time)
+        mainView.bottomBar.set(totalTime: time)
     }
     public func playBackManager(_ manager: DBYOnlinePlayBackManager!, playedAtTime time: TimeInterval) {
         setupNowPlaying()
         if beginInteractive {
             return
         }
-        bottomBar.set(time: time)
+        mainView.bottomBar.set(time: time)
     }
     public func playbackManagerDidPlayEnd(_ manager: DBYOnlinePlayBackManager!) {
-        bottomBar.set(state: .end)
+        mainView.bottomBar.set(state: .end)
     }
     public func playbackManager(_ manager: DBYOnlinePlayBackManager!, hasVideo: Bool, in view: UIView!) {
         
@@ -365,26 +284,26 @@ extension DBYOnlineController: DBYBottomBarDelegate {
     }
     
     func progressDidChange(owner: DBYBottomBar, value: Float) {
-        stopHiddenTimer()
+        mainView.stopHiddenTimer()
         beginInteractive = true
         timeTipLab.isHidden = false
         timeTipLab.text = String.playTime(time:Int(value))
         timeTipLab.sizeToFit()
-        bottomBar.set(time: TimeInterval(value))
+        mainView.bottomBar.set(time: TimeInterval(value))
     }
     
     func progressEndChange(owner: DBYBottomBar, value: Float) {
-        startHiddenTimer()
+        mainView.startHiddenTimer()
         beginInteractive = false
         timeTipLab.isHidden = true
         
-        mainView.startLoading()
+        mainView.videoView.startLoading()
         playbackManager.seekToTime(with: TimeInterval(value), completeHandler: { message in
             if let msg = message {
                 DBYGlobalMessage.shared().showText(msg)
             }
-            self.mainView.stopLoading()
-            self.bottomBar.set(state: .play)
+            self.mainView.videoView.stopLoading()
+            self.mainView.bottomBar.set(state: .play)
         })
     }
 }

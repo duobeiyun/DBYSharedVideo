@@ -12,25 +12,40 @@ import DBYSDK_dylib
 class DBYChatListView: DBYView {
     let fromIdentifier: String = "DBYCommentFromCell"
     let toIdentifier: String = "DBYCommentToCell"
+    let zanCell = "DBYZanCell"
     let estimatedRowHeight: CGFloat = 44
     
-    var roomConfig: DBYRoomConfig?
+    var tipView: DBYTipClickView?
     
-    lazy var qaList: [[String:Any]] = [[String:Any]]()
+    var roomConfig: DBYRoomConfig?
+    var newMessageCount:Int = 0
+    var showTip:Bool = false
+    var tipViewSafeSize: CGSize = .zero
+    var tipViewPosition: DBYTipView.Position = [.bottom, .center]
+    
+    var allChatList: [[String:Any]] = [[String:Any]]() {
+        didSet {
+            if allChatList.count > 0 {
+                tableView.backgroundView = nil
+            }
+        }
+    }
     
     lazy var tableView: UITableView = {
-        let t = UITableView(frame: .zero, style: .grouped)
+        let t = UITableView(frame: .zero, style: .plain)
         let classType = type(of: self)
         let bundle = Bundle(for: classType)
-        let fromNib = UINib(nibName: fromIdentifier, bundle: bundle)
-        let toNib = UINib(nibName: toIdentifier, bundle: bundle)
+        let fromNib = UINib(nibName: fromIdentifier, bundle: currentBundle)
+        let toNib = UINib(nibName: toIdentifier, bundle: currentBundle)
+        let zanNib = UINib(nibName: zanCell, bundle: currentBundle)
         
-        t.backgroundColor = DBYStyle.lightGray
+        t.backgroundColor = .clear
         t.separatorStyle = .none
         t.allowsSelection = false
         t.estimatedRowHeight = estimatedRowHeight;
         t.register(fromNib, forCellReuseIdentifier: fromIdentifier)
         t.register(toNib, forCellReuseIdentifier: toIdentifier)
+        t.register(zanNib, forCellReuseIdentifier: zanCell)
         
         return t
     }()
@@ -40,109 +55,142 @@ class DBYChatListView: DBYView {
         tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         addSubview(tableView)
     }
-    func set(list: [[String:Any]]) {
-        qaList = list
-        tableView.reloadData()
-    }
     func append(dict: [String:Any]) {
-        qaList.append(dict)
-        tableView.reloadData()
+        let count = allChatList.count
+        allChatList.append(dict)
+        let index = IndexPath(row:count, section:0)
+        tableView.beginUpdates()
+        tableView.insertRows(at: [index], with: .automatic)
+        tableView.endUpdates()
+        if count > 0 {
+            tableView.scrollToRow(at: index, at: .bottom, animated: true)
+        }
     }
-    func remove(questionId: String) {
-        var index:Int = -1
-        for i in 0..<qaList.count {
-            let dict = qaList[i]
-            let msgId = dict["id"] as? String
-            if msgId == questionId {
-                index = i
-                break
+    func reloadData() {
+        tableView.reloadData()
+        scrollToBottom()
+    }
+    func clearAll() {
+        showTip = false
+        newMessageCount = 0
+        allChatList.removeAll()
+        tableView.reloadData()
+        scrollToBottom()
+    }
+    func scrollToTop() {
+        
+    }
+    func scrollToBottom() {
+        let count = self.allChatList.count
+        if count > 0 {
+            self.tableView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: false)
+        }
+        DBYTipView.removeTipViews(type: .click, on: self)
+    }
+    func appendChats(array: [[String:Any]]) {
+        allChatList += array
+        let maxCount = allChatList.count - 1000
+        if maxCount > 0 {
+            for _ in 0..<maxCount {
+                allChatList.removeFirst()
             }
         }
-        if index < 0 {
-            return
-        }
-        qaList.remove(at: index)
         tableView.reloadData()
+        let count = allChatList.count
+        if showTip {
+            newMessageCount += array.count
+            let image = UIImage(name: "message-tip")
+            let message = "\(newMessageCount)条新消息"
+            DBYTipView.removeTipViews(type: .click, on: self)
+            guard let tipView = DBYTipView.loadView(type: .click) else {
+                return
+            }
+            addSubview(tipView)
+            if let p = tipView as? DBYTipViewUIProtocol {
+                p.show(icon: image, message: message)
+                p.setPosition(position: tipViewPosition)
+                p.setContentOffset(size: tipViewSafeSize)
+            }
+            guard let clickView = tipView as? DBYTipClickView else {
+                return
+            }
+            weak var weakView = clickView
+            weak var weakSelf = self
+            clickView.clickBlock = {
+                weakView?.removeFromSuperview()
+                weakSelf?.newMessageCount = 0
+                weakSelf?.showTip = false
+                let count = weakSelf?.allChatList.count ?? 1
+                if count > 0 {
+                    weakSelf?.tableView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: true)
+                }
+            }
+        }else if count > 0 {
+            tableView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: true)
+        }
     }
 }
 extension DBYChatListView: UITableViewDelegate {
-    
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        stoppedScrolling(scrollView: scrollView)
+    }
+    public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        stoppedScrolling(scrollView: scrollView)
+    }
+    func stoppedScrolling(scrollView: UIScrollView) {
+        if scrollView == tableView {
+            let delta = scrollView.contentSize.height - scrollView.contentOffset.y
+            //浮点数可能不准，+1减少误差
+            showTip = delta > tableView.bounds.height + 1
+            if !showTip {
+                newMessageCount = 0
+                DBYTipView.removeTipViews(type: .click, on: self)
+            }
+        }
+    }
 }
 extension DBYChatListView: UITableViewDataSource {
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return qaList.count
-    }
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 2
-    }
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let imageView = UIImageView()
-        imageView.image = UIImage(name: "dottedline")
-        imageView.frame = CGRect(x: 8, y: 4, width: tableView.frame.width - 16, height: 22)
-        let view = UIView()
-        view.addSubview(imageView)
-        return view
-    }
-    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        return nil
-    }
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 30
+        return .leastNonzeroMagnitude
     }
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return CGFloat.leastNonzeroMagnitude
+        return .leastNonzeroMagnitude
     }
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    public func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        let count = allChatList.count
+        if count > 0 {
+            tableView.backgroundView = nil
+        }else {
+            let chatTipView = DBYEmptyView(image: UIImage(name: "icon-empty-status-1"), message: "聊天消息为空")
+            tableView.backgroundView = chatTipView
+        }
+        return count
+    }
+    public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
+    }
+    public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var cell:DBYCommentCell = DBYCommentCell()
         
-        let chatDict = qaList[indexPath.section]
-        
-        let value = chatDict["value"] as? String
-        guard let data = value?.data(using: .utf8) else {
+        if allChatList.count <= indexPath.row {
             return cell
         }
-        guard let valueDict = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:Any] else {
-            return cell
+        var chatDict = allChatList[indexPath.row]
+        if let type:String = chatDict["type"] as? String, type == "thumbup" {
+            let thumbCell = tableView.dequeueReusableCell(withIdentifier: zanCell, for: indexPath) as! DBYZanCell
+            thumbCell.set(text: chatDict["name"] as? String)
+            return thumbCell
         }
-        var infoDict:[String:Any]?
-        if indexPath.row == 0 {
-            infoDict = valueDict["questionInfo"] as? [String:Any]
-        }else {
-            infoDict = valueDict["answerInfo"] as? [String:Any]
-        }
-        let role:String = infoDict?["role"] as? String ?? ""
-        let name:String = infoDict?["username"] as? String ?? ""
-        let message:String = infoDict?["msg"] as? String ?? ""
+        chatDict["size"] = UIScreen.main.bounds.size
+        let model = DBYCellModel.commentCellModel(dict: chatDict, roomConfig: roomConfig)
         
-        if role == "1" {
-            cell = tableView.dequeueReusableCell(withIdentifier: toIdentifier) as! DBYCommentCell
-            if isPortrait() {
-                cell.setBubbleImage(UIImage(name: "chat-to-bubble"))
-            }else {
-                cell.setBubbleImage(UIImage(name: "chat-to-dark-bubble"))
-            }
-        }else {
-            cell = tableView.dequeueReusableCell(withIdentifier: fromIdentifier) as! DBYCommentCell
-            if isPortrait() {
-                cell.setBubbleImage(UIImage(name: "chat-from-bubble"))
-            }else {
-                cell.setBubbleImage(UIImage(name: "chat-from-dark-bubble"))
-            }
-        }
-        if isPortrait() {
-            cell.setTextColor(DBYStyle.dark)
-        }else {
-            cell.setTextColor(UIColor.white)
-        }
-        
-        let avatarUrl = DBYUrlConfig.shared().staticUrl(withSourceName: roomConfig?.avatar ?? "")
-        let badge = badgeUrl(role: Int(role) ?? 0, badgeDict: roomConfig?.badge)
-        let width = cell.bounds.width - 100
-        let attMessage = beautifyMessage(message: message, maxWidth: width)
-        cell.setText(name: name,
-                     message: attMessage,
-                     avatarUrl: avatarUrl,
-                     badge: badge)
+        cell = tableView.dequeueReusableCell(withIdentifier: model.identifier) as! DBYCommentCell
+        cell.setTextColor(model.textColor)
+        cell.setBubbleImage(model.bubbleImage)
+        cell.setText(name: model.name,
+                     message: model.message,
+                     avatarUrl: model.avatarUrl,
+                     badge: model.badge)
         
         return cell
     }

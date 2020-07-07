@@ -44,7 +44,6 @@ public class DBY1VNController: UIViewController {
     let topBtnMargin: CGFloat = 5
     let topBtnSize: CGSize = CGSize(width: 38, height: 38)
     let popBtnSize: CGSize = CGSize(width: 38, height: 38)
-    let roomControlbarHeight: CGFloat = 40
     let fromIdentifier: String = "DBYCommentFromCell"
     let toIdentifier: String = "DBYCommentToCell"
     let zanCell = "DBYZanCell"
@@ -52,72 +51,28 @@ public class DBY1VNController: UIViewController {
     
     @objc public var authinfo: DBYAuthInfo?
     
-    var mainViewFrame: CGRect = .zero
     var chatListViewFrame: CGRect = .zero
-    var segmentedViewFrame: CGRect = .zero
     var smallPopViewFrame: CGRect = .zero
     var largePopViewFrame: CGRect = .zero
     
-    var iphoneXTop: CGFloat = 20
-    var iphoneXLeft: CGFloat = 0
-    var iphoneXRight: CGFloat = 0
-    var iphoneXBottom: CGFloat = 0
-    
-    var beganPosition:CGPoint = .zero
-    var brightness:CGFloat = 0
-    var volume:Float = 0
-    
-    var controlBarIsHidden: Bool = false
     var isLoading: Bool = false
     var isStoping: Bool = false
-    
-    var voiceTimer: Timer?
-    
-    var allChatList: [[String:Any]] = [[String:Any]]() {
-        didSet {
-            if allChatList.count > 0 {
-                chatListView.backgroundView = nil
-            }
-        }
-    }
     
     lazy var videoDict = [String: DBYStudentVideoView]()
     //缓存高度字典
     lazy var cellHeightCache:[Int: CGFloat] = [Int: CGFloat]()
     
-    lazy var mainView = DBYVideoView()
-    lazy var chatContainer = UIView()
+    lazy var mainView = DBYMainView()
+    lazy var chatContainer = DBYChatContainer()
     lazy var courseInfoView = DBYCourseInfoView()
     lazy var videoTipView = DBYVideoTipView()
     lazy var segmentedView = DBYSegmentedView()
-    lazy var volumeProgressView = DBYProgressView()
-    lazy var brightnessProgressView = DBYProgressView()
+    
     lazy var settingView = DBYSettingView()
-    lazy var chatListView: UITableView = {
-        let t = UITableView(frame: .zero, style: .plain)
-        let classType = type(of: self)
-        
-        let fromNib = UINib(nibName: fromIdentifier, bundle: currentBundle)
-        let toNib = UINib(nibName: toIdentifier, bundle: currentBundle)
-        let zanNib = UINib(nibName: zanCell, bundle: currentBundle)
-        
-        t.backgroundColor = DBYStyle.lightGray
-        t.separatorStyle = .none
-        t.allowsSelection = false
-        t.estimatedRowHeight = estimatedRowHeight
-        
-        t.register(fromNib, forCellReuseIdentifier: fromIdentifier)
-        t.register(toNib, forCellReuseIdentifier: toIdentifier)
-        t.register(zanNib, forCellReuseIdentifier: zanCell)
-        
-        return t
-    }()
+    lazy var chatListView = DBYChatListView()
     
     lazy var netTipView = DBYNetworkTipView()
     lazy var internetReachability = DBYReachability.forInternetConnection()
-    
-    lazy var topBar:DBYTopBar = DBYTopBar()
-    lazy var bottomBar:DBYBottomBar = DBYBottomBar()
     
     lazy var playbackBtn:DBYVerticalButton = {
         let btn = DBYVerticalButton()
@@ -136,17 +91,17 @@ public class DBY1VNController: UIViewController {
         return .default
     }
     public override var prefersStatusBarHidden: Bool {
-        return controlBarIsHidden
+        return mainView.controlBarIsHidden
     }
     override public func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
-        startHiddenTimer()
+        mainView.startHiddenTimer()
         DBYSystemControl.shared.beginControl()
     }
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        stopHiddenTimer()
+        mainView.stopHiddenTimer()
         DBYSystemControl.shared.endControl()
     }
     override public func viewDidLoad() {
@@ -165,16 +120,18 @@ public class DBY1VNController: UIViewController {
         addSubviews()
         addActions()
         setupOrientationUI()
-        updateFrame()
+        setViewStyle()
         setupStaticUI()
         internetReachability?.startNotifier()
+        
+        setViewStyle()
     }
     public override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
-        updateFrame()
+        view.zf_layoutSubviews()
     }
     override public func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        startHiddenTimer()
+        mainView.startHiddenTimer()
         weak var weakSelf = self
         coordinator.animate(alongsideTransition: { (context) in
             weakSelf?.setupOrientationUI()
@@ -191,22 +148,10 @@ public class DBY1VNController: UIViewController {
     //MARK: - private functions
     func addSubviews() {
         view.addSubview(mainView)
-        view.addSubview(volumeProgressView)
-        view.addSubview(brightnessProgressView)
-        view.addSubview(topBar)
-        view.addSubview(bottomBar)
         view.addSubview(segmentedView)
         view.addSubview(settingView)
     }
     func addActions() {
-        let oneTap = UITapGestureRecognizer(target: self,
-                                            action: #selector(oneTap(tap:)))
-        mainView.addGestureRecognizer(oneTap)
-        
-        let pan = UIPanGestureRecognizer(target: self,
-                                         action: #selector(gestureControl(pan:)))
-        
-        mainView.addGestureRecognizer(pan)
         playbackBtn.addTarget(self, action: #selector(playbackEnable), for: .touchUpInside)
     }
     func setupStaticUI() {
@@ -217,20 +162,6 @@ public class DBY1VNController: UIViewController {
         segmentedView.barColor = DBYStyle.yellow
         segmentedView.hilightColor = DBYStyle.darkGray
         segmentedView.defaultColor = DBYStyle.middleGray
-        
-        if #available(iOS 11.0, *) {
-            chatListView.insetsContentViewsToSafeArea = false
-        }
-        volumeProgressView.setIcon(icon: "volume")
-        let volume = DBYSystemControl.shared.getVolume()
-        volumeProgressView.setProgress(value: CGFloat(volume))
-        
-        brightnessProgressView.setIcon(icon: "brightness")
-        let brightness = DBYSystemControl.shared.getBrightness()
-        brightnessProgressView.setProgress(value: brightness)
-        
-        volumeProgressView.isHidden = true
-        brightnessProgressView.isHidden = true
         
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
     }
@@ -243,17 +174,14 @@ public class DBY1VNController: UIViewController {
         settingView.isHidden = true
     }
     func setupPortraitUI() {
-        chatListView.isHidden = false
-        chatListView.backgroundColor = DBYStyle.lightGray
     }
     func setupLandscapeUI() {
-        chatListView.backgroundColor = DBYStyle.darkAlpha
     }
-    func updateFrame() {
-        iphoneXTop = 20
-        iphoneXLeft = 0
-        iphoneXRight = 0
-        iphoneXBottom = 0
+    func setupIphoneX() -> UIEdgeInsets {
+        var iphoneXTop:CGFloat = 20
+        var iphoneXLeft:CGFloat = 0
+        var iphoneXRight:CGFloat = 0
+        var iphoneXBottom:CGFloat = 0
         if isIphoneXSeries() {
             let orientation = UIApplication.shared.statusBarOrientation
             if orientation == .landscapeLeft || orientation == .landscapeRight{
@@ -265,95 +193,24 @@ public class DBY1VNController: UIViewController {
             }
             iphoneXBottom = 34
         }
+        return UIEdgeInsets(top: iphoneXTop, left: iphoneXLeft, bottom: iphoneXBottom, right: iphoneXRight)
+    }
+    func setViewStyle() {
+        let edge = setupIphoneX()
         
-        if isPortrait() {
-            updatePortraitFrame()
-        }else {
-            updateLandscapeFrame()
-        }
-        let size = view.bounds.size
-        let progressWidth:CGFloat = 30
-        let progressHeight:CGFloat = 140
+        let size = UIScreen.main.bounds.size
+        let videoHeight = size.width * 0.5625
+        let segmentedViewMinX = videoHeight + edge.top
+        let segmentedViewHeight = size.height - segmentedViewMinX
+        mainView.portraitFrame = CGRect(x: 0, y: edge.top, width: size.width, height: videoHeight)
+        mainView.landscapeFrame = CGRect(x: edge.left, y: 0, width: size.height - edge.right, height: size.width)
+        segmentedView.portraitFrame = CGRect(x: 0, y: segmentedViewMinX, width: size.width, height: segmentedViewHeight)
+        segmentedView.landscapeFrame = CGRect(x: size.height - size.width - edge.right, y: -44, width: size.width, height: size.width + 44)
         
-        mainView.frame = mainViewFrame
-        chatListView.frame = chatListViewFrame
-        topBar.frame = CGRect(x: 0,
-                              y: 0,
-                              width: size.width,
-                              height: 44 + iphoneXTop)
-        volumeProgressView.frame = CGRect(x: mainViewFrame.maxX - progressWidth - normalMargin,
-                                          y: mainViewFrame.midY - progressHeight * 0.5,
-                                          width: progressWidth,
-                                          height: progressHeight)
-        brightnessProgressView.frame = CGRect(x: mainViewFrame.minX + normalMargin,
-                                              y: mainViewFrame.midY - progressHeight * 0.5,
-                                              width: progressWidth,
-                                              height: progressHeight)
-        segmentedView.frame = segmentedViewFrame
-        videoTipView.frame = mainView.bounds
-        netTipView.frame = mainView.bounds
-        settingView.frame = largePopViewFrame
+        chatListView.setBackgroundColor(color: DBYStyle.lightGray, forState: .portrait)
+        chatListView.setBackgroundColor(color: DBYStyle.lightAlpha, forState: .landscape)
     }
-    
-    func updatePortraitFrame() {
-        let size = view.bounds.size
-        let largePopViewHeight = size.height * 0.5
-        mainViewFrame = CGRect(x: 0,
-                               y: iphoneXTop,
-                               width: size.width,
-                               height: size.width * 0.56)
-        largePopViewFrame = CGRect(x: 0,
-                                   y: largePopViewHeight,
-                                   width: size.width,
-                                   height: largePopViewHeight)
-        bottomBar.frame = CGRect(x: 0,
-                                 y: mainViewFrame.maxY - 44,
-                                 width: size.width,
-                                 height: 44)
-    }
-    func updateLandscapeFrame() {
-        let size = view.bounds.size
-        let largePopViewWidth = size.width * 0.4
-        let const_scale:CGFloat = 16/9.0
-        let scale:CGFloat = size.width/size.height
-        var largeViewW = size.width
-        var largeViewH = size.height
-        if scale > const_scale {
-            largeViewW = size.height * const_scale
-            largeViewH = size.height
-        }else {
-            largeViewW = size.width
-            largeViewH = size.width / const_scale
-        }
-        mainViewFrame = CGRect(x: (size.width - largeViewW) * 0.5,
-                                y: (size.height - largeViewH) * 0.5,
-                                width: largeViewW,
-                                height: largeViewH)
-        largePopViewFrame = CGRect(x: size.width - largePopViewWidth,
-                                   y: 0,
-                                   width: largePopViewWidth,
-                                   height: size.height)
-        bottomBar.frame = CGRect(x: 0,
-                                 y: size.height - 78,
-                                 width: size.width,
-                                 height: 78)
-    }
-    
-    func startHiddenTimer() {
-        let date:Date = Date(timeIntervalSinceNow: 5)
-        voiceTimer = Timer(fireAt: date,
-                           interval: 0,
-                           target: self,
-                           selector: #selector(hiddenControlBar),
-                           userInfo: nil,
-                           repeats: false)
-        RunLoop.current.add(voiceTimer!,
-                            forMode: RunLoop.Mode.default)
-    }
-    func stopHiddenTimer() {
-        voiceTimer?.invalidate()
-        voiceTimer = nil
-    }
+
     func showSettingView() {
         UIView.animate(withDuration: 0.25) {
             self.settingView.isHidden = false
@@ -394,20 +251,14 @@ public class DBY1VNController: UIViewController {
     func hiddenVideoTipView() {
         videoTipView.removeFromSuperview()
     }
-    func changeVolume(value: CGFloat) {
-        DBYSystemControl.shared.setVolume(value: volume + Float(value))
-        volumeProgressView.setProgress(value: CGFloat(volume) + value)
-    }
-    func changeLight(value: CGFloat) {
-        DBYSystemControl.shared.setBrightness(value: brightness + value)
-        brightnessProgressView.setProgress(value: brightness + value)
-    }
+    
     func createVideoView(uid: String) -> DBYStudentVideoView {
         let videoView = DBYStudentVideoView()
         videoView.userId = uid
         videoDict[uid] = videoView
         view.addSubview(videoView)
-        videoView.frame = CGRect(x: mainViewFrame.minX, y: mainViewFrame.maxY, width: 170, height: 150)
+        videoView.portraitFrame = CGRect(x: mainView.frame.minX, y: mainView.frame.maxY, width: 170, height: 150)
+        videoView.landscapeFrame = CGRect(x: mainView.frame.minX, y: 0, width: 170, height: 150)
         let drag = UIPanGestureRecognizer(target: self,
                                           action: #selector(dragVideoView(pan:)))
         let pinch = UIPinchGestureRecognizer(target: self,
@@ -443,7 +294,7 @@ public class DBY1VNController: UIViewController {
     //MARK: - objc functions
     @objc func volumeChange(notification:Notification) {
         if let volume = notification.object as? CGFloat {
-            volumeProgressView.setProgress(value: volume)
+            mainView.volumeProgressView.setProgress(value: volume)
         }
     }
     @objc func scaleVideoView(pinch:UIPinchGestureRecognizer) {
@@ -481,55 +332,8 @@ public class DBY1VNController: UIViewController {
             break
         }
     }
-    @objc func gestureControl(pan:UIPanGestureRecognizer) {
-        switch pan.state {
-        case .began:
-            beganPosition = pan.location(in: mainView)
-            brightness = DBYSystemControl.shared.getBrightness()
-            volume = DBYSystemControl.shared.getVolume()
-        case .changed:
-            let position = pan.location(in: mainView)
-            let offsetY = beganPosition.y - position.y
-            let offsetX = beganPosition.x - position.x
-            if abs(offsetX) > abs(offsetY) {
-                return
-            }
-            let progress = offsetY / mainViewFrame.height
-            if position.x > mainViewFrame.width * 0.5 {
-                changeVolume(value: progress)
-            }else {
-                changeLight(value: progress)
-            }
-        default:
-            break
-        }
-    }
-    @objc func oneTap(tap:UITapGestureRecognizer) {
-        hiddenSettingView()
-        
-        if controlBarIsHidden {
-            showControlBar()
-        }else {
-            hiddenControlBar()
-        }
-    }
     
-    @objc func hiddenControlBar() {
-        topBar.isHidden = true
-        bottomBar.isHidden = true
-        controlBarIsHidden = true
-        setNeedsStatusBarAppearanceUpdate()
-        stopHiddenTimer()
-    }
     
-    @objc func showControlBar() {
-        topBar.isHidden = false
-        bottomBar.isHidden = false
-        controlBarIsHidden = false
-        setNeedsStatusBarAppearanceUpdate()
-        stopHiddenTimer()
-        startHiddenTimer()
-    }
     @objc func reachabilityChanged(note:NSNotification) {
         
     }
@@ -543,16 +347,3 @@ public class DBY1VNController: UIViewController {
     func closeCamera() {
     }
 }
-//extension DBY1VNController: DBYRoomControlbarDelegate {
-//    func roomControlBar(owner: DBYRoomControlbar, stateWillChange state: DBYRoomControlbar.CameraState) {
-//        if state == .normal {
-//            requestOpenCamera()
-//        }
-//        if state == .invite {
-//            cancelOpenCamera()
-//        }
-//        if state == .joined {
-//            closeCamera()
-//        }
-//    }
-//}
