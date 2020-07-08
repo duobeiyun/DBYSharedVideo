@@ -36,7 +36,6 @@ public class DBYPlaybackController: DBY1VNController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         
-        mainView.startHiddenTimer()
         segmentedView.scrollToIndex(index: 0)
     }
     override public func addSubviews() {
@@ -106,21 +105,6 @@ public class DBYPlaybackController: DBY1VNController {
         
         chatListView.portraitFrame = CGRect(x: 0, y: 0, width: size.width, height: chatListViewHeight)
         chatListView.landscapeFrame = CGRect(x: 0, y: 0, width: size.width, height: size.width)
-    }
-    func changeProgress(value: CGFloat) {
-        let tempTime = time + mainView.bottomBar.maxValue * Double(value)
-        mainView.stopHiddenTimer()
-        beginInteractive = true
-        timeTipLab.isHidden = false
-        timeTipLab.text = String.playTime(time:Int(tempTime))
-        timeTipLab.sizeToFit()
-        mainView.bottomBar.set(time: tempTime)
-    }
-    func changeEnded() {
-        beginInteractive = false
-        timeTipLab.isHidden = true
-        indicator.isHidden = false
-        indicator.startAnimating()
     }
     //MARK: - private functions
     

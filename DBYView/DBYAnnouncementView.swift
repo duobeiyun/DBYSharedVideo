@@ -16,7 +16,7 @@ class DBYAnnouncementView: DBYNibView {
     let minLeft:CGFloat = 8
     let constHeight:CGFloat = 40
     let constLeft:CGFloat = 36
-    var timer: Timer?
+    weak var timer: ZFTimer?
     var isExpend:Bool = false
     
     @IBAction func tap(gesture: UITapGestureRecognizer) {
@@ -44,28 +44,19 @@ class DBYAnnouncementView: DBYNibView {
         layer.shadowColor = DBYStyle.middleGray.cgColor
         layer.shadowOffset = CGSize(width: 0, height: 4)
     }
+    deinit {
+        timer?.stopTimer()
+    }
     func set(text:String) {
         self.messageLab.text = text
         let width = messageLab.text!.width(withMaxHeight: constHeight, font: messageLab.font)
         messgaeLabWidth.constant = width
         messgaeLabLeft.constant = minLeft
         
-        stopTimer()
-        startTimer()
-    }
-    func startTimer() {
-        let date:Date = Date(timeIntervalSinceNow: 0)
-        timer = Timer(fireAt: date,
-                      interval: 0.1,
-                      target: self,
-                      selector: #selector(updateMessage),
-                      userInfo: nil,
-                      repeats: true)
-        RunLoop.main.add(timer!, forMode: RunLoop.Mode.common)
-    }
-    func stopTimer() {
-        timer?.invalidate()
-        timer = nil
+        timer?.stopTimer()
+        timer = ZFTimer.startTimer(interval: 0.1, repeats: true, block: {[weak self] in
+            self?.updateMessage()
+        })
     }
     @objc func updateMessage() {
         if isExpend {

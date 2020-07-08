@@ -122,17 +122,6 @@ public class DBYOnlineController: DBYPlaybackController {
         }
     }
     
-    override func changeProgress(value: CGFloat) {
-        super.changeProgress(value: value)
-        
-    }
-    override func changeEnded() {
-        super.changeEnded()
-        
-        playbackManager.seekToTime(with: mainView.bottomBar.currentValue, completeHandler: {message in
-            self.mainView.videoView.stopLoading()
-        })
-    }
     //MARK: - private functions
     func addObserver() {
         NotificationCenter.default.addObserver(self,
@@ -281,9 +270,10 @@ extension DBYOnlineController: DBYBottomBarDelegate {
             recoverManager()
         }
     }
-    
+    func progressWillChange(owner: DBYBottomBar, value: Float) {
+        mainView.stopTimer()
+    }
     func progressDidChange(owner: DBYBottomBar, value: Float) {
-        mainView.stopHiddenTimer()
         beginInteractive = true
         timeTipLab.isHidden = false
         timeTipLab.text = String.playTime(time:Int(value))
@@ -292,7 +282,7 @@ extension DBYOnlineController: DBYBottomBarDelegate {
     }
     
     func progressEndChange(owner: DBYBottomBar, value: Float) {
-        mainView.startHiddenTimer()
+        mainView.startTimer()
         beginInteractive = false
         timeTipLab.isHidden = true
         

@@ -39,7 +39,7 @@ class DBYMainView: DBYView {
     var volume:Float = 0
     var controlBarIsHidden: Bool = false
     
-    var voiceTimer: Timer?
+    weak var voiceTimer: ZFTimer?
     
     override func setupUI() {
         addSubview(videoView)
@@ -59,11 +59,11 @@ class DBYMainView: DBYView {
         }
         topBar.snp.makeConstraints { (make) in
             make.top.left.right.equalTo(0)
-            make.height.equalTo(80)
+            make.height.equalTo(60)
         }
         bottomBar.snp.makeConstraints { (make) in
             make.bottom.left.right.equalTo(0)
-            make.height.equalTo(80)
+            make.height.equalTo(60)
         }
         volumeProgressView.snp.makeConstraints { (make) in
             make.bottom.right.equalTo(-10)
@@ -116,26 +116,20 @@ class DBYMainView: DBYView {
                 break
         }
     }
-    func startHiddenTimer() {
-        let date:Date = Date(timeIntervalSinceNow: 5)
-        voiceTimer = Timer(fireAt: date,
-                           interval: 0,
-                           target: self,
-                           selector: #selector(hiddenControlBar),
-                           userInfo: nil,
-                           repeats: false)
-        RunLoop.current.add(voiceTimer!, forMode: RunLoop.Mode.default)
+    func startTimer() {
+        voiceTimer = ZFTimer.startTimer(interval: 5, repeats: false, block: {[weak self] in
+            self?.hiddenControlBar()
+        })
     }
-    func stopHiddenTimer() {
-        voiceTimer?.invalidate()
-        voiceTimer = nil
+    func stopTimer() {
+        voiceTimer?.stopTimer()
     }
     @objc func hiddenControlBar() {
         topBar.isHidden = true
         bottomBar.isHidden = true
         controlBarIsHidden = true
         delegate?.willHiddenControlBar(owner: self)
-        stopHiddenTimer()
+        stopTimer()
     }
     
     @objc func showControlBar() {
@@ -143,8 +137,8 @@ class DBYMainView: DBYView {
         bottomBar.isHidden = false
         controlBarIsHidden = false
         delegate?.willShowControlBar(owner: self)
-        stopHiddenTimer()
-        startHiddenTimer()
+        stopTimer()
+        startTimer()
     }
     func changeVolume(value: CGFloat) {
         DBYSystemControl.shared.setVolume(value: volume + Float(value))

@@ -94,12 +94,11 @@ public class DBY1VNController: UIViewController {
     override public func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
-        mainView.startHiddenTimer()
         DBYSystemControl.shared.beginControl()
+        mainView.showControlBar()
     }
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        mainView.stopHiddenTimer()
         DBYSystemControl.shared.endControl()
     }
     override public func viewDidLoad() {
@@ -128,7 +127,7 @@ public class DBY1VNController: UIViewController {
         view.zf_layoutSubviews()
     }
     override public func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        mainView.startHiddenTimer()
+        mainView.showControlBar()
         weak var weakSelf = self
         coordinator.animate(alongsideTransition: { (context) in
             weakSelf?.setupOrientationUI()

@@ -65,14 +65,6 @@ public class DBYOfflineController: DBYPlaybackController {
             toPortrait()
         }
     }
-    override func changeProgress(value: CGFloat) {
-        super.changeProgress(value: value)
-    }
-    override func changeEnded() {
-        super.changeEnded()
-        offlineManager.seek(toTime: mainView.bottomBar.currentValue)
-        indicator.stopAnimating()
-    }
 }
 //MARK: - private functions
 extension DBYOfflineController: DBYOfflinePlayBackManagerDelegate {
@@ -152,18 +144,19 @@ extension DBYOfflineController: DBYBottomBarDelegate {
             offlineManager.play()
         }
     }
-    
+    func progressWillChange(owner: DBYBottomBar, value: Float) {
+        mainView.stopTimer()
+    }
     func progressDidChange(owner: DBYBottomBar, value: Float) {
-        mainView.stopHiddenTimer()
         beginInteractive = true
         timeTipLab.isHidden = false
         timeTipLab.text = String.playTime(time:Int(value))
         timeTipLab.sizeToFit()
         mainView.bottomBar.set(time: TimeInterval(value))
     }
-    
+
     func progressEndChange(owner: DBYBottomBar, value: Float) {
-        mainView.startHiddenTimer()
+        mainView.startTimer()
         beginInteractive = false
         timeTipLab.isHidden = true
         indicator.isHidden = false

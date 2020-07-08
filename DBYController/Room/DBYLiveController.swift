@@ -77,9 +77,9 @@ public class DBYLiveController: DBY1VNController {
     
     var roomConfig: DBYRoomConfig?
     var sensitiveWords: [String]?
-    var animationTimer: Timer?
+    weak var animationTimer: ZFTimer?
+    weak var zanTimer:ZFTimer?
     var questions: [[String:Any]]?
-    var zanTimer:Timer?
     
     //MARK: - override functions
     override public func viewDidLoad() {
@@ -127,10 +127,9 @@ public class DBYLiveController: DBY1VNController {
         mainView.videoView.startLoading()
         enterRoom()
     }
-    public override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        stopTimer()
-        stopZanTimer()
+    deinit {
+        animationTimer?.stopTimer()
+        zanTimer?.stopTimer()
     }
     override func addSubviews() {
         super.addSubviews()
@@ -431,14 +430,19 @@ public class DBYLiveController: DBY1VNController {
         guard let mq = roomConfig?.marquee else {
             return
         }
-        let width:CGFloat = mq.content?.width(withMaxHeight: 30, font: UIFont.systemFont(ofSize: 20)) ?? 40
+        guard let content = mq.content else {
+            return
+        }
+        let width:CGFloat = content.width(withMaxHeight: 30, font: UIFont.systemFont(ofSize: 20))
         let x:CGFloat = 0
         let y:CGFloat = CGFloat(mq.regionMin) / 100.0 * mainView.frame.height
         marqueeView.frame = CGRect(x: x, y: y, width: width, height: 30)
         mainView.bringSubviewToFront(marqueeView)
         marqueeView.set(marquee: mq)
-        stopTimer()
-        startTimer()
+        animationTimer?.stopTimer()
+        animationTimer = ZFTimer.startTimer(interval: 1, repeats: true) {[weak self] in
+            self?.updateAnimation()
+        }
     }
     func showExtendView() {
         guard let extends = roomConfig?.extends else {
@@ -475,22 +479,6 @@ public class DBYLiveController: DBY1VNController {
     func removeQustion(questionId: String) {
         questionView.remove(questionId: questionId)
     }
-    func startTimer() {
-        let interval:TimeInterval = 1
-        let date:Date = Date(timeIntervalSinceNow: interval)
-        animationTimer = Timer(fireAt: date,
-                               interval: interval,
-                               target: self,
-                               selector: #selector(updateAnimation),
-                               userInfo: nil,
-                               repeats: true)
-        RunLoop.current.add(animationTimer!,
-                            forMode: RunLoop.Mode.default)
-    }
-    func stopTimer() {
-        animationTimer?.invalidate()
-        animationTimer = nil
-    }
     
     func send(message: String) {
         let chatDict:[String : Any] = [
@@ -512,7 +500,6 @@ public class DBYLiveController: DBY1VNController {
         }
     }
     //MARK: - objc functions
-    
     @objc func updateAnimation() {
         guard let mq = roomConfig?.marquee else {
             return
@@ -549,23 +536,15 @@ public class DBYLiveController: DBY1VNController {
         zanView.startAnimating()
         
         zanCount += 1
-        stopZanTimer()
-        startZanTimer()
-    }
-    func startZanTimer() {
-        zanTimer = Timer(timeInterval: 1, target: self, selector: #selector(updateZan), userInfo: nil, repeats: false)
-        RunLoop.main.add(zanTimer!, forMode: .common)
-    }
-    @objc func updateZan() {
-        liveManager.thumbsup(withCount: Int32(zanCount)) { (message) in
-            print(message ?? "updateZan")
+        zanTimer?.stopTimer()
+        zanTimer = ZFTimer.startTimer(interval: 1, repeats: false) {[weak self] in
+            self?.liveManager.thumbsup(withCount: Int32(self?.zanCount ?? 0)) { (message) in
+                print(message ?? "updateZan")
+            }
+            self?.zanCount = 0
         }
-        zanCount = 0
     }
-    func stopZanTimer() {
-        zanTimer?.invalidate()
-        zanTimer = nil
-    }
+    
     @objc func audioOnly(sender:UIButton) {
         sender.isSelected = !sender.isSelected
         if sender.isSelected {
@@ -924,7 +903,9 @@ extension DBYLiveController: DBYBottomBarDelegate {
             showVideoTipView()
         }
     }
-    
+    func progressWillChange(owner: DBYBottomBar, value: Float) {
+        
+    }
     func progressDidChange(owner: DBYBottomBar, value: Float) {
         
     }

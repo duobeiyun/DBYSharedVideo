@@ -88,6 +88,10 @@ class DBYHangUpView: DBYNibView {
     }
 }
 extension DBYHangUpView: DBYSliderDelegate {
+    func valueWillChange(owner: DBYSlider, value: Float) {
+        
+    }
+    
     func valueDidChange(owner: DBYSlider, value: Float) {
         
     }

@@ -15,11 +15,17 @@ public enum DBYBottomBarType:Int {
     case liveLandscape
     case playbackLandscape
 }
+public enum DBYPlayState {
+    case play
+    case pause
+    case end
+}
 protocol DBYBottomBarDelegate: NSObjectProtocol {
     func chatButtonClick(owner: DBYBottomBar)
     func voteButtonClick(owner: DBYBottomBar)
     func fullscreenButtonClick(owner: DBYBottomBar)
     func stateDidChange(owner: DBYBottomBar, state: DBYPlayState)
+    func progressWillChange(owner: DBYBottomBar, value:Float)
     func progressDidChange(owner: DBYBottomBar, value:Float)
     func progressEndChange(owner: DBYBottomBar, value:Float)
 }
@@ -151,11 +157,6 @@ class DBYBottomBar: DBYView {
     }
     @objc func playButtonClick() {
         playBtn.isSelected = !playBtn.isSelected
-//        if playBtn.isSelected {
-//            playState = .play
-//        } else {
-//            playState = .pause
-//        }
         delegate?.stateDidChange(owner: self, state: playState)
     }
     @objc func chatButtonClick() {
@@ -241,6 +242,10 @@ class DBYBottomBar: DBYView {
     }
 }
 extension DBYBottomBar: DBYSliderDelegate {
+    func valueWillChange(owner: DBYSlider, value: Float) {
+        delegate?.progressWillChange(owner: self, value: value)
+    }
+    
     func valueDidChange(owner: DBYSlider, value: Float) {
         delegate?.progressDidChange(owner: self, value: value)
     }

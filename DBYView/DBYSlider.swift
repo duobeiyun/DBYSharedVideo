@@ -9,6 +9,7 @@
 import UIKit
 
 protocol DBYSliderDelegate: NSObjectProtocol {
+    func valueWillChange(owner: DBYSlider, value:Float)
     func valueDidChange(owner: DBYSlider, value:Float)
     func valueEndChange(owner: DBYSlider, value:Float)
 }
@@ -43,6 +44,7 @@ class DBYSlider: UIView {
         switch tap.state {
         case .began:
             shouldUpdate = true
+            delegate?.valueWillChange(owner: self, value: value)
             break
         case .changed:
             if shouldUpdate == false {
@@ -109,7 +111,7 @@ class DBYSlider: UIView {
             progress = 0
         }
         let maxW:CGFloat = self.bounds.width - 8
-        let sliderMaxX:CGFloat = maxW - sliderBar.bounds.width
+        let sliderMaxX:CGFloat = self.bounds.width - sliderBar.bounds.width
         sliderLeft.constant = progress * sliderMaxX
         progressViewWidth.constant = progress * maxW
     }

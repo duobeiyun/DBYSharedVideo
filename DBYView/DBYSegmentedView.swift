@@ -12,6 +12,7 @@ class DBYSegmentedModel: NSObject {
     var displayWidth: CGFloat = 0
     var label: UILabel?
     var view: UIView?
+    var selected: Bool = false
 }
 protocol DBYSegmentedProtocol {
     func removeModel(model: DBYSegmentedModel)
@@ -33,7 +34,6 @@ class DBYSegmentedTitleView: UIScrollView {
     var hilightColor: UIColor = .lightGray
     var defaultColor: UIColor = .darkGray
     var indexChanged: ((Int)->())?
-    var scrollIndex:Int = 0
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -59,13 +59,19 @@ class DBYSegmentedTitleView: UIScrollView {
         
         contentWidth = 0
         for model in models {
-            if let label = model.label {
-                label.frame = CGRect(x: contentWidth, y: 0, width: model.displayWidth, height: bounds.height)
-                contentWidth += model.displayWidth
+            guard let label = model.label else {
+                return
             }
+            label.frame = CGRect(x: contentWidth, y: 0, width: model.displayWidth, height: bounds.height)
+            if model.selected {
+                let textWidth = label.text?.width(withMaxHeight: bounds.height, font: label.font) ?? 40
+                let barMinX = contentWidth + (model.displayWidth - textWidth) * 0.5
+                let barMinY = bounds.height - 12
+                barLayer.frame = CGRect(x: barMinX, y: barMinY, width: textWidth, height: 4)
+            }
+            contentWidth += model.displayWidth
         }
         contentSize = CGSize(width: contentWidth, height: bounds.height)
-        updateBarFrame()
     }
     @objc private func tap(ges: UITapGestureRecognizer) {
         let location = ges.location(in: self)
@@ -107,13 +113,11 @@ class DBYSegmentedTitleView: UIScrollView {
     public func removeModel(at index: Int) {
         let model = models.remove(at: index)
         removeModel(model: model)
-        scrollToIndex(index: index - 1)
     }
     public func scrollToIndex(index: Int) {
         if index >= models.count {
             return
         }
-        scrollIndex = index
         //取消选中
         preModel?.label?.textColor = defaultColor
         //选中的label
@@ -148,20 +152,6 @@ class DBYSegmentedTitleView: UIScrollView {
         let offset = CGPoint(x: diff, y: 0)
         setContentOffset(offset, animated: true)
     }
-    func updateBarFrame() {
-        let model = models[scrollIndex]
-        guard let label = model.label else {
-            return
-        }
-        let textWidth = label.text?.width(withMaxHeight: bounds.height, font: label.font) ?? 0
-        let minX = CGFloat(scrollIndex) * model.displayWidth
-        let barMinX = minX + (model.displayWidth - textWidth) * 0.5
-        let barMinY = bounds.height - 12
-        barLayer.frame = CGRect(x: barMinX, y: barMinY, width: textWidth, height: 4)
-    }
-    func updateOffset() {
-        
-    }
 }
 class DBYSegmentedContainerView: UIScrollView {
     lazy var models:[DBYSegmentedModel] = [DBYSegmentedModel]()
@@ -175,21 +165,14 @@ class DBYSegmentedContainerView: UIScrollView {
                 contentOffset += bounds.width
             }
         }
-        contentSize = CGSize(width: contentOffset, height: bounds.height)
-    }
-    private func removeModel(model: DBYSegmentedModel) {
-        if let view = model.view {
-            view.removeFromSuperview()
-        }
     }
     public func appendModel(model: DBYSegmentedModel) {
-        if models.contains(model) {
-            return
-        }
         models.append(model)
         if let view = model.view {
             addSubview(view)
         }
+        let count = models.count
+        contentSize = CGSize(width: CGFloat(count) * bounds.width, height: bounds.height)
     }
     public func appendModels(models: [DBYSegmentedModel]) {
         for model in models {
@@ -202,8 +185,9 @@ class DBYSegmentedContainerView: UIScrollView {
     }
     public func removeModel(at index: Int) {
         let model = models.remove(at: index)
-        removeModel(model: model)
-        scrollToIndex(index: index - 1)
+        model.view?.removeFromSuperview()
+        let count = models.count
+        contentSize = CGSize(width: CGFloat(count) * bounds.width, height: bounds.height)
     }
     public func scrollToIndex(index: Int) {
         if index >= models.count {
@@ -244,6 +228,7 @@ class DBYSegmentedView: UIView {
         }
     }
     var titleViewHeight:CGFloat = 44
+    var scrollIndex:Int = 0
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -297,18 +282,22 @@ class DBYSegmentedView: UIView {
     public func removeData(at index: Int) {
         titleView?.removeModel(at: index)
         containerView?.removeModel(at: index)
+        let count = titleView?.models.count ?? 0
+        if scrollIndex >= count {
+            scrollToIndex(index: count - 1)
+        }
     }
     public func removeData(with title: String) {
         let count = titleView?.models.count ?? 0
         for i in (0..<count).reversed() {
             let model = titleView?.models[i]
             if model?.label?.text == title {
-                titleView?.removeModel(at: i)
-                containerView?.removeModel(at: i)
+                removeData(at: i)
             }
         }
     }
     public func scrollToIndex(index: Int) {
+        scrollIndex = index
         titleView?.scrollToIndex(index: index)
         containerView?.scrollToIndex(index: index)
     }
@@ -321,13 +310,13 @@ extension DBYSegmentedView: UIScrollViewDelegate {
         scrollViewDidEndScroll(scrollView)
     }
     func scrollViewDidEndScroll(_ scrollView: UIScrollView) {
+        let index = Int(scrollView.contentOffset.x / scrollView.bounds.width)
         if scrollView == containerView {
-            let index = Int(scrollView.contentOffset.x / scrollView.bounds.width)
             titleView?.scrollToIndex(index: index)
         }
         if scrollView == titleView {
-            let index = Int(scrollView.contentOffset.x / scrollView.bounds.width)
             containerView?.scrollToIndex(index: index)
         }
+        scrollIndex = index
     }
 }
