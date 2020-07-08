@@ -124,13 +124,13 @@ class DBYBottomBar: DBYView {
         }
         if barType == .playback {
             slederFrame = CGRect(x: btnWidth + 8,
-                                 y: 0,
+                                 y: size.height - 4 - btnWidth,
                                  width: size.width - 96 - timeWidth,
-                                 height: size.height)
+                                 height: btnWidth)
             timeLabFrame = CGRect(x: slederFrame.maxX,
-                                  y: 0,
+                                  y: size.height - 4 - btnWidth,
                                   width: timeWidth,
-                                  height: size.height)
+                                  height: btnWidth)
         }
         gradientLayer.frame = bounds
         playBtn.frame = CGRect(x: 8,

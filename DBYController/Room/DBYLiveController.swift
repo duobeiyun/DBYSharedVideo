@@ -11,10 +11,6 @@ import WebKit
 import DBYSDK_dylib
 
 public class DBYLiveController: DBY1VNController {
-    var chatBarFrame: CGRect = .zero
-    var hangUpViewFrame: CGRect = .zero
-    var micListViewFrame: CGRect = .zero
-    var forbiddenBtnFrame: CGRect = .zero
     var announcementViewFrame: CGRect = .zero
     var tipViewSafeSize: CGSize = CGSize(width: 0, height: -44)
     var tipViewPosition: DBYTipView.Position = [.bottom, .center]
@@ -93,7 +89,6 @@ public class DBYLiveController: DBY1VNController {
         chatBar.delegate = self
         micListView.delegate = self
         hangUpView.delegate = self
-        mainView.delegate = self
         mainView.topBarDelegate = self
         mainView.bottomBarDelegate = self
         settingView.delegate = self
@@ -132,12 +127,10 @@ public class DBYLiveController: DBY1VNController {
         mainView.videoView.startLoading()
         enterRoom()
     }
-    public override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-    }
-    deinit {
-        print("---deinit", type(of: self))
-        NotificationCenter.default.removeObserver(self)
+    public override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        stopTimer()
+        stopZanTimer()
     }
     override func addSubviews() {
         super.addSubviews()
@@ -186,7 +179,7 @@ public class DBYLiveController: DBY1VNController {
             model.view = v
             models.append(model)
         }
-        segmentedView.appendData(models: models)
+        segmentedView.appendDatas(models: models)
         
         chatBar.emojiImageDict = emojiImageDict
         chatBar.backgroundColor = UIColor.white
@@ -351,7 +344,6 @@ public class DBYLiveController: DBY1VNController {
         isHandsup = false
     }
     func clearChatMessage() {
-        cellHeightCache.removeAll()
         chatListView.clearAll()
     }
     func showChatView() {
@@ -368,7 +360,7 @@ public class DBYLiveController: DBY1VNController {
         model.displayWidth = 60
         model.label = label
         model.view = voteView
-        segmentedView.appendData(models: [model])
+        segmentedView.appendData(model: model)
     }
     func hiddenVoteView() {
         if voteView.delegate == nil {
@@ -376,7 +368,7 @@ public class DBYLiveController: DBY1VNController {
         }
         voteView.delegate = nil
         mainView.bottomBar.hiddenVoteButton()
-        segmentedView.removeLastData()
+        segmentedView.removeData(with: "答题")
     }
     func showVoteView() {
         segmentedView.scrollToIndex(index: 0)
@@ -469,7 +461,7 @@ public class DBYLiveController: DBY1VNController {
             }
             model.displayWidth = 60
             model.label = label
-            segmentedView.appendData(models: [model])
+            segmentedView.appendData(model: model)
         }
         segmentedView.scrollToIndex(index: 0)
     }
@@ -689,7 +681,7 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         showVoteView(title: "答题", votes: votes)
     }
     public func liveManagerShouldStopVote(_ manager: DBYLiveManager!) {
-        
+        segmentedView.removeData(with: "答题")
     }
     public func liveManagerShouldHideVote(_ manager: DBYLiveManager!) {
         hiddenVoteView()
@@ -904,33 +896,6 @@ extension DBYLiveController: DBYMicListViewDelegate {
             hangUpView.isHidden = !showMicList
         }
         updateMicListViewFrame()
-    }
-}
-//MARK: - DBYMainViewDelegate
-extension DBYLiveController: DBYMainViewDelegate {
-    func volumeChange(owner: DBYMainView, volume: CGFloat) {
-        
-    }
-    
-    func lightnessChange(owner: DBYMainView, volume: CGFloat) {
-        
-    }
-    
-    func tapGesture(owner: DBYMainView, isSelected: Bool) {
-        
-    }
-    
-    func willHiddenControlBar(owner: DBYMainView) {
-        if isPortrait() {
-            return
-        }
-        segmentedView.isHidden = true
-    }
-    func willShowControlBar(owner: DBYMainView) {
-        if isPortrait() {
-            return
-        }
-        segmentedView.isHidden = false
     }
 }
 //MARK: - DBYBottomBarDelegate

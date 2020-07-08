@@ -10,14 +10,12 @@ import UIKit
 import DBYSDK_dylib
 
 public class DBYOfflineController: DBYPlaybackController {
-    
     @objc public var roomID:String?
     @objc public var offlineKey:String?
     @objc public var classFilePath:String?
     @objc public var hasVideo:Bool = false
     
     lazy var offlineManager = DBYOfflinePlayBackManager()
-    var chatInfoList:[DBYChatEventInfo] = [DBYChatEventInfo]()
     
     //MARK: - override functions
     override public func viewDidLoad() {
@@ -26,11 +24,13 @@ public class DBYOfflineController: DBYPlaybackController {
         weak var weakSelf = self
         
         settingView.delegate = self
+        mainView.topBarDelegate = self
+        mainView.bottomBarDelegate = self
         
         if authinfo?.classType == .sharedVideo {
-            offlineManager.setSharedVideoView(mainView)
+            offlineManager.setSharedVideoView(mainView.videoView)
         }else {
-            offlineManager.setTeacherViewWith(mainView)
+            offlineManager.setTeacherViewWith(mainView.videoView)
         }
         offlineManager.setStudentViewWith(UIView())
         offlineManager.delegate = self
@@ -56,18 +56,6 @@ public class DBYOfflineController: DBYPlaybackController {
         super.setupStaticUI()
         mainView.topBar.set(title)
         courseInfoView.set(title: title)
-    }
-    override func setupLandscapeUI() {
-        super.setupLandscapeUI()
-        
-    }
-    override func setupPortraitUI() {
-        super.setupPortraitUI()
-        
-    }
-    override func setViewStyle() {
-        super.setViewStyle()
-        
     }
     override func goBack() {
         if isPortrait() {
@@ -102,19 +90,19 @@ extension DBYOfflineController: DBYOfflinePlayBackManagerDelegate {
         
     }
     public func offlinePlayBackManager(_ manager: DBYOfflinePlayBackManager!, hasNewChatMessageWithChatArray newChatDictArray: [Any]!) {
-        if let chatDicts = newChatDictArray as? [DBYChatEventInfo] {
-            chatInfoList += chatDicts
-            let maxCount = chatInfoList.count - 1000
-            if maxCount > 0 {
-                for _ in 0..<maxCount {
-                    chatInfoList.removeFirst()
-                }
-            }
+        guard let chatInfos = newChatDictArray as? [DBYChatEventInfo] else {
+            return
         }
+        var chatDicts = [[String:Any]]()
+        for info in chatInfos {
+            chatDicts.append(info.jsonObject() as! [String : Any])
+        }
+        
+        chatListView.appendChats(array:chatDicts)
     }
     
     public func offlinePlayBackManagerChatMessageShouldClear(_ manager: DBYOfflinePlayBackManager!) {
-        chatInfoList.removeAll()
+        chatListView.clearAll()
         chatListView.reloadData()
     }
     public func offlinePlayBackManager(_ manager: DBYOfflinePlayBackManager!, isPlayingAtProgress progress: Float, time: TimeInterval) {

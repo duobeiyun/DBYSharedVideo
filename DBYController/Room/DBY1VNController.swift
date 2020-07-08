@@ -59,8 +59,6 @@ public class DBY1VNController: UIViewController {
     var isStoping: Bool = false
     
     lazy var videoDict = [String: DBYStudentVideoView]()
-    //缓存高度字典
-    lazy var cellHeightCache:[Int: CGFloat] = [Int: CGFloat]()
     
     lazy var mainView = DBYMainView()
     lazy var chatContainer = DBYChatContainer()
@@ -116,15 +114,14 @@ public class DBY1VNController: UIViewController {
                                                selector: #selector(volumeChange(notification:)),
                                                name: volumeChangeNotification,
                                                object: nil)
-        
+        mainView.delegate = self
         addSubviews()
+        setViewStyle()
         addActions()
         setupOrientationUI()
         setViewStyle()
         setupStaticUI()
         internetReachability?.startNotifier()
-        
-        setViewStyle()
     }
     public override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
@@ -135,7 +132,6 @@ public class DBY1VNController: UIViewController {
         weak var weakSelf = self
         coordinator.animate(alongsideTransition: { (context) in
             weakSelf?.setupOrientationUI()
-            weakSelf?.cellHeightCache.removeAll()
             weakSelf?.chatListView.reloadData()
         }) { (context) in
 
@@ -345,5 +341,32 @@ public class DBY1VNController: UIViewController {
     func cancelOpenCamera() {
     }
     func closeCamera() {
+    }
+}
+//MARK: - DBYMainViewDelegate
+extension DBY1VNController: DBYMainViewDelegate {
+    func volumeChange(owner: DBYMainView, volume: CGFloat) {
+        
+    }
+    
+    func lightnessChange(owner: DBYMainView, volume: CGFloat) {
+        
+    }
+    
+    func tapGesture(owner: DBYMainView, isSelected: Bool) {
+        
+    }
+    
+    func willHiddenControlBar(owner: DBYMainView) {
+        if isPortrait() {
+            return
+        }
+        segmentedView.isHidden = true
+    }
+    func willShowControlBar(owner: DBYMainView) {
+        if isPortrait() {
+            return
+        }
+        segmentedView.isHidden = false
     }
 }

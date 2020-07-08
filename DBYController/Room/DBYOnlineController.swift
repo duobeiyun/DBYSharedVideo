@@ -26,9 +26,9 @@ public class DBYOnlineController: DBYPlaybackController {
         weak var weakSelf = self
         
         if authinfo?.classType == .sharedVideo {
-            playbackManager.setSharedVideoView(mainView)
+            playbackManager.setSharedVideoView(mainView.videoView)
         }else {
-            playbackManager.setTeacherViewWith(mainView)
+            playbackManager.setTeacherViewWith(mainView.videoView)
         }
         playbackManager.delegate = self
         playbackManager.setPPTViewBackgroundImage(UIImage(name: "black-board"))
@@ -175,7 +175,6 @@ public class DBYOnlineController: DBYPlaybackController {
         super.settingClick()
     }
     func clearChatMessage() {
-        cellHeightCache.removeAll()
         chatListView.clearAll()
     }
     @objc func pauseApi() {
