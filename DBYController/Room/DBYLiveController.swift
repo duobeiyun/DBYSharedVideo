@@ -756,7 +756,7 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         self.interactionView.set(models: list, for: type)
     }
     public func willReceivedVideoData(_ liveManager: DBYLiveManager!, userId uid: String!) {
-        if uid == authinfo?.teacherId {
+        if uid == authinfo?.teacherId || uid == liveManager.assitantId {
             return
         }
         let videoView = createVideoView(uid: uid)
