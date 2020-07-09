@@ -77,7 +77,7 @@ public class DBYPlaybackController: DBY1VNController {
             
             let titleWidth = title.width(withMaxHeight: 44, font: l.font) * 2
             
-            model.displayWidth = 60
+            model.labelWidth = 60
             model.label = l
             model.view = v
             models.append(model)

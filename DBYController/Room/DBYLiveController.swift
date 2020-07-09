@@ -118,7 +118,6 @@ public class DBYLiveController: DBY1VNController {
                 self.questionView.roomConfig = roomConfig
                 self.showMarqueeView()
                 self.showExtendView()
-                self.setupVideoButton()
             }
         }
         let oneTap = UITapGestureRecognizer(target: self,
@@ -173,7 +172,7 @@ public class DBYLiveController: DBY1VNController {
             let title = dict["title"] as! String
             let label = segmentedTitleLabel(title: title)
             let v = dict["view"] as! UIView
-            model.displayWidth = 60
+            model.labelWidth = 60
             model.label = label
             model.view = v
             models.append(model)
@@ -183,8 +182,6 @@ public class DBYLiveController: DBY1VNController {
         chatBar.emojiImageDict = emojiImageDict
         chatBar.backgroundColor = UIColor.white
         forbiddenButton.isHidden = true
-        let volume = DBYSystemControl.shared.getVolume()
-        hangUpView.setProgress(value: volume)
         forbiddenButton.titleLabel?.font = UIFont.systemFont(ofSize: 15)
         forbiddenButton.setTitle(" 已开启全体禁言", for: .normal)
         zanButton.setImage(UIImage(name: "greate-icon"), for: .normal)
@@ -232,6 +229,8 @@ public class DBYLiveController: DBY1VNController {
         let chatBarHeight = 44 + edge.bottom
         let chatListViewHeight = segmentedView.portraitFrame.height - chatBarHeight - segmentedView.titleViewHeight
         let hangUpViewMinX = 60 + tipViewHeight + 8
+        let fbly = segmentedView.landscapeFrame.height - segmentedView.titleViewHeight - 24 - edge.bottom
+        let fblx = (segmentedView.landscapeFrame.width - 160) * 0.5
         
         tipViewSafeSize = CGSize(width: 0, height: -60 - edge.bottom)
         
@@ -247,8 +246,8 @@ public class DBYLiveController: DBY1VNController {
         inputButton.portraitFrame = .zero
         inputButton.landscapeFrame = CGRect(x: 10, y: size.width - 24 - edge.bottom, width: 84, height: 24)
         
-        forbiddenButton.portraitFrame = CGRect(x: 4, y: segmentedView.portraitFrame.height - 44 - edge.bottom, width: segmentedView.portraitFrame.width - 8, height: 44)
-        forbiddenButton.landscapeFrame = CGRect(x: (segmentedView.landscapeFrame.width - 160) * 0.5, y: segmentedView.landscapeFrame.height - 24 - edge.bottom, width: 160, height: 24)
+        forbiddenButton.portraitFrame = CGRect(x: 4, y: chatListViewHeight, width: segmentedView.portraitFrame.width - 8, height: 44)
+        forbiddenButton.landscapeFrame = CGRect(x: fblx, y: fbly, width: 160, height: 24)
         
         hangUpView.portraitFrame = CGRect(x: size.width - 200, y: segmentedView.portraitFrame.minY + hangUpViewMinX, width: 200, height: tipViewHeight)
         hangUpView.landscapeFrame = CGRect(x: size.width - 200, y: hangUpViewMinX, width: 200, height: tipViewHeight)
@@ -356,7 +355,7 @@ public class DBYLiveController: DBY1VNController {
         
         let model = DBYSegmentedModel()
         let label = segmentedTitleLabel(title: title)
-        model.displayWidth = 60
+        model.labelWidth = 60
         model.label = label
         model.view = voteView
         segmentedView.appendData(model: model)
@@ -416,16 +415,6 @@ public class DBYLiveController: DBY1VNController {
         watermarkView.set(watermark: wk)
         mainView.bringSubviewToFront(watermarkView)
     }
-    func setupVideoButton() {
-        let studentVideo = roomConfig?.studentVideo
-        guard let disable = studentVideo?["disabled"] as? Bool else {
-            return
-        }
-        if disable {
-            return
-        }
-        
-    }
     func showMarqueeView() {
         guard let mq = roomConfig?.marquee else {
             return
@@ -456,14 +445,15 @@ public class DBYLiveController: DBY1VNController {
             if extend.type == .diy {
                 let webview = WKWebView()
                 webview.backgroundColor = UIColor.white
-                webview.loadHTMLString(extend.content ?? "", baseURL: nil)
+                let header = "<header><meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no'><style>img{max-width:100%}</style></header>";
+                webview.loadHTMLString(header + (extend.content ?? ""), baseURL: nil)
                 model.view = webview
             }
             if extend.type == .qa {
                 questionView.backgroundColor = UIColor.white
                 model.view = questionView
             }
-            model.displayWidth = 60
+            model.labelWidth = 60
             model.label = label
             segmentedView.appendData(model: model)
         }
@@ -518,6 +508,9 @@ public class DBYLiveController: DBY1VNController {
         marqueeView.frame = marqueeView.frame.offsetBy(dx: deltaX, dy: deltaY)
     }
     @objc func showChatBar() {
+        if !forbiddenButton.isHidden {
+            return
+        }
         inputVC.modalPresentationStyle = .custom
         inputVC.modalTransitionStyle = .crossDissolve
 
