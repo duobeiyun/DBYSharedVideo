@@ -19,8 +19,8 @@ public class DBYOnlineController: DBYPlaybackController {
         super.viewDidLoad()
         
         netTipView.delegate = self
-        mainView.topBarDelegate = self
-        mainView.bottomBarDelegate = self
+        topBar.delegate = self
+        bottomBar.delegate = self
         settingView.delegate = self
         
         weak var weakSelf = self
@@ -105,11 +105,11 @@ public class DBYOnlineController: DBYPlaybackController {
     }
     override func setupLandscapeUI() {
         super.setupLandscapeUI()
-        mainView.topBar.set(type: .landscape)
+        topBar.set(type: .landscape)
     }
     override func setupPortraitUI() {
         super.setupPortraitUI()
-        mainView.topBar.set(type: .portrait)
+        topBar.set(type: .portrait)
     }
     override func setViewStyle() {
         super.setViewStyle()
@@ -196,9 +196,9 @@ extension DBYOnlineController:DBYOnlinePlayBackManagerDelegate {
     }
     public func playbackManager(_ manager: DBYOnlinePlayBackManager!, playStateChange isPlaying: Bool) {
         if isPlaying {
-            mainView.bottomBar.set(state: .play)
+            bottomBar.set(state: .play)
         }else {
-            mainView.bottomBar.set(state: .pause)
+            bottomBar.set(state: .pause)
         }
     }
     public func playbackManager(_ manager: DBYOnlinePlayBackManager!, hasNewChatMessageWithChatArray newChatDictArray: [Any]!) {
@@ -211,17 +211,17 @@ extension DBYOnlineController:DBYOnlinePlayBackManagerDelegate {
         chatListView.clearAll()
     }
     public func playBackManager(_ manager: DBYOnlinePlayBackManager!, totalTime time: TimeInterval) {
-        mainView.bottomBar.set(totalTime: time)
+        bottomBar.set(totalTime: time)
     }
     public func playBackManager(_ manager: DBYOnlinePlayBackManager!, playedAtTime time: TimeInterval) {
         setupNowPlaying()
         if beginInteractive {
             return
         }
-        mainView.bottomBar.set(time: time)
+        bottomBar.set(time: time)
     }
     public func playbackManagerDidPlayEnd(_ manager: DBYOnlinePlayBackManager!) {
-        mainView.bottomBar.set(state: .end)
+        bottomBar.set(state: .end)
     }
     public func playbackManager(_ manager: DBYOnlinePlayBackManager!, hasVideo: Bool, in view: UIView!) {
         
@@ -278,7 +278,7 @@ extension DBYOnlineController: DBYBottomBarDelegate {
         timeTipLab.isHidden = false
         timeTipLab.text = String.playTime(time:Int(value))
         timeTipLab.sizeToFit()
-        mainView.bottomBar.set(time: TimeInterval(value))
+        bottomBar.set(time: TimeInterval(value))
     }
     
     func progressEndChange(owner: DBYBottomBar, value: Float) {
@@ -287,12 +287,12 @@ extension DBYOnlineController: DBYBottomBarDelegate {
         timeTipLab.isHidden = true
         
         mainView.videoView.startLoading()
-        playbackManager.seekToTime(with: TimeInterval(value), completeHandler: { message in
+        playbackManager.seekToTime(with: TimeInterval(value), completeHandler: { [weak self] message in
             if let msg = message {
                 DBYGlobalMessage.shared().showText(msg)
             }
-            self.mainView.videoView.stopLoading()
-            self.mainView.bottomBar.set(state: .play)
+            self?.mainView.videoView.stopLoading()
+            self?.bottomBar.set(state: .play)
         })
     }
 }

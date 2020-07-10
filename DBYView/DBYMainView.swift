@@ -17,19 +17,7 @@ protocol DBYMainViewDelegate: NSObjectProtocol {
 
 class DBYMainView: DBYView {
     weak var delegate:DBYMainViewDelegate?
-    weak var bottomBarDelegate:DBYBottomBarDelegate? {
-        didSet {
-            bottomBar.delegate = bottomBarDelegate
-        }
-    }
-    weak var topBarDelegate:DBYTopBarDelegate? {
-        didSet {
-            topBar.delegate = topBarDelegate
-        }
-    }
     
-    lazy var topBar:DBYTopBar = DBYTopBar()
-    lazy var bottomBar:DBYBottomBar = DBYBottomBar()
     lazy var videoView = DBYVideoView()
     lazy var volumeProgressView = DBYProgressView()
     lazy var brightnessProgressView = DBYProgressView()
@@ -43,8 +31,6 @@ class DBYMainView: DBYView {
     
     override func setupUI() {
         addSubview(videoView)
-        addSubview(topBar)
-        addSubview(bottomBar)
         addSubview(volumeProgressView)
         addSubview(brightnessProgressView)
         
@@ -56,14 +42,6 @@ class DBYMainView: DBYView {
         
         videoView.snp.makeConstraints { (make) in
             make.edges.equalTo(self)
-        }
-        topBar.snp.makeConstraints { (make) in
-            make.top.left.right.equalTo(0)
-            make.height.equalTo(60)
-        }
-        bottomBar.snp.makeConstraints { (make) in
-            make.bottom.left.right.equalTo(0)
-            make.height.equalTo(60)
         }
         volumeProgressView.snp.makeConstraints { (make) in
             make.bottom.right.equalTo(-10)
@@ -85,7 +63,6 @@ class DBYMainView: DBYView {
         addGestureRecognizer(pan)
     }
     @objc func oneTap(tap:UITapGestureRecognizer) {
-        
         if controlBarIsHidden {
             showControlBar()
         }else {
@@ -125,16 +102,12 @@ class DBYMainView: DBYView {
         voiceTimer?.stopTimer()
     }
     @objc func hiddenControlBar() {
-        topBar.isHidden = true
-        bottomBar.isHidden = true
         controlBarIsHidden = true
         delegate?.willHiddenControlBar(owner: self)
         stopTimer()
     }
     
     @objc func showControlBar() {
-        topBar.isHidden = false
-        bottomBar.isHidden = false
         controlBarIsHidden = false
         delegate?.willShowControlBar(owner: self)
         stopTimer()

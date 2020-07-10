@@ -45,13 +45,9 @@ public class DBYPlaybackController: DBY1VNController {
         view.addSubview(indicator)
         chatContainer.addSubview(chatListView)
     }
-    override func addActions() {
-        super.addActions()
-        
-    }
     override func setupStaticUI() {
         super.setupStaticUI()
-        mainView.topBar.set(authinfo?.courseTitle)
+        topBar.set(authinfo?.courseTitle)
         settingView.set(speeds: playRateTitles)
         courseInfoView.set(title: authinfo?.courseTitle)
         
@@ -88,11 +84,11 @@ public class DBYPlaybackController: DBY1VNController {
     
     override func setupPortraitUI() {
         super.setupPortraitUI()
-        mainView.bottomBar.set(type: .playback)
+        bottomBar.set(type: .playback)
     }
     override func setupLandscapeUI() {
         super.setupLandscapeUI()
-        mainView.bottomBar.set(type: .playbackLandscape)
+        bottomBar.set(type: .playbackLandscape)
     }
     override func setViewStyle() {
         super.setViewStyle()

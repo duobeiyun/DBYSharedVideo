@@ -24,8 +24,8 @@ public class DBYOfflineController: DBYPlaybackController {
         weak var weakSelf = self
         
         settingView.delegate = self
-        mainView.topBarDelegate = self
-        mainView.bottomBarDelegate = self
+        topBar.delegate = self
+        bottomBar.delegate = self
         
         if authinfo?.classType == .sharedVideo {
             offlineManager.setSharedVideoView(mainView.videoView)
@@ -45,7 +45,7 @@ public class DBYOfflineController: DBYPlaybackController {
                 return
             }
             let totalTime = weakSelf?.offlineManager.lessonLength() ?? 0
-            weakSelf?.mainView.bottomBar.set(totalTime: totalTime)
+            weakSelf?.bottomBar.set(totalTime: totalTime)
             weakSelf?.offlineManager.seek(toTime: 10)
         }
     }
@@ -54,7 +54,7 @@ public class DBYOfflineController: DBYPlaybackController {
     }
     override func setupStaticUI() {
         super.setupStaticUI()
-        mainView.topBar.set(title)
+        topBar.set(title)
         courseInfoView.set(title: title)
     }
     override func goBack() {
@@ -73,9 +73,9 @@ extension DBYOfflineController: DBYOfflinePlayBackManagerDelegate {
     }
     public func offlinePlayBackManager(_ manager: DBYOfflinePlayBackManager!, playStateIsPlaying isPlaying: Bool) {
         if isPlaying {
-            mainView.bottomBar.set(state: .play)
+            bottomBar.set(state: .play)
         }else {
-            mainView.bottomBar.set(state: .pause)
+            bottomBar.set(state: .pause)
         }
     }
     public func offlinePlayBackManager(_ manager: DBYOfflinePlayBackManager!, hasVideo: Bool, in view: UIView!) {
@@ -101,11 +101,11 @@ extension DBYOfflineController: DBYOfflinePlayBackManagerDelegate {
         if beginInteractive {
             return
         }
-        mainView.bottomBar.set(time: time)
+        bottomBar.set(time: time)
     }
     public func offlinePlayBackManagerFinishedPlay(_ manager: DBYOfflinePlayBackManager!) {
-        mainView.bottomBar.set(time: 0)
-        mainView.bottomBar.set(state: .end)
+        bottomBar.set(time: 0)
+        bottomBar.set(state: .end)
     }
 }
 //MARK: - DBYTopBarDelegate
@@ -152,7 +152,7 @@ extension DBYOfflineController: DBYBottomBarDelegate {
         timeTipLab.isHidden = false
         timeTipLab.text = String.playTime(time:Int(value))
         timeTipLab.sizeToFit()
-        mainView.bottomBar.set(time: TimeInterval(value))
+        bottomBar.set(time: TimeInterval(value))
     }
 
     func progressEndChange(owner: DBYBottomBar, value: Float) {

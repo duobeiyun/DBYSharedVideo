@@ -60,6 +60,9 @@ public class DBY1VNController: UIViewController {
     
     lazy var videoDict = [String: DBYStudentVideoView]()
     
+    lazy var topBar:DBYTopBar = DBYTopBar()
+    lazy var bottomBar:DBYBottomBar = DBYBottomBar()
+    
     lazy var mainView = DBYMainView()
     lazy var chatContainer = DBYChatContainer()
     lazy var courseInfoView = DBYCourseInfoView()
@@ -143,6 +146,8 @@ public class DBY1VNController: UIViewController {
     //MARK: - private functions
     func addSubviews() {
         view.addSubview(mainView)
+        view.addSubview(topBar)
+        view.addSubview(bottomBar)
         view.addSubview(segmentedView)
         view.addSubview(settingView)
     }
@@ -169,8 +174,10 @@ public class DBY1VNController: UIViewController {
         settingView.isHidden = true
     }
     func setupPortraitUI() {
+        segmentedView.isHidden = false
     }
     func setupLandscapeUI() {
+        segmentedView.isHidden = true
     }
     func setupIphoneX() -> UIEdgeInsets {
         var iphoneXTop:CGFloat = 20
@@ -199,31 +206,37 @@ public class DBY1VNController: UIViewController {
         let segmentedViewHeight = size.height - segmentedViewMinX
         mainView.portraitFrame = CGRect(x: 0, y: edge.top, width: size.width, height: videoHeight)
         mainView.landscapeFrame = CGRect(x: edge.left, y: 0, width: size.height - edge.right, height: size.width)
+        
+        topBar.snp.makeConstraints { (make) in
+            make.top.left.right.equalTo(mainView)
+            make.height.equalTo(60)
+        }
+        bottomBar.snp.makeConstraints { (make) in
+            make.bottom.left.right.equalTo(mainView)
+            make.height.equalTo(60)
+        }
+        
         segmentedView.portraitFrame = CGRect(x: 0, y: segmentedViewMinX, width: size.width, height: segmentedViewHeight)
         segmentedView.landscapeFrame = CGRect(x: size.height - size.width - edge.right, y: -44, width: size.width, height: size.width + 44)
         
+        settingView.portraitFrame = segmentedView.portraitFrame
+        settingView.landscapeFrame = CGRect(x: size.height - size.width - edge.right, y: 0, width: size.width, height: size.width)
+        
         chatListView.setBackgroundColor(color: DBYStyle.lightGray, forState: .portrait)
         chatListView.setBackgroundColor(color: DBYStyle.lightAlpha, forState: .landscape)
+        
+        settingView.setBackgroundColor(color: DBYStyle.lightGray, forState: .portrait)
+        settingView.setBackgroundColor(color: DBYStyle.lightAlpha, forState: .landscape)
     }
 
     func showSettingView() {
         UIView.animate(withDuration: 0.25) {
             self.settingView.isHidden = false
-            self.settingView.frame = self.largePopViewFrame
         }
     }
     func hiddenSettingView() {
-        let size = view.bounds.size
-        var rect:CGRect = .zero
-        if isPortrait() {
-            rect = CGRect(x: 0, y: size.height, width: size.width, height: 0)
-        }
-        if isLandscape() {
-            rect = CGRect(x: size.width, y: 0, width: 0, height: size.height)
-        }
         UIView.animate(withDuration: 0.25) {
             self.settingView.isHidden = true
-            self.settingView.frame = rect
         }
     }
     func settingClick() {
@@ -241,6 +254,8 @@ public class DBY1VNController: UIViewController {
         UIDevice.current.setValue(UIDeviceOrientation.portrait.rawValue, forKey: "orientation")
     }
     func showVideoTipView() {
+        videoTipView.frame = mainView.bounds
+        videoTipView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         mainView.addSubview(videoTipView)
     }
     func hiddenVideoTipView() {
@@ -353,19 +368,28 @@ extension DBY1VNController: DBYMainViewDelegate {
     }
     
     func tapGesture(owner: DBYMainView, isSelected: Bool) {
-        
-    }
-    
-    func willHiddenControlBar(owner: DBYMainView) {
+        if !topBar.isHidden {
+            return
+        }
         if isPortrait() {
             return
         }
         segmentedView.isHidden = true
+        settingView.isHidden = true
     }
-    func willShowControlBar(owner: DBYMainView) {
+    
+    func willHiddenControlBar(owner: DBYMainView) {
+        topBar.isHidden = true
+        bottomBar.isHidden = true
         if isPortrait() {
             return
         }
-        segmentedView.isHidden = false
+    }
+    func willShowControlBar(owner: DBYMainView) {
+        topBar.isHidden = false
+        bottomBar.isHidden = false
+        if isPortrait() {
+            return
+        }
     }
 }

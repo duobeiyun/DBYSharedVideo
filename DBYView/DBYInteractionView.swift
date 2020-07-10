@@ -15,6 +15,7 @@ protocol DBYInteractionViewDelegate: NSObjectProtocol {
     func switchInteraction(owner: DBYInteractionView, type: DBYInteractionType)
     func closeInteraction(owner: DBYInteractionView, type: DBYInteractionType)
     func interactionAlert(owner: DBYInteractionView, message: String)
+    func waittingForVideo(owner: DBYInteractionView, count: Int)
 }
 class DBYInteractionInfo {
     var type: DBYInteractionType
@@ -168,6 +169,7 @@ class DBYInteractionView: DBYNibView {
         }
         tableView.reloadData()
         
+        delegate?.waittingForVideo(owner: self, count: inqueueCount)
         //被邀请上台或上麦
         if userModel != nil && userModel?.state == .inqueue && currentInfo.state == .normal {
             delegate?.receiveInteraction(owner: self, state: .inqueue, type: type, model: userModel)
