@@ -166,10 +166,10 @@ class DBYInteractionView: DBYNibView {
         }
         if type == .video {
             label.text = "前方还有\(inqueueCount)人正在等待上台"
+            delegate?.waittingForVideo(owner: self, count: inqueueCount)
         }
         tableView.reloadData()
         
-        delegate?.waittingForVideo(owner: self, count: inqueueCount)
         //被邀请上台或上麦
         if userModel != nil && userModel?.state == .inqueue && currentInfo.state == .normal {
             delegate?.receiveInteraction(owner: self, state: .inqueue, type: type, model: userModel)
