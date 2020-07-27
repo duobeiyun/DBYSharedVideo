@@ -44,13 +44,14 @@ class DBYMainView: DBYView {
             make.edges.equalTo(self)
         }
         volumeProgressView.snp.makeConstraints { (make) in
-            make.bottom.right.equalTo(-10)
-            make.top.equalTo(10)
+            make.centerY.equalTo(self.snp_centerY)
+            make.right.equalTo(-10)
+            make.height.equalTo(150)
             make.width.equalTo(20)
         }
         brightnessProgressView.snp.makeConstraints { (make) in
-            make.bottom.equalTo(-10)
-            make.left.top.equalTo(10)
+            make.centerY.equalTo(self.snp_centerY)
+            make.height.equalTo(150)
             make.width.equalTo(20)
         }
         let oneTap = UITapGestureRecognizer(target: self,
