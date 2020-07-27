@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name         = "DBYSharedVideo"
-  s.version      = "2.1.1"
+  s.version      = "2.1.3"
   s.summary      = "新版大班"
   s.description  = <<-DESC
 DBYSharedVideo主要是封装了直播和回放的界面，方便开发者快速对接自己的产品。主要特点是快速集成，不支持界面定制。
