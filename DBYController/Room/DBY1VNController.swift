@@ -47,7 +47,6 @@ public class DBY1VNController: UIViewController {
     let fromIdentifier: String = "DBYCommentFromCell"
     let toIdentifier: String = "DBYCommentToCell"
     let zanCell = "DBYZanCell"
-    var originTransform:CGAffineTransform = CGAffineTransform(scaleX: 1, y: 1)
     
     @objc public var authinfo: DBYAuthInfo?
     
@@ -99,6 +98,7 @@ public class DBY1VNController: UIViewController {
         navigationController?.setNavigationBarHidden(true, animated: animated)
         DBYSystemControl.shared.beginControl()
         mainView.showControlBar()
+        view.zf_layoutSubviews()
     }
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
@@ -125,10 +125,7 @@ public class DBY1VNController: UIViewController {
         setupStaticUI()
         internetReachability?.startNotifier()
     }
-    public override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        view.zf_layoutSubviews()
-    }
+    
     override public func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         mainView.showControlBar()
         weak var weakSelf = self
@@ -136,7 +133,8 @@ public class DBY1VNController: UIViewController {
             weakSelf?.setupOrientationUI()
             weakSelf?.chatListView.reloadData()
         }) { (context) in
-
+            //hook方法，会改变子view的frame
+            weakSelf?.view.zf_layoutSubviews()
         }
     }
     deinit {
@@ -264,11 +262,15 @@ public class DBY1VNController: UIViewController {
     
     func createVideoView(uid: String) -> DBYStudentVideoView {
         let videoView = DBYStudentVideoView()
+        videoView.backgroundColor = UIColor.white
         videoView.userId = uid
         videoDict[uid] = videoView
+        
+        videoView.portraitFrame = CGRect(x: mainView.frame.minX, y: mainView.frame.maxY + 60, width: 172, height: 150)
+        videoView.landscapeFrame = CGRect(x: mainView.frame.minX, y: 60, width: 172, height: 150)
+        videoView.frame = videoView.portraitFrame
         view.addSubview(videoView)
-        videoView.portraitFrame = CGRect(x: mainView.frame.minX, y: mainView.frame.maxY, width: 170, height: 150)
-        videoView.landscapeFrame = CGRect(x: mainView.frame.minX, y: 0, width: 170, height: 150)
+        
         let drag = UIPanGestureRecognizer(target: self,
                                           action: #selector(dragVideoView(pan:)))
         let pinch = UIPinchGestureRecognizer(target: self,
@@ -307,24 +309,30 @@ public class DBY1VNController: UIViewController {
             mainView.volumeProgressView.setProgress(value: volume)
         }
     }
+    
     @objc func scaleVideoView(pinch:UIPinchGestureRecognizer) {
-        let scale = pinch.scale
-        
-        let videoView = pinch.view
-        
-        if pinch.state == .began {
-            videoView?.transform = originTransform
+        guard let videoView = pinch.view as? DBYStudentVideoView else {
+            return
         }
+        if pinch.state == .began {
+            pinch.scale = videoView.scale
+        }
+        var scale = pinch.scale
         if pinch.state == .changed {
-            let transform = originTransform.scaledBy(x: scale, y: scale)
-            let scaleX = transform.a
-            if scaleX < 2.0 && scaleX > 1.0 {
-                videoView?.transform = transform
+            if scale > 2 {
+                scale = 2
             }
+            if scale < 1 {
+                scale = 1
+            }
+            let scaleW = videoView.portraitFrame.width * scale
+            let scaleH = videoView.portraitFrame.height * scale
+            
+            videoView.bounds = CGRect(x: 0, y: 0, width: scaleW, height: scaleH)
         }
         if pinch.state == .ended {
-            originTransform = videoView!.transform
-            adjustVideoViewFrame(videoView: videoView)
+            videoView.scale = scale
+            adjustVideoViewFrame(videoView: pinch.view)
         }
     }
     @objc func dragVideoView(pan:UIPanGestureRecognizer) {
