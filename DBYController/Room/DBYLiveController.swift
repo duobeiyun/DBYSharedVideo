@@ -194,6 +194,7 @@ public class DBYLiveController: DBY1VNController {
         
         inputButton.isHidden = false
         announcementView.isHidden = true
+        interactionView.isHidden = true
         
         topBar.set(type: .landscape)
         chatBar.endInput()
@@ -210,6 +211,7 @@ public class DBYLiveController: DBY1VNController {
     override func setupPortraitUI() {
         super.setupPortraitUI()
         
+        interactionView.isHidden = false
         inputVC.dismiss(animated: true, completion: nil)
         announcementView.isHidden = (announcement?.count ?? 0) <= 0
         topBar.set(type: .portrait)
@@ -237,7 +239,7 @@ public class DBYLiveController: DBY1VNController {
         tipViewSafeSize = CGSize(width: 0, height: -60 - edge.bottom)
         
         interactionView.portraitFrame = segmentedView.portraitFrame
-        interactionView.landscapeFrame = segmentedView.landscapeFrame
+        interactionView.landscapeFrame = .zero
         
         chatListView.portraitFrame = CGRect(x: 0, y: 0, width: size.width, height: chatListViewHeight)
         chatListView.landscapeFrame = CGRect(x: 0, y: 0, width: size.width, height: size.width)

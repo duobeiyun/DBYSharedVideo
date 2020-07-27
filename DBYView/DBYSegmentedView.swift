@@ -252,6 +252,8 @@ class DBYSegmentedView: UIView {
         addSubview(containerView!)
         
         containerView?.isPagingEnabled = true
+        containerView?.showsHorizontalScrollIndicator = false
+        containerView?.showsVerticalScrollIndicator = false
         titleView?.delegate = self
         containerView?.delegate = self
         
