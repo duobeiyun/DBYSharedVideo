@@ -66,6 +66,9 @@
                         <constraint firstAttribute="width" constant="18" id="u1i-iL-JT0"/>
                     </constraints>
                     <state key="normal" image="close-18"/>
+                    <connections>
+                        <action selector="closeWithSender:" destination="aJm-53-cVR" eventType="touchUpInside" id="rEo-fF-qqW"/>
+                    </connections>
                 </button>
             </subviews>
             <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>

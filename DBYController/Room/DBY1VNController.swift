@@ -266,8 +266,8 @@ public class DBY1VNController: UIViewController {
         videoView.userId = uid
         videoDict[uid] = videoView
         
-        videoView.portraitFrame = CGRect(x: mainView.frame.minX, y: mainView.frame.maxY + 60, width: 172, height: 150)
-        videoView.landscapeFrame = CGRect(x: mainView.frame.minX, y: 60, width: 172, height: 150)
+        videoView.portraitFrame = CGRect(x: mainView.frame.minX, y: mainView.frame.maxY + segmentedView.titleViewHeight, width: 172, height: 150)
+        videoView.landscapeFrame = CGRect(x: mainView.frame.minX, y: topBar.bounds.height, width: 172, height: 150)
         videoView.frame = videoView.portraitFrame
         view.addSubview(videoView)
         

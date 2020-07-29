@@ -11,7 +11,6 @@ import WebKit
 import DBYSDK_dylib
 
 public class DBYLiveController: DBY1VNController {
-    var announcementViewFrame: CGRect = .zero
     var tipViewSafeSize: CGSize = CGSize(width: 0, height: -44)
     var tipViewPosition: DBYTipView.Position = [.bottom, .center]
     
@@ -134,6 +133,8 @@ public class DBYLiveController: DBY1VNController {
     override func addSubviews() {
         super.addSubviews()
         
+        view.addSubview(interactionView)
+        
         chatContainer.addSubview(chatListView)
         chatContainer.addSubview(chatBar)
         chatContainer.addSubview(forbiddenButton)
@@ -183,6 +184,7 @@ public class DBYLiveController: DBY1VNController {
         chatBar.emojiImageDict = emojiImageDict
         chatBar.backgroundColor = UIColor.white
         forbiddenButton.isHidden = true
+        interactionView.isHidden = true
         forbiddenButton.titleLabel?.font = UIFont.systemFont(ofSize: 15)
         forbiddenButton.setTitle(" 已开启全体禁言", for: .normal)
         zanButton.setImage(UIImage(name: "greate-icon"), for: .normal)
@@ -211,7 +213,6 @@ public class DBYLiveController: DBY1VNController {
     override func setupPortraitUI() {
         super.setupPortraitUI()
         
-        interactionView.isHidden = false
         inputVC.dismiss(animated: true, completion: nil)
         announcementView.isHidden = (announcement?.count ?? 0) <= 0
         topBar.set(type: .portrait)
@@ -230,7 +231,7 @@ public class DBYLiveController: DBY1VNController {
         
         let edge = setupIphoneX()
         let size = UIScreen.main.bounds.size
-        let chatBarHeight = 44 + edge.bottom
+        let chatBarHeight = 48 + edge.bottom
         let chatListViewHeight = segmentedView.portraitFrame.height - chatBarHeight - segmentedView.titleViewHeight
         let hangUpViewMinX = 60 + tipViewHeight + 8
         let fbly = segmentedView.landscapeFrame.height - segmentedView.titleViewHeight - 24 - edge.bottom
@@ -256,7 +257,8 @@ public class DBYLiveController: DBY1VNController {
         hangUpView.portraitFrame = CGRect(x: size.width - 200, y: segmentedView.portraitFrame.minY + hangUpViewMinX, width: 200, height: tipViewHeight)
         hangUpView.landscapeFrame = CGRect(x: size.width - 200, y: hangUpViewMinX, width: 200, height: tipViewHeight)
         
-        announcementView.frame = announcementViewFrame
+        announcementView.portraitFrame = CGRect(x: 0, y: 1, width: size.width, height: tipViewHeight)
+        announcementView.landscapeFrame = .zero
         
         zanView.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
         zanView.center = view.center
@@ -309,10 +311,10 @@ public class DBYLiveController: DBY1VNController {
     func showAnnouncement(text: String) {
         announcement = text
         announcementView.set(text: text)
-        let dy = announcementViewFrame.height
-        announcementView.frame = announcementViewFrame.offsetBy(dx: 0, dy: -dy)
+        let dy = tipViewHeight
+        announcementView.frame = announcementView.portraitFrame.offsetBy(dx: 0, dy: -dy)
         UIView.animate(withDuration: 0.25) {
-            self.announcementView.frame = self.announcementViewFrame
+            self.announcementView.frame = self.announcementView.portraitFrame
         }
         if isLandscape() {
             announcementView.isHidden = true
@@ -784,8 +786,7 @@ extension DBYLiveController: DBYChatBarDelegate {
         send(message: message)
     }
     func chatBar(owner: DBYChatBar, buttonClickWith target: UIButton) {
-        interactionView.frame = segmentedView.bounds
-        view.addSubview(interactionView)
+        interactionView.isHidden = false
     }
     func chatBarWillShowInputView(rect: CGRect, duration: TimeInterval) {
         if isLandscape() {
@@ -959,11 +960,17 @@ extension DBYLiveController: DBYInteractionViewDelegate {
             p.setContentOffset(size: tipViewSafeSize)
         }
         tipView.dismiss(after: 3)
+        guard let closeView = tipView as? DBYTipCloseView else {
+            return
+        }
+        weak var weakView = closeView
+        closeView.closeBlock = {
+            weakView?.removeFromSuperview()
+        }
     }
     
-    
     func closeInteraction(owner: DBYInteractionView, type: DBYInteractionType) {
-        owner.removeFromSuperview()
+        interactionView.isHidden = true
         if owner.currentInfo.state == .normal {
             chatBar.interactionButton.isSelected = false
         }else {

@@ -60,7 +60,7 @@ extension UIView {
     }
     func backgroundColorforState(state:UIColorState) -> UIColor? {
         let key = backgroundColorKey + "\(state)"
-        return colors?[key]
+        return colors?[key] ?? backgroundColor
     }
     func zf_layoutSubviews() {
         let orientation = UIApplication.shared.statusBarOrientation

@@ -105,7 +105,7 @@ class DBYInteractionView: DBYNibView {
         }
         
         updateContent(type: type)
-        updateButton(type: type)
+        updateBottomButton(type: type)
     }
     //消息触发
     func set(models:[DBYInteractionModel], for type:DBYInteractionType) {
@@ -116,10 +116,13 @@ class DBYInteractionView: DBYNibView {
         if type == .video {
             videoInfo.models = models
         }
-        //切换状态
-        switchButton(type)
+        if type == currentInfo.type {
+            //切换状态
+            updateContent(type: type)
+            updateBottomButton(type: type)
+        }
     }
-    func updateButton(type: DBYInteractionType) {
+    func updateBottomButton(type: DBYInteractionType) {
         if currentInfo.state == .normal && type == .audio {
             applyButton.setTitle("申请语音上麦", for: .normal)
         }

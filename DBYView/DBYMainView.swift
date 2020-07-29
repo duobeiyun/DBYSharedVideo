@@ -51,6 +51,7 @@ class DBYMainView: DBYView {
         }
         brightnessProgressView.snp.makeConstraints { (make) in
             make.centerY.equalTo(self.snp_centerY)
+            make.left.equalTo(10)
             make.height.equalTo(150)
             make.width.equalTo(20)
         }

@@ -52,24 +52,20 @@ class DBYAnnouncementView: DBYNibView {
         let width = messageLab.text!.width(withMaxHeight: constHeight, font: messageLab.font)
         messgaeLabWidth.constant = width
         messgaeLabLeft.constant = minLeft
-        
-        timer?.stopTimer()
-        timer = ZFTimer.startTimer(interval: 0.1, repeats: true, block: {[weak self] in
-            self?.updateMessage()
-        })
-    }
-    @objc func updateMessage() {
         if isExpend {
             return
         }
         let maxWidth = bounds.width - constLeft
-        guard let width = messageLab.text?.width(withMaxHeight: maxWidth, font: messageLab.font) else {
-            return
-        }
         let delta = width - maxWidth
         if delta <= 0 {
             return
         }
+        timer?.stopTimer()
+        timer = ZFTimer.startTimer(interval: 0.1, repeats: true, block: {[weak self] in
+            self?.updateMessage(delta: delta)
+        })
+    }
+    @objc func updateMessage(delta:CGFloat) {
         var x = messgaeLabLeft.constant - 1
         if x < -delta {
             x = minLeft

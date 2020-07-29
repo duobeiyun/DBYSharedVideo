@@ -135,6 +135,11 @@ class DBYTipCloseView: DBYTipBaseView, DBYTipViewUIProtocol {
     @IBOutlet weak var iconView: UIImageView!
     @IBOutlet weak var messageLabel: UILabel!
     @IBOutlet weak var closeButton: UIButton!
+    @IBAction func close(sender: UIButton) {
+        closeBlock?()
+    }
+    
+    var closeBlock:(()->())?
     
     override func contentSize() -> CGSize {
         let height = bounds.size.height
