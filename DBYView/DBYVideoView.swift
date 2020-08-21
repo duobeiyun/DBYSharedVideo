@@ -35,6 +35,11 @@ class DBYVideoView: UIView {
         imageHolder?.image = image
     }
     func startLoading() {
+        for subview in subviews {
+            if subview.isKind(of: DBYVideoLoadingView.self) {
+                return
+            }
+        }
         let loadingView = DBYVideoLoadingView()
         addSubview(loadingView)
         loadingView.frame = bounds

@@ -62,21 +62,19 @@ extension UIView {
         let key = backgroundColorKey + "\(state)"
         return colors?[key] ?? backgroundColor
     }
-    func zf_layoutSubviews() {
+    func updateStyle() {
         let orientation = UIApplication.shared.statusBarOrientation
-        for sub in subviews {
-            if orientation == .portrait {
-                sub.frame = sub.portraitFrame
-                sub.backgroundColor = sub.backgroundColorforState(state: .portrait)
-            }
-            if orientation == .landscapeLeft {
-                sub.frame = sub.landscapeFrame
-                sub.backgroundColor = sub.backgroundColorforState(state: .landscape)
-            }
-            if orientation == .landscapeRight {
-                sub.frame = sub.landscapeFrame
-                sub.backgroundColor = sub.backgroundColorforState(state: .landscape)
-            }
+        if orientation == .portrait {
+            frame = portraitFrame
+            backgroundColor = backgroundColorforState(state: .portrait)
+        }
+        if orientation == .landscapeLeft {
+            frame = landscapeFrame
+            backgroundColor = backgroundColorforState(state: .landscape)
+        }
+        if orientation == .landscapeRight {
+            frame = landscapeFrame
+            backgroundColor = backgroundColorforState(state: .landscape)
         }
     }
 }

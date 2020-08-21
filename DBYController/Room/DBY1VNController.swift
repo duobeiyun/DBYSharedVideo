@@ -98,7 +98,7 @@ public class DBY1VNController: UIViewController {
         navigationController?.setNavigationBarHidden(true, animated: animated)
         DBYSystemControl.shared.beginControl()
         mainView.showControlBar()
-        view.zf_layoutSubviews()
+        inner_layoutSubviews()
     }
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
@@ -134,7 +134,7 @@ public class DBY1VNController: UIViewController {
             weakSelf?.chatListView.reloadData()
         }) { (context) in
             //hook方法，会改变子view的frame
-            weakSelf?.view.zf_layoutSubviews()
+            weakSelf?.inner_layoutSubviews()
         }
     }
     deinit {
@@ -142,6 +142,11 @@ public class DBY1VNController: UIViewController {
         NotificationCenter.default.removeObserver(self)
     }
     //MARK: - private functions
+    func inner_layoutSubviews() {
+        mainView.updateStyle()
+        segmentedView.updateStyle()
+        chatListView.updateStyle()
+    }
     func addSubviews() {
         view.addSubview(mainView)
         view.addSubview(topBar)
@@ -268,8 +273,8 @@ public class DBY1VNController: UIViewController {
         
         videoView.portraitFrame = CGRect(x: mainView.frame.minX, y: mainView.frame.maxY + segmentedView.titleViewHeight, width: 172, height: 150)
         videoView.landscapeFrame = CGRect(x: mainView.frame.minX, y: topBar.bounds.height, width: 172, height: 150)
-        videoView.frame = videoView.portraitFrame
         view.addSubview(videoView)
+        videoView.updateStyle()
         
         let drag = UIPanGestureRecognizer(target: self,
                                           action: #selector(dragVideoView(pan:)))

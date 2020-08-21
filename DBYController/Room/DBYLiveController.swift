@@ -276,6 +276,16 @@ public class DBYLiveController: DBY1VNController {
         }
     }
     //MARK: - private functions
+    override func inner_layoutSubviews() {
+        super.inner_layoutSubviews()
+        interactionView.updateStyle()
+        chatBar.updateStyle()
+        inputButton.updateStyle()
+        forbiddenButton.updateStyle()
+        hangUpView.updateStyle()
+        announcementView.updateStyle()
+        micListView.updateStyle()
+    }
     func addObserver() {
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(recoverManager),
@@ -377,6 +387,7 @@ public class DBYLiveController: DBY1VNController {
                                             y: 60,
                                             width: width,
                                             height: tipViewHeight)
+        micListView.updateStyle()
     }
     func showWatermarkView() {
         guard let wk = roomConfig?.watermark else {
@@ -1062,7 +1073,6 @@ extension DBYLiveController: DBYInteractionViewDelegate {
             liveManager.openMic(true) { (message) in
                 
             }
-            hangUpView.isHidden = false
             view.addSubview(hangUpView)
             view.addSubview(micListView)
         }

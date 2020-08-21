@@ -12,7 +12,7 @@ class DBYChatContainer: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        zf_layoutSubviews()
+        updateStyle()
     }
 
 }
