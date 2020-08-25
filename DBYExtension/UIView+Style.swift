@@ -78,3 +78,8 @@ extension UIView {
         }
     }
 }
+extension CGRect {
+    func resizeBy(subw: CGFloat, subh: CGFloat) -> CGRect {
+        return CGRect(x: minX, y: minY, width: width - subw, height: height - subh)
+    }
+}

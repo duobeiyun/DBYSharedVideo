@@ -20,6 +20,8 @@ protocol DBYInteractionViewDelegate: NSObjectProtocol {
 class DBYInteractionInfo {
     var type: DBYInteractionType
     var state: DBYInteractionState = .normal
+    var joinedCount: Int = 0
+    var inqueueCount: Int = 0
     lazy var models:[DBYInteractionModel] = [DBYInteractionModel]()
     init(type:DBYInteractionType) {
         self.type = type
@@ -106,6 +108,13 @@ class DBYInteractionView: DBYNibView {
         
         updateContent(type: type)
         updateBottomButton(type: type)
+        if type == .audio {
+            label.text = "\(currentInfo.joinedCount)人正在上麦"
+        }
+        if type == .video {
+            label.text = "前方还有\(currentInfo.inqueueCount)人正在等待上台"
+        }
+        tableView.reloadData()
     }
     //消息触发
     func set(models:[DBYInteractionModel], for type:DBYInteractionType) {
@@ -116,9 +125,8 @@ class DBYInteractionView: DBYNibView {
         if type == .video {
             videoInfo.models = models
         }
+        updateContent(type: type)
         if type == currentInfo.type {
-            //切换状态
-            updateContent(type: type)
             updateBottomButton(type: type)
         }
     }
@@ -164,13 +172,8 @@ class DBYInteractionView: DBYNibView {
                 inqueueCount += 1
             }
         }
-        if type == .audio {
-            label.text = "\(count)人正在上麦"
-        }
-        if type == .video {
-            label.text = "前方还有\(inqueueCount)人正在等待上台"
-        }
-        tableView.reloadData()
+        currentInfo.joinedCount = count
+        currentInfo.inqueueCount = inqueueCount
         
         //被邀请上台或上麦
         if userModel != nil && userModel?.state == .inqueue && currentInfo.state == .normal {

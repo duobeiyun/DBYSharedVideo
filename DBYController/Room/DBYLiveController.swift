@@ -806,7 +806,7 @@ extension DBYLiveController: DBYChatBarDelegate {
         let edge = setupIphoneX()
         let frame1 = chatBar.frame.offsetBy(dx: 0, dy: edge.bottom - rect.height)
         
-        let frame2 = chatListView.frame.offsetBy(dx: 0, dy: edge.bottom - rect.height)
+        let frame2 = chatListView.frame.resizeBy(subw: 0, subh: rect.height - edge.bottom)
         
         UIView.animate(withDuration: 0.25) {
             self.chatBar.frame = frame1
