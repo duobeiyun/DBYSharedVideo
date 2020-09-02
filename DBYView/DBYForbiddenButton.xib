@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="45k-Ri-8fs" userLabel="portraitView" customClass="DBYForbiddenButton" customModule="DBYSharedVideo" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="440" height="40"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="forbiddenRect" translatesAutoresizingMaskIntoConstraints="NO" id="b0j-rh-hEo">
+                    <rect key="frame" x="0.0" y="0.0" width="440" height="40"/>
+                </imageView>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="forbidden-light" translatesAutoresizingMaskIntoConstraints="NO" id="fFb-RU-CcM">
+                    <rect key="frame" x="151" y="11" width="18" height="18"/>
+                </imageView>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="已开启全体禁言" textAlignment="center" lineBreakMode="characterWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tV0-Zo-U92">
+                    <rect key="frame" x="177" y="13" width="86" height="14.5"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                    <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+            <gestureRecognizers/>
+            <constraints>
+                <constraint firstItem="tV0-Zo-U92" firstAttribute="centerX" secondItem="45k-Ri-8fs" secondAttribute="centerX" id="2KR-1F-9Rz"/>
+                <constraint firstItem="tV0-Zo-U92" firstAttribute="leading" secondItem="fFb-RU-CcM" secondAttribute="trailing" constant="8" id="E9t-w3-OL2"/>
+                <constraint firstAttribute="bottom" secondItem="b0j-rh-hEo" secondAttribute="bottom" id="IhA-e6-b7a"/>
+                <constraint firstItem="b0j-rh-hEo" firstAttribute="top" secondItem="45k-Ri-8fs" secondAttribute="top" id="XqT-8H-nzu"/>
+                <constraint firstItem="fFb-RU-CcM" firstAttribute="centerY" secondItem="45k-Ri-8fs" secondAttribute="centerY" id="aSs-oX-qTy"/>
+                <constraint firstItem="b0j-rh-hEo" firstAttribute="leading" secondItem="45k-Ri-8fs" secondAttribute="leading" id="fyN-Ab-fe6"/>
+                <constraint firstItem="tV0-Zo-U92" firstAttribute="centerY" secondItem="45k-Ri-8fs" secondAttribute="centerY" id="hfs-SJ-EzS"/>
+                <constraint firstAttribute="trailing" secondItem="b0j-rh-hEo" secondAttribute="trailing" id="ldd-d5-tI0"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <point key="canvasLocation" x="127.53623188405798" y="644.86607142857144"/>
+        </view>
+        <view contentMode="scaleToFill" id="sPJ-eJ-ffh" userLabel="landscapeView" customClass="DBYForbiddenButton" customModule="DBYSharedVideo" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="160" height="24"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="forbiddenSmallRect" translatesAutoresizingMaskIntoConstraints="NO" id="Bsf-y2-D7B">
+                    <rect key="frame" x="0.0" y="0.0" width="160" height="24"/>
+                </imageView>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="forbidden-white" translatesAutoresizingMaskIntoConstraints="NO" id="c74-dB-Nre">
+                    <rect key="frame" x="35.5" y="3" width="18" height="18"/>
+                </imageView>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="多贝云" textAlignment="center" lineBreakMode="characterWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zYf-6M-G46">
+                    <rect key="frame" x="61.5" y="5" width="37" height="14.5"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstItem="Bsf-y2-D7B" firstAttribute="leading" secondItem="sPJ-eJ-ffh" secondAttribute="leading" id="5pS-q3-KVR"/>
+                <constraint firstItem="Bsf-y2-D7B" firstAttribute="top" secondItem="sPJ-eJ-ffh" secondAttribute="top" id="AIJ-re-vNL"/>
+                <constraint firstItem="zYf-6M-G46" firstAttribute="centerY" secondItem="sPJ-eJ-ffh" secondAttribute="centerY" id="IWD-gd-6U8"/>
+                <constraint firstAttribute="bottom" secondItem="Bsf-y2-D7B" secondAttribute="bottom" id="SVf-MB-lnT"/>
+                <constraint firstItem="c74-dB-Nre" firstAttribute="centerY" secondItem="sPJ-eJ-ffh" secondAttribute="centerY" id="Shx-e0-M69"/>
+                <constraint firstItem="zYf-6M-G46" firstAttribute="leading" secondItem="c74-dB-Nre" secondAttribute="trailing" constant="8" id="bWI-BZ-e5t"/>
+                <constraint firstAttribute="trailing" secondItem="Bsf-y2-D7B" secondAttribute="trailing" id="hDk-nH-Zxu"/>
+                <constraint firstItem="zYf-6M-G46" firstAttribute="centerX" secondItem="sPJ-eJ-ffh" secondAttribute="centerX" id="kgb-Sy-uxV"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <point key="canvasLocation" x="84" y="719"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="forbidden-light" width="18" height="18"/>
+        <image name="forbidden-white" width="18" height="18"/>
+        <image name="forbiddenRect" width="351" height="32"/>
+        <image name="forbiddenSmallRect" width="160" height="24"/>
+    </resources>
+</document>

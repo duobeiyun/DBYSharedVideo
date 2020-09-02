@@ -43,20 +43,20 @@ public class DBYPlaybackController: DBY1VNController {
         
         view.addSubview(timeTipLab)
         view.addSubview(indicator)
-        chatContainer.addSubview(chatListView)
     }
     override func setupStaticUI() {
         super.setupStaticUI()
         topBar.set(authinfo?.courseTitle)
         settingView.set(speeds: playRateTitles)
         courseInfoView.set(title: authinfo?.courseTitle)
+        chatListView.showChatbar = false
         
         var models = [DBYSegmentedModel]()
         var titleOffset:CGFloat = 0
         let dicts:[[String:Any]] = [
             [
                 "title":"互动",
-                "view":chatContainer
+                "view":chatListView
             ],[
                 "title":"课程信息",
                 "view":courseInfoView
@@ -90,8 +90,8 @@ public class DBYPlaybackController: DBY1VNController {
         super.setupLandscapeUI()
         bottomBar.set(type: .playbackLandscape)
     }
-    override func setViewStyle() {
-        super.setViewStyle()
+    override func setViewFrameAndStyle() {
+        super.setViewFrameAndStyle()
         
         let size = UIScreen.main.bounds.size
         let chatListViewHeight = segmentedView.portraitFrame.height - segmentedView.titleViewHeight

@@ -7,12 +7,11 @@
 
 import UIKit
 
-class DBYChatContainer: UIView {
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        updateStyle()
-    }
-
+class DBYChatContainer: DBYView {
+    lazy var chatListView = DBYChatListView()
+    lazy var chatBar = DBYChatBar()
+    lazy var forbiddenButton = DBYButton()
+    lazy var announcementView = DBYAnnouncementView()
+    
+    
 }

@@ -10,47 +10,24 @@ import Foundation
 let currentBundle = Bundle(identifier: "com.duobei.DBYSharedVideo")
 let regexString = "(\\[:(.*?)\\])"
 
-let emojiImageDict: [String:String] = [
-    "hello": "[:问好]",
-    "love": "[:比心]",
-    "smile": "[:微笑]",
-    "happy": "[:开心]",
-    "sad": "[:伤心]",
-    "yes": "[:是的]",
-    "no": "[:反对]",
-    "question": "[:疑问]",
-    "angry": "[:气愤]",
-    "bye": "[:再见]",
-    "like": "[:喜欢]",
-    "fight": "[:加油]",
-    "cry": "[:流泪]",
-    "sorry": "[:抱歉]",
-    "loudly": "[:大笑]",
-    "strive": "[:努力]",
-    "amazing": "[:惊讶]",
-    "hum": "[:哼]"
-]
-let emojiNameDict: [String:String] = [
-    "[:问好]": "hello",
-    "[:比心]": "love",
-    "[:微笑]": "smile",
-    "[:开心]": "happy",
-    "[:伤心]": "sad",
-    "[:是的]": "yes",
-    "[:反对]": "no",
-    "[:疑问]": "question",
-    "[:气愤]": "angry",
-    "[:再见]": "bye",
-    "[:喜欢]": "like",
-    "[:加油]": "fight",
-    "[:流泪]": "cry",
-    "[:抱歉]": "sorry",
-    "[:大笑]": "loudly",
-    "[:努力]": "strive",
-    "[:惊讶]": "amazing",
-    "[:哼]": "hum"
-]
-
+public func getIphonexEdge() -> UIEdgeInsets {
+    var iphoneXTop:CGFloat = 20
+    var iphoneXLeft:CGFloat = 0
+    var iphoneXRight:CGFloat = 0
+    var iphoneXBottom:CGFloat = 0
+    if isIphoneXSeries() {
+        let orientation = UIApplication.shared.statusBarOrientation
+        if orientation == .landscapeLeft || orientation == .landscapeRight{
+            iphoneXLeft = 44
+            iphoneXRight = 44
+        }
+        if orientation == .portrait {
+            iphoneXTop = 44
+        }
+        iphoneXBottom = 34
+    }
+    return UIEdgeInsets(top: iphoneXTop, left: iphoneXLeft, bottom: iphoneXBottom, right: iphoneXRight)
+}
 public func isIphoneXSeries() -> Bool {
     var systemInfo = utsname()
     uname(&systemInfo)

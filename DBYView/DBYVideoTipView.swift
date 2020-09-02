@@ -8,16 +8,16 @@
 
 import UIKit
 
-protocol DBYVideoTipViewDelegate:NSObjectProtocol {
-    func buttonClick(owner: DBYVideoTipView, type: DBYTipType)
+protocol DBYVideoTipViewDelegate1:NSObjectProtocol {
+    func buttonClick(owner: DBYVideoTipView1, type: DBYTipType)
 }
 public enum DBYTipType:Int {
     case pause
     case audio
     case unknow
 }
-class DBYVideoTipView: DBYNibView {
-    weak var delegate: DBYVideoTipViewDelegate?
+class DBYVideoTipView1: DBYNibView {
+    weak var delegate: DBYVideoTipViewDelegate1?
     var tipType:DBYTipType = .unknow
     
     @IBOutlet weak var iconView: UIImageView!

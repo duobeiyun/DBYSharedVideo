@@ -28,26 +28,12 @@ public class DBYLiveController: DBY1VNController {
     
     lazy var liveManager:DBYLiveManager = DBYLiveManager()
     
-    lazy var chatBar = DBYChatBar()
     lazy var interactionView = DBYInteractionView()
     lazy var voteView:DBYVoteView = DBYVoteView()
     lazy var announcementView = DBYAnnouncementView()
     lazy var micListView = DBYMicListView()
     lazy var hangUpView = DBYHangUpView()
-    lazy var forbiddenButton = DBYButton()
-    lazy var zanButton = UIButton(type: .custom)
-    lazy var inputButton:DBYButton = {
-        let btn = DBYButton()
-        btn.setBackgroudnStyle(fillColor: DBYStyle.halfBlack,
-                               strokeColor: UIColor.clear,
-                               radius: 15)
-        btn.setImage(UIImage(name: "btn-chat"), for: .normal)
-        let att = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12),
-                   NSAttributedString.Key.foregroundColor: UIColor.white]
-        let attStr = NSAttributedString(string: " 输入聊天", attributes: att)
-        btn.setAttributedTitle(attStr, for: .normal)
-        return btn
-    }()
+    
     lazy var audioBtn:DBYVerticalButton = {
         let btn = DBYVerticalButton()
         btn.setImage(UIImage(name:"audio-only-normal"), for: .normal)
@@ -73,7 +59,6 @@ public class DBYLiveController: DBY1VNController {
     lazy var watermarkView = DBYWatermarkView()
     lazy var marqueeView = DBYMarqueeView()
     lazy var questionView = DBYQustionListView()
-    lazy var zanView = UIImageView()
     
     var roomConfig: DBYRoomConfig?
     var sensitiveWords: [String]?
@@ -85,14 +70,12 @@ public class DBYLiveController: DBY1VNController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         
-        netTipView.delegate = self
-        chatBar.delegate = self
+        chatListView.chatBar.delegate = self
         micListView.delegate = self
         hangUpView.delegate = self
         topBar.delegate = self
         bottomBar.delegate = self
         settingView.delegate = self
-        videoTipView.delegate = self
         interactionView.delegate = self
         
         if authinfo?.classType == .sharedVideo {
@@ -123,7 +106,7 @@ public class DBYLiveController: DBY1VNController {
         let oneTap = UITapGestureRecognizer(target: self,
                                             action: #selector(viewTap(tap:)))
         chatListView.addGestureRecognizer(oneTap)
-        mainView.videoView.startLoading()
+        mainView.showLoadingView(delegate: nil)
         enterRoom()
     }
     deinit {
@@ -135,12 +118,6 @@ public class DBYLiveController: DBY1VNController {
         
         view.addSubview(interactionView)
         
-        chatContainer.addSubview(chatListView)
-        chatContainer.addSubview(chatBar)
-        chatContainer.addSubview(forbiddenButton)
-        chatContainer.addSubview(inputButton)
-        chatContainer.addSubview(announcementView)
-        
         mainView.addSubview(marqueeView)
         mainView.addSubview(watermarkView)
         
@@ -149,21 +126,21 @@ public class DBYLiveController: DBY1VNController {
     }
     override func addActions() {
         super.addActions()
-        inputButton.addTarget(self, action: #selector(showChatBar), for: .touchUpInside)
+        chatListView.inputButton.addTarget(self, action: #selector(showInputController), for: .touchUpInside)
         audioBtn.addTarget(self, action: #selector(audioOnly), for: .touchUpInside)
-        zanButton.addTarget(self, action: #selector(zanAnimation), for: .touchUpInside)
     }
     override func setupStaticUI() {
         super.setupStaticUI()
         
         topBar.set(authinfo?.courseTitle)
         settingView.set(buttons: [audioBtn])
+        chatListView.showChatbar = true
         
         var models = [DBYSegmentedModel]()
         let dicts:[[String:Any]] = [
             [
                 "title":"讨论",
-                "view":chatContainer
+                "view":chatListView
             ],[
                 "title":"课程信息",
                 "view":courseInfoView
@@ -180,79 +157,44 @@ public class DBYLiveController: DBY1VNController {
             models.append(model)
         }
         segmentedView.appendDatas(models: models)
-        
-        chatBar.emojiImageDict = emojiImageDict
-        chatBar.backgroundColor = UIColor.white
-        forbiddenButton.isHidden = true
         interactionView.isHidden = true
-        forbiddenButton.titleLabel?.font = UIFont.systemFont(ofSize: 15)
-        forbiddenButton.setTitle(" 已开启全体禁言", for: .normal)
-        zanButton.setImage(UIImage(name: "greate-icon"), for: .normal)
         courseInfoView.set(title: authinfo?.courseTitle)
         interactionView.userId = authinfo?.userId
     }
     override func setupLandscapeUI() {
         super.setupLandscapeUI()
         
-        inputButton.isHidden = false
         announcementView.isHidden = true
         interactionView.isHidden = true
         
         topBar.set(type: .landscape)
-        chatBar.endInput()
+        chatListView.chatBar.endInput()
         bottomBar.set(type: .liveLandscape)
-        forbiddenButton.setTitleColor(UIColor.white, for: .normal)
-        forbiddenButton.setBackgroudnStyle(fillColor: DBYStyle.darkGray,
-                                           strokeColor: UIColor.white,
-                                           radius: forbiddenBtnHeight * 0.5)
-        forbiddenButton.setImage(UIImage(name: "forbidden-white"), for: .normal)
-        voteView.setTheme(.dark)
-        chatListView.setTheme(.dark)
         segmentedView.containerView?.isScrollEnabled = false
     }
     override func setupPortraitUI() {
         super.setupPortraitUI()
         
+        chatListView.inputButton.dismiss()
+        
         inputVC.dismiss(animated: true, completion: nil)
         announcementView.isHidden = (announcement?.count ?? 0) <= 0
         topBar.set(type: .portrait)
         bottomBar.set(type: .live)
-        forbiddenButton.setTitleColor(DBYStyle.brown, for: .normal)
-        forbiddenButton.setBackgroudnStyle(fillColor: UIColor.white,
-                                           strokeColor: DBYStyle.brown,
-                                           radius: 4)
-        forbiddenButton.setImage(UIImage(name: "forbidden-light"), for: .normal)
-        voteView.setTheme(.light)
-        chatListView.setTheme(.light)
+        
         segmentedView.containerView?.isScrollEnabled = true
     }
-    override func setViewStyle() {
-        super.setViewStyle()
+    override func setViewFrameAndStyle() {
+        super.setViewFrameAndStyle()
         
-        let edge = setupIphoneX()
         let size = UIScreen.main.bounds.size
-        let chatBarHeight = 48 + edge.bottom
-        let chatListViewHeight = segmentedView.portraitFrame.height - chatBarHeight - segmentedView.titleViewHeight
+        let edge = getIphonexEdge()
         let hangUpViewMinX = 60 + tipViewHeight + 8
-        let fbly = segmentedView.landscapeFrame.height - segmentedView.titleViewHeight - 24 - edge.bottom
-        let fblx = (segmentedView.landscapeFrame.width - 160) * 0.5
         
         tipViewSafeSize = CGSize(width: 0, height: -60 - edge.bottom)
         
         interactionView.portraitFrame = segmentedView.portraitFrame
         interactionView.landscapeFrame = .zero
-        
-        chatListView.portraitFrame = CGRect(x: 0, y: 0, width: size.width, height: chatListViewHeight)
-        chatListView.landscapeFrame = CGRect(x: 0, y: 0, width: size.width, height: size.width)
-        
-        chatBar.portraitFrame = CGRect(x: 0, y: chatListViewHeight, width: size.width, height: chatBarHeight)
-        chatBar.landscapeFrame = CGRect(x: 0, y: segmentedView.landscapeFrame.height, width: size.width, height: chatBarHeight)
-        
-        inputButton.portraitFrame = .zero
-        inputButton.landscapeFrame = CGRect(x: 10, y: size.width - 24 - edge.bottom, width: 84, height: 24)
-        
-        forbiddenButton.portraitFrame = CGRect(x: 4, y: chatListViewHeight, width: segmentedView.portraitFrame.width - 8, height: 44)
-        forbiddenButton.landscapeFrame = CGRect(x: fblx, y: fbly, width: 160, height: 24)
         
         hangUpView.portraitFrame = CGRect(x: size.width - 200, y: segmentedView.portraitFrame.minY + hangUpViewMinX, width: 200, height: tipViewHeight)
         hangUpView.landscapeFrame = CGRect(x: size.width - 200, y: hangUpViewMinX, width: 200, height: tipViewHeight)
@@ -260,8 +202,14 @@ public class DBYLiveController: DBY1VNController {
         announcementView.portraitFrame = CGRect(x: 0, y: 1, width: size.width, height: tipViewHeight)
         announcementView.landscapeFrame = .zero
         
-        zanView.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
-        zanView.center = view.center
+        chatListView.setBackgroundColor(color: DBYStyle.lightAlpha, forState: .landscape)
+        chatListView.setBackgroundColor(color: DBYStyle.lightGray, forState: .portrait)
+    }
+    override func updateStyles() {
+        super.updateStyles()
+        interactionView.updateStyle()
+        hangUpView.updateStyle()
+        announcementView.updateStyle()
     }
     override func reachabilityChanged(note:NSNotification) {
         if let reachability = note.object as? DBYReachability {
@@ -276,16 +224,6 @@ public class DBYLiveController: DBY1VNController {
         }
     }
     //MARK: - private functions
-    override func inner_layoutSubviews() {
-        super.inner_layoutSubviews()
-        interactionView.updateStyle()
-        chatBar.updateStyle()
-        inputButton.updateStyle()
-        forbiddenButton.updateStyle()
-        hangUpView.updateStyle()
-        announcementView.updateStyle()
-        micListView.updateStyle()
-    }
     func addObserver() {
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(recoverManager),
@@ -297,7 +235,7 @@ public class DBYLiveController: DBY1VNController {
                                                object: nil)
     }
     @objc func viewTap(tap: UITapGestureRecognizer) {
-        chatBar.endInput()
+        chatListView.chatBar.endInput()
     }
     func dealWith(reachability: DBYReachability) {
         let netStatus = internetReachability?.currentReachabilityStatus()
@@ -310,7 +248,7 @@ public class DBYLiveController: DBY1VNController {
             pauseManager()
             break
         case ReachableViaWiFi:
-            netTipView.hidden()
+            netTipView.dismiss()
             recoverManager()
             break
         default:
@@ -505,8 +443,8 @@ public class DBYLiveController: DBY1VNController {
         
         marqueeView.frame = marqueeView.frame.offsetBy(dx: deltaX, dy: deltaY)
     }
-    @objc func showChatBar() {
-        if !forbiddenButton.isHidden {
+    @objc func showInputController() {
+        if chatListView.isChatForbidden {
             return
         }
         inputVC.modalPresentationStyle = .custom
@@ -517,32 +455,13 @@ public class DBYLiveController: DBY1VNController {
         }
         present(inputVC, animated: true, completion: nil)
     }
-    @objc func zanAnimation(sender:UIButton) {
-        if zanView.isAnimating {
-            return
-        }
-        zanView.animationImages = images
-        zanView.animationRepeatCount = 1
-        zanView.animationDuration = 0.3
-        zanView.startAnimating()
-        
-        zanCount += 1
-        zanTimer?.stopTimer()
-        zanTimer = ZFTimer.startTimer(interval: 1, repeats: false) {[weak self] in
-            self?.liveManager.thumbsup(withCount: Int32(self?.zanCount ?? 0)) { (message) in
-                print(message ?? "updateZan")
-            }
-            self?.zanCount = 0
-        }
-    }
     
     @objc func audioOnly(sender:UIButton) {
         sender.isSelected = !sender.isSelected
         if sender.isSelected {
-            videoTipView.set(type: .audio)
-            showVideoTipView()
+            mainView.showVideoTipView(type: .audio, delegate: self)
         }else {
-            hiddenVideoTipView()
+            mainView.hiddenVideoTipView()
         }
         
         liveManager.setReceiveVideoWith(!sender.isSelected) { (message) in
@@ -576,7 +495,7 @@ public class DBYLiveController: DBY1VNController {
         liveManager.pauseLive()
     }
     @objc func recoverManager() {
-        hiddenVideoTipView()
+        mainView.hiddenVideoTipView()
         clearChatMessage()
         bottomBar.set(state: .play)
         liveManager.recoverLive()
@@ -584,12 +503,12 @@ public class DBYLiveController: DBY1VNController {
     
     //MARK: - scrollView
     public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        chatBar.endInput()
+        chatListView.chatBar.endInput()
     }
 }
 extension DBYLiveController: DBYLiveManagerDelegate {
     public func clientOnline(_ liveManager: DBYLiveManager!, userId uid: String!, nickName: String!, userRole role: Int32) {
-        mainView.videoView.stopLoading()
+        mainView.hiddenLoadingView()
         
         liveManager.getInteractionList(.audio) {[weak self] (list) in
             if let models = list {
@@ -713,8 +632,8 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         })
     }
     public func liveManager(_ manager: DBYLiveManager!, denyChatStatusChange isDeny: Bool) {
-        forbiddenButton.isHidden = !isDeny
-        chatBar.isHidden = isDeny
+        chatListView.isChatForbidden = isDeny
+        chatListView.chatBar.isHidden = isDeny
     }
     public func liveManager(_ manager: DBYLiveManager!, canChat: Bool) {
         sendMessageEnable = canChat
@@ -780,8 +699,8 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     }
 }
 extension DBYLiveController:DBYNetworkTipViewDelegate {
-    func confirmClick(_ owner: DBYNibView) {
-        netTipView.hidden()
+    func confirmClick(_ owner: DBYNetworkTipView) {
+        mainView.hiddenNetworkTipView()
         recoverManager()
     }
 }
@@ -803,28 +722,15 @@ extension DBYLiveController: DBYChatBarDelegate {
         if isLandscape() {
             return
         }
-        let edge = setupIphoneX()
-        let frame1 = chatBar.frame.offsetBy(dx: 0, dy: edge.bottom - rect.height)
-        
-        let frame2 = chatListView.frame.resizeBy(subw: 0, subh: rect.height - edge.bottom)
-        
-        UIView.animate(withDuration: 0.25) {
-            self.chatBar.frame = frame1
-            self.chatListView.frame = frame2
-        }
-        chatListView.scrollToBottom()
+        chatListView.showInputView(offset: rect.height)
     }
     
     func chatBarWillDismissInputView(duration: TimeInterval) {
         if isLandscape() {
             return
         }
-        chatBar.frame = chatBar.portraitFrame
-        chatListView.frame = chatListView.portraitFrame
+        chatListView.hiddenInputView()
     }
-}
-extension DBYLiveController {
-    
 }
 //MARK: - DBYVoteViewDelegate
 extension DBYLiveController: DBYVoteViewDelegate {
@@ -874,6 +780,10 @@ extension DBYLiveController: DBYBottomBarDelegate {
         bottomBar.isHidden = true
         segmentedView.isHidden = false
         segmentedView.scrollToIndex(index: 0)
+        let rect = segmentedView.landscapeFrame
+        UIView.animate(withDuration: 0.25) {
+            self.segmentedView.frame = rect.offsetBy(dx: -rect.width, dy: 0)
+        }
     }
     
     func voteButtonClick(owner: DBYBottomBar) {
@@ -890,13 +800,12 @@ extension DBYLiveController: DBYBottomBarDelegate {
     func stateDidChange(owner: DBYBottomBar, state: DBYPlayState) {
         if state == .pause {
             recoverManager()
-            netTipView.hidden()
-            hiddenVideoTipView()
+            mainView.hiddenNetworkTipView()
+            mainView.hiddenVideoTipView()
         }
         if state == .play {
             pauseManager()
-            videoTipView.set(type: .pause)
-            showVideoTipView()
+            mainView.showVideoTipView(type: .pause, delegate: self)
         }
     }
     func progressWillChange(owner: DBYBottomBar, value: Float) {
@@ -933,13 +842,17 @@ extension DBYLiveController: DBYSettingViewDelegate {
     }
 }
 extension DBYLiveController: DBYVideoTipViewDelegate {
-    func buttonClick(owner: DBYVideoTipView, type: DBYTipType) {
+    func continueClick(_ owner: DBYPauseTipView) {
+        recoverManager()
+    }
+    
+    func buttonClick(owner: DBYVideoTipView1, type: DBYTipType) {
         if type == .audio {
             audioBtn.isSelected = true
             liveManager.setReceiveVideoWith(true) { (message) in
                 print(message ?? "setReceiveVideoWith")
             }
-            hiddenVideoTipView()
+            mainView.hiddenVideoTipView()
         }
         if type == .pause {
             recoverManager()
@@ -950,7 +863,7 @@ extension DBYLiveController: DBYCommentCellDelegate {
     func commentCell(cell: UITableViewCell, didPressWith index: IndexPath) {
         let chatDict = chatListView.allChatList[index.row]
         let name:String = chatDict["userName"] as? String ?? ""
-        chatBar.append(text: "@" + name)
+        chatListView.chatBar.append(text: "@" + name)
     }
 }
 //MARK: - DBYInteractionViewDelegate
@@ -983,9 +896,9 @@ extension DBYLiveController: DBYInteractionViewDelegate {
     func closeInteraction(owner: DBYInteractionView, type: DBYInteractionType) {
         interactionView.isHidden = true
         if owner.currentInfo.state == .normal {
-            chatBar.interactionButton.isSelected = false
+            chatListView.chatBar.interactionButton.isSelected = false
         }else {
-            chatBar.interactionButton.isSelected = true
+            chatListView.chatBar.interactionButton.isSelected = true
         }
     }
     

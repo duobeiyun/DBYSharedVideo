@@ -34,22 +34,4 @@ class DBYVideoView: UIView {
     func setImageHolder(image:UIImage?) {
         imageHolder?.image = image
     }
-    func startLoading() {
-        for subview in subviews {
-            if subview.isKind(of: DBYVideoLoadingView.self) {
-                return
-            }
-        }
-        let loadingView = DBYVideoLoadingView()
-        addSubview(loadingView)
-        loadingView.frame = bounds
-        loadingView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-    }
-    func stopLoading() {
-        for subview in subviews {
-            if subview.isKind(of: DBYVideoLoadingView.self) {
-                subview.removeFromSuperview()
-            }
-        }
-    }
 }

@@ -195,7 +195,7 @@ class DBYMessageTipView: DBYView {
         timer = nil
     }
     
-    @objc func dismiss() {
+    @objc override func dismiss() {
         UIView.animate(withDuration: 0.25) {
             self.isHidden = true
         }

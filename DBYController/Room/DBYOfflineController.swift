@@ -121,7 +121,10 @@ extension DBYOfflineController: DBYTopBarDelegate {
 //MARK: - DBYBottomBarDelegate
 extension DBYOfflineController: DBYBottomBarDelegate {
     func chatButtonClick(owner: DBYBottomBar) {
-        
+        topBar.isHidden = true
+        bottomBar.isHidden = true
+        segmentedView.isHidden = false
+        segmentedView.scrollToIndex(index: 0)
     }
     
     func voteButtonClick(owner: DBYBottomBar) {
@@ -135,10 +138,11 @@ extension DBYOfflineController: DBYBottomBarDelegate {
     func stateDidChange(owner: DBYBottomBar, state: DBYPlayState) {
         if state == .play {
             offlineManager.pause()
+            mainView.showVideoTipView(type: .pause, delegate: self)
         }
         if state == .pause {
-            videoTipView.set(title: "点击播放", message: "已暂停播放", icon: "video-tip")
             offlineManager.resume()
+            mainView.hiddenVideoTipView()
         }
         if state == .end {
             offlineManager.play()
@@ -173,4 +177,12 @@ extension DBYOfflineController: DBYSettingViewDelegate {
             offlineManager.setPlayRate(playRate)
         }
     }
+}
+//MARK: - DBYVideoTipViewDelegate
+extension DBYOfflineController: DBYVideoTipViewDelegate {
+    func continueClick(_ owner: DBYPauseTipView) {
+        
+    }
+    
+    
 }

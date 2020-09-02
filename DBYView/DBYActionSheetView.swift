@@ -168,8 +168,4 @@ class DBYActionSheetView: DBYView {
         frame = window?.bounds ?? .zero
         autoresizingMask = [.flexibleWidth, .flexibleHeight]
     }
-    
-    func dismiss() {
-        removeFromSuperview()
-    }
 }

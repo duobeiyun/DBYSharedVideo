@@ -37,22 +37,7 @@ func badgeUrl(role: Int, badgeDict:[String: Any]?) -> (String?, String?) {
 }
 
 public class DBY1VNController: UIViewController {
-    let messageLabFontSize: CGFloat = 12
-    let messageLabMargin: CGFloat = 18
-    let estimatedRowHeight: CGFloat = 44
-    let normalMargin: CGFloat = 8
-    let topBtnMargin: CGFloat = 5
-    let topBtnSize: CGSize = CGSize(width: 38, height: 38)
-    let popBtnSize: CGSize = CGSize(width: 38, height: 38)
-    let fromIdentifier: String = "DBYCommentFromCell"
-    let toIdentifier: String = "DBYCommentToCell"
-    let zanCell = "DBYZanCell"
-    
     @objc public var authinfo: DBYAuthInfo?
-    
-    var chatListViewFrame: CGRect = .zero
-    var smallPopViewFrame: CGRect = .zero
-    var largePopViewFrame: CGRect = .zero
     
     var isLoading: Bool = false
     var isStoping: Bool = false
@@ -63,28 +48,13 @@ public class DBY1VNController: UIViewController {
     lazy var bottomBar:DBYBottomBar = DBYBottomBar()
     
     lazy var mainView = DBYMainView()
-    lazy var chatContainer = DBYChatContainer()
     lazy var courseInfoView = DBYCourseInfoView()
-    lazy var videoTipView = DBYVideoTipView()
     lazy var segmentedView = DBYSegmentedView()
-    
     lazy var settingView = DBYSettingView()
     lazy var chatListView = DBYChatListView()
     
     lazy var netTipView = DBYNetworkTipView()
     lazy var internetReachability = DBYReachability.forInternetConnection()
-    
-    lazy var playbackBtn:DBYVerticalButton = {
-        let btn = DBYVerticalButton()
-        btn.setImage(UIImage(name:"playback-normal"), for: .normal)
-        btn.setImage(UIImage(name:"playback-selected"), for: .selected)
-        btn.setTitle("后台播放", for: .normal)
-        btn.titleLabel?.font = UIFont.systemFont(ofSize: 8)
-        btn.titleLabel?.textColor = UIColor.white
-        btn.titleLabel?.textAlignment = .center
-        btn.imageView?.contentMode = .center
-        return btn
-    }()
 
     //MARK: - override functions
     public override var preferredStatusBarStyle: UIStatusBarStyle {
@@ -98,7 +68,6 @@ public class DBY1VNController: UIViewController {
         navigationController?.setNavigationBarHidden(true, animated: animated)
         DBYSystemControl.shared.beginControl()
         mainView.showControlBar()
-        inner_layoutSubviews()
     }
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
@@ -118,49 +87,47 @@ public class DBY1VNController: UIViewController {
                                                object: nil)
         mainView.delegate = self
         addSubviews()
-        setViewStyle()
+        setViewFrameAndStyle()
         addActions()
-        setupOrientationUI()
-        setViewStyle()
         setupStaticUI()
+        setupPortraitUI()
         internetReachability?.startNotifier()
     }
     
     override public func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        mainView.showControlBar()
+        if size.width < size.height {
+            setupPortraitUI()
+        }else {
+            setupLandscapeUI()
+        }
         weak var weakSelf = self
         coordinator.animate(alongsideTransition: { (context) in
-            weakSelf?.setupOrientationUI()
-            weakSelf?.chatListView.reloadData()
         }) { (context) in
-            //hook方法，会改变子view的frame
-            weakSelf?.inner_layoutSubviews()
+            weakSelf?.mainView.showControlBar()
+            weakSelf?.chatListView.reloadData()
         }
+    }
+    public override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        updateStyles()
     }
     deinit {
         print("---deinit", type(of: self))
         NotificationCenter.default.removeObserver(self)
     }
     //MARK: - private functions
-    func inner_layoutSubviews() {
-        mainView.updateStyle()
-        segmentedView.updateStyle()
-        chatListView.updateStyle()
-    }
     func addSubviews() {
         view.addSubview(mainView)
         view.addSubview(topBar)
         view.addSubview(bottomBar)
         view.addSubview(segmentedView)
-        view.addSubview(settingView)
     }
     func addActions() {
-        playbackBtn.addTarget(self, action: #selector(playbackEnable), for: .touchUpInside)
+        
     }
     func setupStaticUI() {
         view.backgroundColor = UIColor.white
         
-        chatContainer.backgroundColor = UIColor.clear
         mainView.backgroundColor = UIColor.white
         segmentedView.barColor = DBYStyle.yellow
         segmentedView.hilightColor = DBYStyle.darkGray
@@ -168,40 +135,14 @@ public class DBY1VNController: UIViewController {
         
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
     }
-    func setupOrientationUI() {
-        if isPortrait(){
-            setupPortraitUI()
-        }else {
-            setupLandscapeUI()
-        }
-        settingView.isHidden = true
-    }
     func setupPortraitUI() {
         segmentedView.isHidden = false
     }
     func setupLandscapeUI() {
         segmentedView.isHidden = true
     }
-    func setupIphoneX() -> UIEdgeInsets {
-        var iphoneXTop:CGFloat = 20
-        var iphoneXLeft:CGFloat = 0
-        var iphoneXRight:CGFloat = 0
-        var iphoneXBottom:CGFloat = 0
-        if isIphoneXSeries() {
-            let orientation = UIApplication.shared.statusBarOrientation
-            if orientation == .landscapeLeft || orientation == .landscapeRight{
-                iphoneXLeft = 44
-                iphoneXRight = 44
-            }
-            if orientation == .portrait {
-                iphoneXTop = 44
-            }
-            iphoneXBottom = 34
-        }
-        return UIEdgeInsets(top: iphoneXTop, left: iphoneXLeft, bottom: iphoneXBottom, right: iphoneXRight)
-    }
-    func setViewStyle() {
-        let edge = setupIphoneX()
+    func setViewFrameAndStyle() {
+        let edge = getIphonexEdge()
         
         let size = UIScreen.main.bounds.size
         let videoHeight = size.width * 0.5625
@@ -210,17 +151,8 @@ public class DBY1VNController: UIViewController {
         mainView.portraitFrame = CGRect(x: 0, y: edge.top, width: size.width, height: videoHeight)
         mainView.landscapeFrame = CGRect(x: edge.left, y: 0, width: size.height - edge.right, height: size.width)
         
-        topBar.snp.makeConstraints { (make) in
-            make.top.left.right.equalTo(mainView)
-            make.height.equalTo(60)
-        }
-        bottomBar.snp.makeConstraints { (make) in
-            make.bottom.left.right.equalTo(mainView)
-            make.height.equalTo(60)
-        }
-        
         segmentedView.portraitFrame = CGRect(x: 0, y: segmentedViewMinX, width: size.width, height: segmentedViewHeight)
-        segmentedView.landscapeFrame = CGRect(x: size.height - size.width - edge.right, y: -44, width: size.width, height: size.width + 44)
+        segmentedView.landscapeFrame = CGRect(x: size.height, y: -44, width: size.width, height: size.width + 44)
         
         settingView.portraitFrame = segmentedView.portraitFrame
         settingView.landscapeFrame = CGRect(x: size.height - size.width - edge.right, y: 0, width: size.width, height: size.width)
@@ -230,14 +162,31 @@ public class DBY1VNController: UIViewController {
         
         settingView.setBackgroundColor(color: DBYStyle.lightGray, forState: .portrait)
         settingView.setBackgroundColor(color: DBYStyle.lightAlpha, forState: .landscape)
+        
+        topBar.snp.makeConstraints { (make) in
+            make.top.left.right.equalTo(mainView)
+            make.height.equalTo(60)
+        }
+        bottomBar.snp.makeConstraints { (make) in
+            make.bottom.left.right.equalTo(mainView)
+            make.height.equalTo(60)
+        }
+        updateStyles()
     }
-
+    func updateStyles() {
+        mainView.updateStyle()
+        segmentedView.updateStyle()
+        chatListView.updateStyle()
+        settingView.updateStyle()
+    }
     func showSettingView() {
+        view.addSubview(settingView)
         UIView.animate(withDuration: 0.25) {
             self.settingView.isHidden = false
         }
     }
     func hiddenSettingView() {
+        settingView.removeFromSuperview()
         UIView.animate(withDuration: 0.25) {
             self.settingView.isHidden = true
         }
@@ -255,14 +204,6 @@ public class DBY1VNController: UIViewController {
     func toPortrait() {
         UIDevice.current.setValue(UIDeviceOrientation.unknown.rawValue, forKey: "orientation")
         UIDevice.current.setValue(UIDeviceOrientation.portrait.rawValue, forKey: "orientation")
-    }
-    func showVideoTipView() {
-        videoTipView.frame = mainView.bounds
-        videoTipView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        mainView.addSubview(videoTipView)
-    }
-    func hiddenVideoTipView() {
-        videoTipView.removeFromSuperview()
     }
     
     func createVideoView(uid: String) -> DBYStudentVideoView {
@@ -380,29 +321,25 @@ extension DBY1VNController: DBYMainViewDelegate {
         
     }
     
-    func tapGesture(owner: DBYMainView, isSelected: Bool) {
-        if !topBar.isHidden {
-            return
-        }
-        if isPortrait() {
-            return
-        }
-        segmentedView.isHidden = true
-        settingView.isHidden = true
-    }
-    
     func willHiddenControlBar(owner: DBYMainView) {
+        if !segmentedView.isHidden {
+            let rect = segmentedView.landscapeFrame
+            UIView.animate(withDuration: 0.25) {
+                self.segmentedView.frame = rect
+            }
+            segmentedView.isHidden = true
+            return
+        }
+        if !settingView.isHidden {
+            settingView.isHidden = true
+            return
+        }
+        
         topBar.isHidden = true
         bottomBar.isHidden = true
-        if isPortrait() {
-            return
-        }
     }
     func willShowControlBar(owner: DBYMainView) {
         topBar.isHidden = false
         bottomBar.isHidden = false
-        if isPortrait() {
-            return
-        }
     }
 }

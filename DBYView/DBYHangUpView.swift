@@ -81,7 +81,7 @@ class DBYHangUpView: DBYNibView {
         }
 //        slider.set(value:value)
     }
-    func dismiss() {
+    override func dismiss() {
         UIView.animate(withDuration: 0.25) {
             self.isHidden = true
         }

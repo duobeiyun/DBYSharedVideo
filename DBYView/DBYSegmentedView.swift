@@ -207,7 +207,7 @@ class DBYSegmentedContainerView: UIScrollView {
         setContentOffset(CGPoint(x: offset, y: 0), animated: true)
     }
 }
-class DBYSegmentedView: UIView {
+class DBYSegmentedView: DBYView {
     var titleView:DBYSegmentedTitleView?
     var containerView:DBYSegmentedContainerView?
     
@@ -235,16 +235,7 @@ class DBYSegmentedView: UIView {
     var titleViewHeight:CGFloat = 44
     var scrollIndex:Int = 0
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupUI()
-    }
-    
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupUI()
-    }
-    func setupUI() {
+    override func setupUI() {
         titleView = DBYSegmentedTitleView()
         containerView = DBYSegmentedContainerView()
         

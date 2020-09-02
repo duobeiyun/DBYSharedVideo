@@ -31,13 +31,13 @@ public class DBYButton: UIButton {
         if let iv = imageView {
             bringSubviewToFront(iv)
         }
+        updateStyle()
     }
     
     func setupUI() {
         layer.addSublayer(backgroundLayer)
     }
-    @objc
-    public func setBackgroudnStyle(fillColor: UIColor,
+    @objc public func setBackgroudnStyle(fillColor: UIColor,
                                    strokeColor: UIColor,
                                    radius: CGFloat) {
         backgroundLayer.fillColor = fillColor.cgColor

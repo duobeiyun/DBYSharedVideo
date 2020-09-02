@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="DBYPauseTipView" customModule="DBYSharedVideo" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="258"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="pause-bg" translatesAutoresizingMaskIntoConstraints="NO" id="0iG-Bx-XJr">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="258"/>
+                </imageView>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2Gg-WW-7g5" customClass="DBYButton" customModule="DBYSharedVideo" customModuleProvider="target">
+                    <rect key="frame" x="107.5" y="107" width="160" height="44"/>
+                    <color key="backgroundColor" red="1" green="0.83137254900000002" blue="0.35294117650000001" alpha="1" colorSpace="calibratedRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="44" id="aM3-Wg-0xn"/>
+                        <constraint firstAttribute="width" constant="160" id="lJS-RR-bia"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                    <state key="normal">
+                        <color key="titleColor" red="0.34817281369999997" green="0.22831133009999999" blue="0.14498910309999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    </state>
+                    <connections>
+                        <action selector="clickWithSender:" destination="iN0-l3-epB" eventType="touchUpInside" id="vHI-6M-MBV"/>
+                    </connections>
+                </button>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="pause-btn" translatesAutoresizingMaskIntoConstraints="NO" id="Mrt-L3-U2b">
+                    <rect key="frame" x="111.5" y="113" width="32" height="32"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="32" id="YT2-oQ-hwv"/>
+                        <constraint firstAttribute="height" constant="32" id="hX3-6a-zIB"/>
+                    </constraints>
+                </imageView>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="点击播放" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OML-p0-fro">
+                    <rect key="frame" x="161.5" y="117" width="82" height="24"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                    <color key="textColor" red="0.34817281369999997" green="0.22831133009999999" blue="0.14498910309999999" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" red="0.25108450651168823" green="0.24697166681289673" blue="0.27988693118095398" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="0iG-Bx-XJr" secondAttribute="bottom" id="5lU-5j-17P"/>
+                <constraint firstItem="OML-p0-fro" firstAttribute="centerY" secondItem="2Gg-WW-7g5" secondAttribute="centerY" id="7MO-l9-Sbc"/>
+                <constraint firstAttribute="trailing" secondItem="0iG-Bx-XJr" secondAttribute="trailing" id="7VD-S8-7vE"/>
+                <constraint firstItem="0iG-Bx-XJr" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="D5K-EZ-PGU"/>
+                <constraint firstItem="Mrt-L3-U2b" firstAttribute="centerY" secondItem="2Gg-WW-7g5" secondAttribute="centerY" id="FKz-vn-WCh"/>
+                <constraint firstItem="Mrt-L3-U2b" firstAttribute="leading" secondItem="2Gg-WW-7g5" secondAttribute="leading" constant="4" id="NxN-YG-dsh"/>
+                <constraint firstItem="2Gg-WW-7g5" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" id="PNZ-hw-7Xu"/>
+                <constraint firstItem="2Gg-WW-7g5" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="fzI-gj-vyc"/>
+                <constraint firstItem="OML-p0-fro" firstAttribute="trailing" secondItem="2Gg-WW-7g5" secondAttribute="trailing" constant="-24" id="gra-Ny-bwv"/>
+                <constraint firstItem="0iG-Bx-XJr" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="iYO-r9-XzQ"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="iconView" destination="Mrt-L3-U2b" id="F8N-rW-YAK"/>
+                <outlet property="label" destination="OML-p0-fro" id="jvo-vR-H8c"/>
+                <outlet property="playBtn" destination="2Gg-WW-7g5" id="PsB-uZ-pXI"/>
+            </connections>
+            <point key="canvasLocation" x="296.37681159420293" y="-28.125"/>
+        </view>
+        <view contentMode="scaleToFill" id="C6z-t5-rE4" customClass="DBYLoadingTipView" customModule="DBYSharedVideo" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="305"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icon-video-loading" translatesAutoresizingMaskIntoConstraints="NO" id="Ms1-bB-rcY">
+                    <rect key="frame" x="67.5" y="88.5" width="240" height="128"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="240" id="3Vc-BZ-kRU"/>
+                        <constraint firstAttribute="height" constant="128" id="oQD-Sd-WjX"/>
+                    </constraints>
+                </imageView>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Yxr-2F-y0Z" customClass="DBYCornerButton" customModule="DBYSharedVideo" customModuleProvider="target">
+                    <rect key="frame" x="0.0" y="261" width="150" height="24"/>
+                    <color key="backgroundColor" red="1" green="0.83137254901960778" blue="0.3529411764705882" alpha="1" colorSpace="calibratedRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="150" id="Fg7-XF-tVP"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                    <state key="normal" title=" 视频加载中">
+                        <color key="titleColor" red="0.35044014449999999" green="0.227529496" blue="0.144643575" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    </state>
+                </button>
+            </subviews>
+            <color key="backgroundColor" red="0.21176470589999999" green="0.25490196079999999" blue="0.32156862749999998" alpha="0.59999999999999998" colorSpace="calibratedRGB"/>
+            <constraints>
+                <constraint firstItem="Yxr-2F-y0Z" firstAttribute="leading" secondItem="C6z-t5-rE4" secondAttribute="leading" id="7hW-Vp-r32"/>
+                <constraint firstAttribute="bottom" secondItem="Yxr-2F-y0Z" secondAttribute="bottom" constant="20" id="LwT-qp-9JI"/>
+                <constraint firstItem="Ms1-bB-rcY" firstAttribute="centerY" secondItem="C6z-t5-rE4" secondAttribute="centerY" id="YQw-Ce-ase"/>
+                <constraint firstItem="Ms1-bB-rcY" firstAttribute="centerX" secondItem="C6z-t5-rE4" secondAttribute="centerX" id="z3M-A2-c9u"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="imageView" destination="Ms1-bB-rcY" id="KWT-au-xZw"/>
+                <outlet property="tipBtn" destination="Yxr-2F-y0Z" id="rlg-JS-b9q"/>
+            </connections>
+            <point key="canvasLocation" x="296.37681159420293" y="214.62053571428569"/>
+        </view>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="cq1-C0-Dmf" customClass="DBYNetworkTipView" customModule="DBYSharedVideo" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="376" height="292"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HVy-BJ-0Td">
+                    <rect key="frame" x="122" y="156" width="132" height="38"/>
+                    <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="0.5" colorSpace="custom" customColorSpace="sRGB"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="38" id="Xnp-5r-Zy6"/>
+                        <constraint firstAttribute="width" constant="132" id="qip-7l-53p"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="13"/>
+                    <state key="normal" title="  继续播放" image="btn-play"/>
+                    <connections>
+                        <action selector="confirmClick" destination="cq1-C0-Dmf" eventType="touchUpInside" id="L0W-KP-oLr"/>
+                    </connections>
+                </button>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="正在使用非WiFi网络，播放将消耗流量" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bMJ-fR-cy2">
+                    <rect key="frame" x="67" y="108.5" width="242.5" height="17"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" red="0.2901960784" green="0.2901960784" blue="0.2901960784" alpha="1" colorSpace="calibratedRGB"/>
+            <constraints>
+                <constraint firstItem="HVy-BJ-0Td" firstAttribute="centerX" secondItem="cq1-C0-Dmf" secondAttribute="centerX" id="4m5-XN-RjW"/>
+                <constraint firstItem="bMJ-fR-cy2" firstAttribute="centerY" secondItem="cq1-C0-Dmf" secondAttribute="centerY" multiplier="0.8" id="V1p-D5-UwJ"/>
+                <constraint firstItem="HVy-BJ-0Td" firstAttribute="centerY" secondItem="cq1-C0-Dmf" secondAttribute="centerY" multiplier="1.2" id="oVj-OG-PLo"/>
+                <constraint firstItem="bMJ-fR-cy2" firstAttribute="centerX" secondItem="cq1-C0-Dmf" secondAttribute="centerX" id="zyP-aG-JP2"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="confirmBtn" destination="HVy-BJ-0Td" id="GAz-gN-0xG"/>
+                <outlet property="tipLab" destination="bMJ-fR-cy2" id="eHq-h8-wxn"/>
+            </connections>
+            <point key="canvasLocation" x="297.10144927536237" y="464.0625"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="btn-play" width="24" height="24"/>
+        <image name="icon-video-loading" width="68" height="12"/>
+        <image name="pause-bg" width="375" height="211"/>
+        <image name="pause-btn" width="34" height="34"/>
+    </resources>
+</document>

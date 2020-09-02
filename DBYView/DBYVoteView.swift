@@ -21,7 +21,7 @@ class DBYBoxLabel: UILabel {
         super.drawText(in: rect.inset(by: margin))
     }
 }
-class DBYVoteView: UIView {
+class DBYVoteView: DBYView {
     let icons: [String] = [
         "icon-a",
         "icon-b",
@@ -87,6 +87,19 @@ class DBYVoteView: UIView {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
+    override func setupUI() {
+        tipLab.setTextColor(color:DBYStyle.lightGray, forState: .landscape)
+        tipLab.setTextColor(color:DBYStyle.darkGray, forState: .portrait)
+        
+        tipLab.setBackgroundColor(color:DBYStyle.lightAlpha, forState: .landscape)
+        tipLab.setBackgroundColor(color:DBYStyle.lightGray, forState: .portrait)
+        
+        self.setBackgroundColor(color:DBYStyle.lightAlpha, forState: .landscape)
+        self.setBackgroundColor(color:DBYStyle.lightGray, forState: .portrait)
+        
+        tableView.setBackgroundColor(color:DBYStyle.lightAlpha, forState: .landscape)
+        tableView.setBackgroundColor(color:DBYStyle.lightGray, forState: .portrait)
+    }
     override func layoutSubviews() {
         super.layoutSubviews()
         tipLab.frame = CGRect(x: 0,
@@ -97,22 +110,6 @@ class DBYVoteView: UIView {
                                  y: 40,
                                  width: bounds.width,
                                  height: bounds.height - 20)
-    }
-    override func setTheme(_ theme: DBYViewTheme) {
-        super.setTheme(theme)
-        if theme == .dark {
-            tipLab.textColor = DBYStyle.lightGray
-            tipLab.backgroundColor = DBYStyle.lightAlpha
-            backgroundColor = DBYStyle.lightAlpha
-            tableView.backgroundColor = DBYStyle.lightAlpha
-        }
-        if theme == .light {
-            tipLab.textColor = DBYStyle.darkGray
-            tipLab.backgroundColor = DBYStyle.lightGray
-            backgroundColor = DBYStyle.lightGray
-            tableView.backgroundColor = DBYStyle.lightGray
-        }
-        tableView.reloadData()
     }
     func setVotes(votes: [String]) {
         countDict.removeAll()
@@ -150,7 +147,7 @@ extension DBYVoteView: UITableViewDataSource {
         let count = countDict[indexPath.row] ?? 0
         let colors = gradientColors[indexPath.row]
         cell.contenColor = tableView.backgroundColor
-        if theme == .light {
+        if isLandscape() {
             cell.borderColor = DBYStyle.middleGray
         }else {
             cell.borderColor = UIColor.clear

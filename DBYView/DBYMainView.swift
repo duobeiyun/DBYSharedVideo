@@ -12,7 +12,6 @@ protocol DBYMainViewDelegate: NSObjectProtocol {
     func lightnessChange(owner:DBYMainView, volume: CGFloat)
     func willHiddenControlBar(owner:DBYMainView)
     func willShowControlBar(owner:DBYMainView)
-    func tapGesture(owner:DBYMainView, isSelected: Bool)
 }
 
 class DBYMainView: DBYView {
@@ -61,7 +60,6 @@ class DBYMainView: DBYView {
         
         let pan = UIPanGestureRecognizer(target: self,
                                          action: #selector(gestureControl(pan:)))
-        
         addGestureRecognizer(pan)
     }
     @objc func oneTap(tap:UITapGestureRecognizer) {
@@ -70,7 +68,6 @@ class DBYMainView: DBYView {
         }else {
             hiddenControlBar()
         }
-        delegate?.tapGesture(owner: self, isSelected: controlBarIsHidden)
     }
     @objc func gestureControl(pan:UIPanGestureRecognizer) {
         switch pan.state {
@@ -94,6 +91,45 @@ class DBYMainView: DBYView {
             default:
                 break
         }
+    }
+    func showVideoTipView(type: DBYTipType, delegate: DBYVideoTipViewDelegate?) {
+        guard let pauseTipView = DBYPauseTipView.loadNibView() else {
+            return
+        }
+        
+        pauseTipView.tag = tag + 1
+        pauseTipView.frame = bounds
+        pauseTipView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addSubview(pauseTipView)
+    }
+    func hiddenVideoTipView() {
+        viewWithTag(tag + 1)?.removeFromSuperview()
+    }
+    func showNetworkTipView(delegate: DBYNetworkTipViewDelegate?) {
+        guard let networkView = DBYNetworkTipView.loadNibView() else {
+            return
+        }
+        networkView.delegate = delegate
+        networkView.tag = tag + 2
+        networkView.frame = bounds
+        networkView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addSubview(networkView)
+    }
+    func hiddenNetworkTipView() {
+        viewWithTag(tag + 2)?.removeFromSuperview()
+    }
+    func showLoadingView(delegate: DBYLoadingTipViewDelegate?) {
+        guard let loadingView = DBYLoadingTipView.loadNibView() else {
+            return
+        }
+        loadingView.delegate = delegate
+        loadingView.tag = tag + 3
+        loadingView.frame = bounds
+        loadingView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addSubview(loadingView)
+    }
+    func hiddenLoadingView() {
+        viewWithTag(tag + 3)?.removeFromSuperview()
     }
     func startTimer() {
         voiceTimer = ZFTimer.startTimer(interval: 5, repeats: false, block: {[weak self] in

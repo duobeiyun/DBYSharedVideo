@@ -13,12 +13,21 @@ import DBYSDK_dylib
 public class DBYOnlineController: DBYPlaybackController {
     var roomConfig: DBYRoomConfig?
     lazy var playbackManager:DBYOnlinePlayBackManager = DBYOnlinePlayBackManager()
-    
+    lazy var playbackBtn:DBYVerticalButton = {
+        let btn = DBYVerticalButton()
+        btn.setImage(UIImage(name:"playback-normal"), for: .normal)
+        btn.setImage(UIImage(name:"playback-selected"), for: .selected)
+        btn.setTitle("后台播放", for: .normal)
+        btn.titleLabel?.font = UIFont.systemFont(ofSize: 8)
+        btn.titleLabel?.textColor = UIColor.white
+        btn.titleLabel?.textAlignment = .center
+        btn.imageView?.contentMode = .center
+        return btn
+    }()
     //MARK: - override functions
     override public func viewDidLoad() {
         super.viewDidLoad()
         
-        netTipView.delegate = self
         topBar.delegate = self
         bottomBar.delegate = self
         settingView.delegate = self
@@ -96,11 +105,15 @@ public class DBYOnlineController: DBYPlaybackController {
     override public func addSubviews() {
         super.addSubviews()
     }
+    override func addActions() {
+        playbackBtn.addTarget(self, action: #selector(playbackEnable), for: .touchUpInside)
+    }
     func registerBlocks() {
         
     }
     override func setupStaticUI() {
         super.setupStaticUI()
+        chatListView.chatBar.isHidden = true
         settingView.set(buttons: [playbackBtn])
     }
     override func setupLandscapeUI() {
@@ -110,10 +123,6 @@ public class DBYOnlineController: DBYPlaybackController {
     override func setupPortraitUI() {
         super.setupPortraitUI()
         topBar.set(type: .portrait)
-    }
-    override func setViewStyle() {
-        super.setViewStyle()
-        
     }
     
     override func reachabilityChanged(note:NSNotification) {
@@ -143,7 +152,7 @@ public class DBYOnlineController: DBYPlaybackController {
             playbackManager.pausePlay()
             break
         case ReachableViaWiFi:
-            netTipView.hidden()
+            mainView.hiddenNetworkTipView()
             playbackManager.resumePlay()
             break
         default:
@@ -228,8 +237,8 @@ extension DBYOnlineController:DBYOnlinePlayBackManagerDelegate {
     }
 }
 extension DBYOnlineController:DBYNetworkTipViewDelegate {
-    func confirmClick(_ owner: DBYNibView) {
-        netTipView.hidden()
+    func confirmClick(_ owner: DBYNetworkTipView) {
+        mainView.hiddenNetworkTipView()
         playbackManager.resumePlay()
     }
 }
@@ -246,7 +255,10 @@ extension DBYOnlineController: DBYTopBarDelegate {
 //MARK: - DBYBottomBarDelegate
 extension DBYOnlineController: DBYBottomBarDelegate {
     func chatButtonClick(owner: DBYBottomBar) {
-        
+        topBar.isHidden = true
+        bottomBar.isHidden = true
+        segmentedView.isHidden = false
+        segmentedView.scrollToIndex(index: 0)
     }
     
     func voteButtonClick(owner: DBYBottomBar) {
@@ -260,11 +272,11 @@ extension DBYOnlineController: DBYBottomBarDelegate {
     func stateDidChange(owner: DBYBottomBar, state: DBYPlayState) {
         if state == .pause {
             recoverManager()
-            videoTipView.set(type: .audio)
+            mainView.showVideoTipView(type: .audio, delegate: self)
         }
         if state == .play {
             pauseManager()
-            videoTipView.set(type: .pause)
+            mainView.showVideoTipView(type: .pause, delegate: self)
         }
         if state == .end {
             recoverManager()
@@ -286,12 +298,12 @@ extension DBYOnlineController: DBYBottomBarDelegate {
         beginInteractive = false
         timeTipLab.isHidden = true
         
-        mainView.videoView.startLoading()
+        mainView.showLoadingView(delegate: nil)
         playbackManager.seekToTime(with: TimeInterval(value), completeHandler: { [weak self] message in
             if let msg = message {
                 DBYGlobalMessage.shared().showText(msg)
             }
-            self?.mainView.videoView.stopLoading()
+            self?.mainView.hiddenLoadingView()
             self?.bottomBar.set(state: .play)
         })
     }
@@ -314,4 +326,10 @@ extension DBYOnlineController: DBYSettingViewDelegate {
             }
         }
     }
+}
+extension DBYOnlineController: DBYVideoTipViewDelegate {
+    func continueClick(_ owner: DBYPauseTipView) {
+        
+    }
+    
 }

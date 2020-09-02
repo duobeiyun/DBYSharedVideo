@@ -25,6 +25,9 @@ class DBYNibView: UIView {
         super.awakeFromNib()
         setupUI()
     }
+    override func layoutSubviews() {
+        super.layoutSubviews()
+    }
     func setupUI() {
         
     }
