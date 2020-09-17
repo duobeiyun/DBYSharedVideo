@@ -124,7 +124,7 @@ extension DBYOfflineController: DBYBottomBarDelegate {
         topBar.isHidden = true
         bottomBar.isHidden = true
         segmentedView.isHidden = false
-        segmentedView.scrollToIndex(index: 0)
+        segmentedView.scrollToIndex(index: 0, animated: false)
     }
     
     func voteButtonClick(owner: DBYBottomBar) {
@@ -135,7 +135,7 @@ extension DBYOfflineController: DBYBottomBarDelegate {
         toLandscape()
     }
     
-    func stateDidChange(owner: DBYBottomBar, state: DBYPlayState) {
+    func playStateDidChange(owner: DBYBottomBar, state: DBYPlayState) {
         if state == .play {
             offlineManager.pause()
             mainView.showVideoTipView(type: .pause, delegate: self)

@@ -23,7 +23,6 @@ class DBYVoteViewCell: UITableViewCell {
     var progress:CGFloat = 0
     var state:State = .enable
     var contenColor:UIColor? = DBYStyle.lightGray
-    var borderColor:UIColor? = DBYStyle.lightGray
     
     weak var delegate: DBYVoteViewCellDelegate?
     
@@ -41,8 +40,8 @@ class DBYVoteViewCell: UITableViewCell {
     @IBOutlet weak var voteBtn:DBYButton! {
         didSet {
             let radius = voteBtn.bounds.height * 0.5
-            voteBtn.setBackgroudnStyle(fillColor: DBYStyle.yellow,
-                                       strokeColor: DBYStyle.brown,
+            voteBtn.setBackgroundStyle(fillColor: DBYStyle.yellow,
+                                       borderColor: DBYStyle.brown,
                                        radius: radius)
         }
     }
@@ -65,7 +64,7 @@ class DBYVoteViewCell: UITableViewCell {
         super.layoutSubviews()
         
         backgroundLayer.fillColor = contenColor?.cgColor
-        backgroundLayer.strokeColor = borderColor?.cgColor
+        backgroundLayer.strokeColor = nil
         
         let rect = CGRect(x: 12, y: 2,
                           width: bounds.width - 24,
@@ -76,13 +75,13 @@ class DBYVoteViewCell: UITableViewCell {
         
         let radius = voteBtn.bounds.height * 0.5
         if state == .disable {
-            voteBtn.setBackgroudnStyle(fillColor: DBYStyle.middleGray,
-                                       strokeColor: DBYStyle.brown,
+            voteBtn.setBackgroundStyle(fillColor: DBYStyle.middleGray,
+                                       borderColor: DBYStyle.brown,
                                        radius: radius)
             voteBtn.setTitleColor(UIColor.white, for: .normal)
         }else {
-            voteBtn.setBackgroudnStyle(fillColor: DBYStyle.yellow,
-                                       strokeColor: DBYStyle.brown,
+            voteBtn.setBackgroundStyle(fillColor: DBYStyle.yellow,
+                                       borderColor: DBYStyle.brown,
                                        radius: radius)
             voteBtn.setTitleColor(DBYStyle.brown, for: .normal)
         }

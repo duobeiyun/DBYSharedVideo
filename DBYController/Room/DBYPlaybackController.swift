@@ -36,7 +36,7 @@ public class DBYPlaybackController: DBY1VNController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         
-        segmentedView.scrollToIndex(index: 0)
+        segmentedView.scrollToIndex(index: 0, animated: false)
     }
     override public func addSubviews() {
         super.addSubviews()

@@ -35,7 +35,8 @@ class DBYCommentController: DBYViewController {
     }
     @IBOutlet weak var sendBtn: UIButton! {
         didSet {
-            sendBtn.setRoundBackground(color: btnNormalColor)
+            sendBtn.setRoundCorner()
+            sendBtn.backgroundColor = btnNormalColor
         }
     }
     
@@ -98,7 +99,7 @@ class DBYCommentController: DBYViewController {
 extension DBYCommentController:UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         if textView.hasText {
-            sendBtn.setRoundBackground(color: btnHilightColor)
+            sendBtn.backgroundColor = btnHilightColor
         }
         if textView.markedTextRange == nil {
             numberLab.text = "\(textView.text.count)/128"

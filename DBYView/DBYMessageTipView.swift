@@ -85,12 +85,12 @@ class DBYMessageTipView: DBYView {
         acceptBtn.frame = refuseBtn.frame.offsetBy(dx: -btnWidth - hMargin, dy: 0)
         gradient.frame = bounds
         
-        acceptBtn.setBackgroudnStyle(fillColor: DBYStyle.yellow,
-                                     strokeColor: DBYStyle.brown,
+        acceptBtn.setBackgroundStyle(fillColor: DBYStyle.yellow,
+                                     borderColor: DBYStyle.brown,
                                      radius: btnHeight * 0.5)
         
-        refuseBtn.setBackgroudnStyle(fillColor: UIColor.white,
-                                     strokeColor: DBYStyle.brown,
+        refuseBtn.setBackgroundStyle(fillColor: UIColor.white,
+                                     borderColor: DBYStyle.brown,
                                      radius: btnHeight * 0.5)
         
         let radius = bounds.height * 0.5

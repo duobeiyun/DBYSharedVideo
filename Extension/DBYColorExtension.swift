@@ -6,7 +6,7 @@
 //  Copyright © 2019 钟凡. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 extension UIColor {
     public convenience init(red: Int, green: Int, blue: Int) {

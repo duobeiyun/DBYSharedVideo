@@ -28,7 +28,3 @@ class ZFTimer {
         timer = nil
     }
 }
-extension Timer {
-    
-    
-}

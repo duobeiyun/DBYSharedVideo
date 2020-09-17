@@ -96,7 +96,7 @@ class DBYMainView: DBYView {
         guard let pauseTipView = DBYPauseTipView.loadNibView() else {
             return
         }
-        
+        pauseTipView.delegate = delegate
         pauseTipView.tag = tag + 1
         pauseTipView.frame = bounds
         pauseTipView.autoresizingMask = [.flexibleWidth, .flexibleHeight]

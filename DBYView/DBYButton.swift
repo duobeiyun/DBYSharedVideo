@@ -9,7 +9,6 @@
 import UIKit
 
 public class DBYButton: UIButton {
-    lazy var backgroundLayer: CAShapeLayer = CAShapeLayer()
     var layerRadius: CGFloat = 0
     
     override init(frame: CGRect) {
@@ -25,23 +24,10 @@ public class DBYButton: UIButton {
     }
     override public func layoutSubviews() {
         super.layoutSubviews()
-        let path = UIBezierPath(roundedRect: bounds,
-                                cornerRadius: layerRadius)
-        backgroundLayer.path = path.cgPath
-        if let iv = imageView {
-            bringSubviewToFront(iv)
-        }
+        
         updateStyle()
     }
     
     func setupUI() {
-        layer.addSublayer(backgroundLayer)
-    }
-    @objc public func setBackgroudnStyle(fillColor: UIColor,
-                                   strokeColor: UIColor,
-                                   radius: CGFloat) {
-        backgroundLayer.fillColor = fillColor.cgColor
-        backgroundLayer.strokeColor = strokeColor.cgColor
-        layerRadius = radius
     }
 }

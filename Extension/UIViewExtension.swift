@@ -5,7 +5,7 @@
 //  Created by 钟凡 on 2020/4/21.
 //
 
-import Foundation
+import UIKit
 
 private var portraitFrameKey = "portraitFrameKey";
 private var landscapeFrameKey = "landscapeFrameKey";
@@ -32,6 +32,7 @@ public protocol ZFViewStyleable {
     func updateStyle()
 }
 protocol ZFNibLoader {
+    static func loadNibView() -> Self?
     static func loadViewsFromNib(name: String, bundle:Bundle) -> [UIView]?
 }
 extension ZFNibLoader {
@@ -93,14 +94,23 @@ extension UIView:ZFViewStyleable {
     @objc public func updateStyle() {
         let orientation = UIApplication.shared.statusBarOrientation
         if orientation == .portrait {
+            if let label = self as? UILabel {
+                label.textColor = textColorforState(state: .portrait)
+            }
             frame = portraitFrame
             backgroundColor = backgroundColorforState(state: .portrait)
         }
         if orientation == .landscapeLeft {
+            if let label = self as? UILabel {
+                label.textColor = textColorforState(state: .landscape)
+            }
             frame = landscapeFrame
             backgroundColor = backgroundColorforState(state: .landscape)
         }
         if orientation == .landscapeRight {
+            if let label = self as? UILabel {
+                label.textColor = textColorforState(state: .landscape)
+            }
             frame = landscapeFrame
             backgroundColor = backgroundColorforState(state: .landscape)
         }

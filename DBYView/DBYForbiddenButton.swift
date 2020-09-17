@@ -8,6 +8,10 @@
 import UIKit
 
 class DBYForbiddenButton: UIView, ZFNibLoader {
+    static func loadNibView() -> Self? {
+        return portraitView()
+    }
+    
     static let bundle = Bundle(for: DBYForbiddenButton.self)
     public static func landscapeView() -> Self? {
         let views = loadViewsFromNib(name: "DBYForbiddenButton", bundle:bundle)

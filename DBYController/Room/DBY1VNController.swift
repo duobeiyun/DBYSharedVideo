@@ -229,6 +229,7 @@ public class DBY1VNController: UIViewController {
     }
     func adjustVideoViewFrame(videoView: UIView?) {
         let viewW = view.bounds.width
+        let viewH = view.bounds.height
         let halfW = viewW * 0.5
         var rect = videoView?.frame ?? .zero
         if rect.midX < 0 || rect.midX <= halfW {
@@ -236,6 +237,12 @@ public class DBY1VNController: UIViewController {
         }
         if rect.midX > halfW {
             rect.origin.x = viewW - rect.width
+        }
+        if rect.midY < 0 {
+            rect.origin.y = 0
+        }
+        if rect.midY > viewH {
+            rect.origin.y = viewH
         }
         UIView.animate(withDuration: 0.25) {
             videoView?.frame = rect
@@ -322,15 +329,15 @@ extension DBY1VNController: DBYMainViewDelegate {
     }
     
     func willHiddenControlBar(owner: DBYMainView) {
-        if !segmentedView.isHidden {
+        if !segmentedView.isHidden && isLandscape() {
             let rect = segmentedView.landscapeFrame
             UIView.animate(withDuration: 0.25) {
                 self.segmentedView.frame = rect
+                self.segmentedView.isHidden = true
             }
-            segmentedView.isHidden = true
             return
         }
-        if !settingView.isHidden {
+        if !settingView.isHidden && isLandscape() {
             settingView.isHidden = true
             return
         }

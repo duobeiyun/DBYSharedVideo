@@ -6,7 +6,7 @@
 //  Copyright © 2018 钟凡. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 extension String {
     public static func playTime(time:Int) -> String {

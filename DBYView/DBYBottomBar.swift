@@ -24,7 +24,7 @@ protocol DBYBottomBarDelegate: NSObjectProtocol {
     func chatButtonClick(owner: DBYBottomBar)
     func voteButtonClick(owner: DBYBottomBar)
     func fullscreenButtonClick(owner: DBYBottomBar)
-    func stateDidChange(owner: DBYBottomBar, state: DBYPlayState)
+    func playStateDidChange(owner: DBYBottomBar, state: DBYPlayState)
     func progressWillChange(owner: DBYBottomBar, value:Float)
     func progressDidChange(owner: DBYBottomBar, value:Float)
     func progressEndChange(owner: DBYBottomBar, value:Float)
@@ -38,8 +38,8 @@ class DBYBottomBar: DBYView {
     
     lazy var chatBtn:DBYButton = {
         let btn = DBYButton()
-        btn.setBackgroudnStyle(fillColor: DBYStyle.halfBlack,
-                               strokeColor: UIColor.clear,
+        btn.setBackgroundStyle(fillColor: DBYStyle.halfBlack,
+                               borderColor: UIColor.clear,
                                radius: 15)
         btn.setImage(UIImage(name: "btn-chat"), for: .normal)
         let att = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12),
@@ -50,8 +50,8 @@ class DBYBottomBar: DBYView {
     }()
     lazy var voteBtn:DBYButton = {
         let btn = DBYButton()
-        btn.setBackgroudnStyle(fillColor: DBYStyle.halfBlack,
-                               strokeColor: UIColor.clear,
+        btn.setBackgroundStyle(fillColor: DBYStyle.halfBlack,
+                               borderColor: UIColor.clear,
                                radius: 15)
         btn.setImage(UIImage(name: "btn-vote"),
                      for: .normal)
@@ -157,7 +157,7 @@ class DBYBottomBar: DBYView {
     }
     @objc func playButtonClick() {
         playBtn.isSelected = !playBtn.isSelected
-        delegate?.stateDidChange(owner: self, state: playState)
+        delegate?.playStateDidChange(owner: self, state: playState)
     }
     @objc func chatButtonClick() {
         delegate?.chatButtonClick(owner: self)

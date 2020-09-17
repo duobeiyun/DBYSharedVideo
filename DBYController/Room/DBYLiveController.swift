@@ -120,9 +120,6 @@ public class DBYLiveController: DBY1VNController {
         
         mainView.addSubview(marqueeView)
         mainView.addSubview(watermarkView)
-        
-//        view.addSubview(zanButton)
-//        view.addSubview(zanView)
     }
     override func addActions() {
         super.addActions()
@@ -310,7 +307,7 @@ public class DBYLiveController: DBY1VNController {
         }
         voteView.delegate = nil
         bottomBar.hiddenVoteButton()
-        segmentedView.removeData(with: "答题")
+        segmentedView.removeData(with: "答题", animated: false)
     }
     func updateMicListViewFrame() {
         let messageLabWidth = micListView.getMessageWidth()
@@ -393,7 +390,7 @@ public class DBYLiveController: DBY1VNController {
             model.label = label
             segmentedView.appendData(model: model)
         }
-        segmentedView.scrollToIndex(index: 0)
+        segmentedView.scrollToIndex(index: 0, animated: false)
     }
     func setQuestions(list: [[String:Any]]) {
         questions = list
@@ -570,7 +567,7 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         showVoteView(title: "答题", votes: votes)
     }
     public func liveManagerShouldStopVote(_ manager: DBYLiveManager!) {
-        segmentedView.removeData(with: "答题")
+        segmentedView.removeData(with: "答题", animated: true)
     }
     public func liveManagerShouldHideVote(_ manager: DBYLiveManager!) {
         hiddenVoteView()
@@ -750,7 +747,7 @@ extension DBYLiveController: DBYHangUpViewDelegate {
         
         weak var weakSelf = self
         button1.action = { btn in
-            weakSelf?.liveManager.request(.audio, state: .quit, completion: { (result) in
+            weakSelf?.liveManager.send(.audio, state: .quit, completion: { (result) in
                 
             })
             weakSelf?.hangUpView.dismiss()
@@ -778,10 +775,10 @@ extension DBYLiveController: DBYBottomBarDelegate {
     func chatButtonClick(owner: DBYBottomBar) {
         topBar.isHidden = true
         bottomBar.isHidden = true
-        segmentedView.isHidden = false
-        segmentedView.scrollToIndex(index: 0)
+        segmentedView.scrollToIndex(index: 0, animated: false)
         let rect = segmentedView.landscapeFrame
         UIView.animate(withDuration: 0.25) {
+            self.segmentedView.isHidden = false
             self.segmentedView.frame = rect.offsetBy(dx: -rect.width, dy: 0)
         }
     }
@@ -789,15 +786,19 @@ extension DBYLiveController: DBYBottomBarDelegate {
     func voteButtonClick(owner: DBYBottomBar) {
         topBar.isHidden = true
         bottomBar.isHidden = true
-        segmentedView.isHidden = false
-        segmentedView.scrollToLast()
+        segmentedView.scrollToLast(animated: false)
+        let rect = segmentedView.landscapeFrame
+        UIView.animate(withDuration: 0.25) {
+            self.segmentedView.isHidden = false
+            self.segmentedView.frame = rect.offsetBy(dx: -rect.width, dy: 0)
+        }
     }
     
     func fullscreenButtonClick(owner: DBYBottomBar) {
         toLandscape()
     }
     
-    func stateDidChange(owner: DBYBottomBar, state: DBYPlayState) {
+    func playStateDidChange(owner: DBYBottomBar, state: DBYPlayState) {
         if state == .pause {
             recoverManager()
             mainView.hiddenNetworkTipView()
@@ -917,7 +918,7 @@ extension DBYLiveController: DBYInteractionViewDelegate {
     }
     
     func requestInteraction(owner: DBYInteractionView, state: DBYInteractionState, type: DBYInteractionType) {
-        liveManager.request(type, state: state) { (result) in
+        liveManager.send(type, state: state) { (result) in
             print("requestInteraction", result)
         }
     }
@@ -958,13 +959,13 @@ extension DBYLiveController: DBYInteractionViewDelegate {
             weak var weakSelf = self
             inviteView.acceptBlock = {
                 weakView?.removeFromSuperview()
-                weakSelf?.liveManager.accept(type, completion: { (result) in
+                weakSelf?.liveManager.send(type, state: .joined, completion: { (result) in
                     
                 })
             }
             inviteView.refuseBlock = {
                 weakView?.removeFromSuperview()
-                weakSelf?.liveManager.request(type, state: .abort, completion: { (result) in
+                weakSelf?.liveManager.send(type, state: .abort, completion: { (result) in
                     
                 })
             }

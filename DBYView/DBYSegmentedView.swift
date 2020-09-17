@@ -84,7 +84,7 @@ class DBYSegmentedTitleView: UIScrollView {
             return
         }
         indexChanged?(index)
-        scrollToIndex(index: index)
+        scrollToIndex(index: index, animated: true)
     }
     public func appendModel(model: DBYSegmentedModel) {
         models.append(model)
@@ -111,7 +111,7 @@ class DBYSegmentedTitleView: UIScrollView {
         let count = models.count
         contentSize = CGSize(width: CGFloat(count) * model.labelWidth, height: bounds.height)
     }
-    public func scrollToIndex(index: Int) {
+    public func scrollToIndex(index: Int, animated: Bool) {
         if index >= models.count || index < 0 {
             return
         }
@@ -150,9 +150,9 @@ class DBYSegmentedTitleView: UIScrollView {
         let offset = CGPoint(x: diff, y: 0)
         setContentOffset(offset, animated: true)
     }
-    public func scrollToLast() {
+    public func scrollToLast(animated: Bool) {
         let count = models.count
-        scrollToIndex(index: count - 1)
+        scrollToIndex(index: count - 1, animated: animated)
     }
 }
 class DBYSegmentedContainerView: UIScrollView {
@@ -194,17 +194,17 @@ class DBYSegmentedContainerView: UIScrollView {
         let count = models.count
         contentSize = CGSize(width: CGFloat(count) * bounds.width, height: bounds.height)
     }
-    public func scrollToIndex(index: Int) {
+    public func scrollToIndex(index: Int, animated: Bool) {
         if index >= models.count || index < 0  {
             return
         }
         let offset = bounds.width * CGFloat(index)
-        setContentOffset(CGPoint(x: offset, y: 0), animated: true)
+        setContentOffset(CGPoint(x: offset, y: 0), animated: animated)
     }
-    public func scrollToLast() {
+    public func scrollToLast(animated: Bool) {
         let index = models.count
         let offset = bounds.width * CGFloat(index)
-        setContentOffset(CGPoint(x: offset, y: 0), animated: true)
+        setContentOffset(CGPoint(x: offset, y: 0), animated: animated)
     }
 }
 class DBYSegmentedView: DBYView {
@@ -250,7 +250,7 @@ class DBYSegmentedView: DBYView {
         
         titleView?.indexChanged = { [weak self] index in
             self?.scrollIndex = index
-            self?.containerView?.scrollToIndex(index: index)
+            self?.containerView?.scrollToIndex(index: index, animated: true)
         }
         titleView?.snp.makeConstraints { (make) in
             make.left.top.right.equalTo(0)
@@ -269,46 +269,46 @@ class DBYSegmentedView: DBYView {
         }
         containerView?.appendModel(model: model)
         titleView?.appendModel(model: model)
-        scrollToLast()
+        scrollToLast(animated: true)
     }
     public func appendDatas(models: [DBYSegmentedModel]) {
         containerView?.appendModels(models: models)
         titleView?.appendModels(models: models)
-        scrollToLast()
+        scrollToLast(animated: true)
     }
-    public func removeLastData() {
+    public func removeLastData(animated: Bool) {
         titleView?.removeLastModel()
         containerView?.removeLastModel()
         let count = titleView?.models.count ?? 0
         if scrollIndex >= count {
-            scrollToIndex(index: count - 1)
+            scrollToIndex(index: count - 1, animated: animated)
         }
     }
-    public func removeData(at index: Int) {
+    public func removeData(at index: Int, animated: Bool) {
         titleView?.removeModel(at: index)
         containerView?.removeModel(at: index)
         let count = titleView?.models.count ?? 0
         if scrollIndex >= count {
-            scrollToIndex(index: count - 1)
+            scrollToIndex(index: count - 1, animated: animated)
         }
     }
-    public func removeData(with title: String) {
+    public func removeData(with title: String, animated: Bool) {
         let count = titleView?.models.count ?? 0
         for i in (0..<count).reversed() {
             let model = titleView?.models[i]
             if model?.label?.text == title {
-                removeData(at: i)
+                removeData(at: i, animated: animated)
             }
         }
     }
-    public func scrollToIndex(index: Int) {
+    public func scrollToIndex(index: Int, animated: Bool) {
         scrollIndex = index
-        titleView?.scrollToIndex(index: index)
-        containerView?.scrollToIndex(index: index)
+        titleView?.scrollToIndex(index: index, animated: animated)
+        containerView?.scrollToIndex(index: index, animated: animated)
     }
-    public func scrollToLast() {
+    public func scrollToLast(animated: Bool) {
         let count = titleView?.models.count ?? 0
-        scrollToIndex(index: count - 1)
+        scrollToIndex(index: count - 1, animated: animated)
     }
 }
 extension DBYSegmentedView: UIScrollViewDelegate {
@@ -321,7 +321,7 @@ extension DBYSegmentedView: UIScrollViewDelegate {
     func scrollViewDidEndScroll(_ scrollView: UIScrollView) {
         let index = Int(scrollView.contentOffset.x / scrollView.bounds.width)
         if scrollView == containerView {
-            titleView?.scrollToIndex(index: index)
+            titleView?.scrollToIndex(index: index, animated: true)
         }
         scrollIndex = index
     }

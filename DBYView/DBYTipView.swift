@@ -189,13 +189,13 @@ class DBYTipInviteView: DBYTipBaseView, DBYTipViewUIProtocol {
         refuseButton.setAttributedTitle(attStr2, for: .normal)
         refuseButton.setTitleColor(DBYStyle.brown, for: .normal)
 
-        acceptButton.setBackgroudnStyle(fillColor: DBYStyle.yellow,
-                                     strokeColor: DBYStyle.brown,
-                                     radius: btnHeight * 0.5)
-
-        refuseButton.setBackgroudnStyle(fillColor: UIColor.white,
-                                     strokeColor: DBYStyle.brown,
-                                     radius: btnHeight * 0.5)
+        acceptButton.setBackgroundStyle(fillColor: DBYStyle.yellow,
+                                        borderColor: DBYStyle.brown,
+                                        radius: btnHeight * 0.5)
+        
+        refuseButton.setBackgroundStyle(fillColor: UIColor.white,
+                                        borderColor: DBYStyle.brown,
+                                        radius: btnHeight * 0.5)
     }
     override func contentSize() -> CGSize {
         let height = bounds.size.height

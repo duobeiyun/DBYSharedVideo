@@ -25,8 +25,8 @@ class DBYVideoTipView1: DBYNibView {
     @IBOutlet weak var playBtn: DBYButton! {
         didSet {
             let radius = playBtn.bounds.height * 0.5
-            playBtn.setBackgroudnStyle(fillColor: DBYStyle.yellow,
-                                       strokeColor: DBYStyle.brown,
+            playBtn.setBackgroundStyle(fillColor: DBYStyle.yellow,
+                                       borderColor: DBYStyle.brown,
                                        radius: radius)
         }
     }

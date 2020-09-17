@@ -78,30 +78,30 @@ class DBYInteractionView: DBYNibView {
         let bundle = Bundle(for: DBYInteractionView.self)
         let nib = UINib(nibName: cellId, bundle: bundle)
         tableView.register(nib, forCellReuseIdentifier: cellId)
-        audioButton.setBackgroudnStyle(fillColor: DBYStyle.yellow,
-                                       strokeColor: DBYStyle.yellow,
+        audioButton.setBackgroundStyle(fillColor: DBYStyle.yellow,
+                                       borderColor: DBYStyle.yellow,
                                        radius: btnHeight * 0.5)
-        videoButton.setBackgroudnStyle(fillColor: DBYStyle.middleGray,
-                                       strokeColor: DBYStyle.middleGray,
+        videoButton.setBackgroundStyle(fillColor: DBYStyle.middleGray,
+                                       borderColor: DBYStyle.middleGray,
                                        radius: btnHeight * 0.5)
         videoButton.setTitleColor(.white, for: .normal)
-        applyButton.setBackgroudnStyle(fillColor: DBYStyle.yellow, strokeColor: DBYStyle.brown, radius: 20)
+        applyButton.setBackgroundStyle(fillColor: DBYStyle.yellow, borderColor: DBYStyle.brown, radius: 20)
     }
     //本地触发
     func switchButton(_ type: DBYInteractionType) {
         if type == .audio {
             currentInfo = audioInfo
-            videoButton.setBackgroudnStyle(fillColor: DBYStyle.middleGray, strokeColor: DBYStyle.middleGray, radius: btnHeight * 0.5)
+            videoButton.setBackgroundStyle(fillColor: DBYStyle.middleGray, borderColor: DBYStyle.middleGray, radius: btnHeight * 0.5)
             videoButton.setTitleColor(UIColor.white, for: .normal)
-            audioButton.setBackgroudnStyle(fillColor: DBYStyle.yellow, strokeColor: DBYStyle.yellow, radius: btnHeight * 0.5)
+            audioButton.setBackgroundStyle(fillColor: DBYStyle.yellow, borderColor: DBYStyle.yellow, radius: btnHeight * 0.5)
             audioButton.setTitleColor(DBYStyle.brown, for: .normal)
             delegate?.switchInteraction(owner: self, type: .audio)
         }
         if type == .video {
             currentInfo = videoInfo
-            videoButton.setBackgroudnStyle(fillColor: DBYStyle.yellow, strokeColor: DBYStyle.yellow, radius: btnHeight * 0.5)
+            videoButton.setBackgroundStyle(fillColor: DBYStyle.yellow, borderColor: DBYStyle.yellow, radius: btnHeight * 0.5)
             videoButton.setTitleColor(DBYStyle.brown, for: .normal)
-            audioButton.setBackgroudnStyle(fillColor: DBYStyle.middleGray, strokeColor: DBYStyle.middleGray, radius: btnHeight * 0.5)
+            audioButton.setBackgroundStyle(fillColor: DBYStyle.middleGray, borderColor: DBYStyle.middleGray, radius: btnHeight * 0.5)
             audioButton.setTitleColor(UIColor.white, for: .normal)
             delegate?.switchInteraction(owner: self, type: .video)
         }

@@ -29,13 +29,13 @@ class DBYPauseTipView: DBYView, ZFNibLoader {
     override func setupUI() {
         super.setupUI()
         let radius = playBtn.bounds.height * 0.5
-        playBtn.setBackgroudnStyle(fillColor: DBYStyle.yellow,
-                                   strokeColor: DBYStyle.brown,
+        playBtn.setBackgroundStyle(fillColor: DBYStyle.yellow,
+                                   borderColor: DBYStyle.brown,
                                    radius: radius)
     }
     public static func loadNibView() -> Self? {
         let views = loadViewsFromNib(name: "DBYFullTipView", bundle: Bundle(for: Self.self))
-        let tipView = views?[1] as? Self
+        let tipView = views?[0] as? Self
         
         return tipView
     }
@@ -46,9 +46,12 @@ class DBYLoadingTipView: DBYView, ZFNibLoader {
     
     weak var delegate:DBYLoadingTipViewDelegate?
     
+    override func setupUI() {
+        tipBtn.setBackground(corner: [.bottomRight, .topRight], radii: CGSize(width: 12, height: 12), color: DBYStyle.yellow)
+    }
     public static func loadNibView() -> Self? {
         let views = loadViewsFromNib(name: "DBYFullTipView", bundle: Bundle(for: Self.self))
-        let tipView = views?[2] as? Self
+        let tipView = views?[1] as? Self
         
         return tipView
     }
@@ -68,7 +71,7 @@ class DBYNetworkTipView: DBYView, ZFNibLoader {
     
     public static func loadNibView() -> Self? {
         let views = loadViewsFromNib(name: "DBYFullTipView", bundle: Bundle(for: Self.self))
-        let tipView = views?[3] as? Self
+        let tipView = views?[2] as? Self
         
         return tipView
     }

@@ -61,8 +61,8 @@ class DBYChatListView: DBYView {
     lazy var fpButton = DBYForbiddenButton.portraitView()
     lazy var inputButton:DBYButton = {
         let btn = DBYButton()
-        btn.setBackgroudnStyle(fillColor: DBYStyle.halfBlack,
-                               strokeColor: UIColor.clear,
+        btn.setBackgroundStyle(fillColor: DBYStyle.halfBlack,
+                               borderColor: UIColor.clear,
                                radius: 15)
         btn.setImage(UIImage(name: "btn-chat"), for: .normal)
         let att = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12),

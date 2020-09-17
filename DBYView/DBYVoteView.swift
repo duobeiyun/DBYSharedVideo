@@ -94,9 +94,6 @@ class DBYVoteView: DBYView {
         tipLab.setBackgroundColor(color:DBYStyle.lightAlpha, forState: .landscape)
         tipLab.setBackgroundColor(color:DBYStyle.lightGray, forState: .portrait)
         
-        self.setBackgroundColor(color:DBYStyle.lightAlpha, forState: .landscape)
-        self.setBackgroundColor(color:DBYStyle.lightGray, forState: .portrait)
-        
         tableView.setBackgroundColor(color:DBYStyle.lightAlpha, forState: .landscape)
         tableView.setBackgroundColor(color:DBYStyle.lightGray, forState: .portrait)
     }
@@ -110,6 +107,9 @@ class DBYVoteView: DBYView {
                                  y: 40,
                                  width: bounds.width,
                                  height: bounds.height - 20)
+        tipLab.updateStyle()
+        tableView.updateStyle()
+        tableView.reloadData()
     }
     func setVotes(votes: [String]) {
         countDict.removeAll()
@@ -147,11 +147,7 @@ extension DBYVoteView: UITableViewDataSource {
         let count = countDict[indexPath.row] ?? 0
         let colors = gradientColors[indexPath.row]
         cell.contenColor = tableView.backgroundColor
-        if isLandscape() {
-            cell.borderColor = DBYStyle.middleGray
-        }else {
-            cell.borderColor = UIColor.clear
-        }
+        
         cell.showVoteName(iconName: iconName, voteName: voteName)
         cell.showProgress(count: count, colors: colors, totalCount: totalCount)
         cell.indexPath = indexPath
