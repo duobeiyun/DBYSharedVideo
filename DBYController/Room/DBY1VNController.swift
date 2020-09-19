@@ -68,6 +68,7 @@ public class DBY1VNController: UIViewController {
         navigationController?.setNavigationBarHidden(true, animated: animated)
         DBYSystemControl.shared.beginControl()
         mainView.showControlBar()
+        updateStyles()
     }
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
@@ -102,14 +103,11 @@ public class DBY1VNController: UIViewController {
         }
         weak var weakSelf = self
         coordinator.animate(alongsideTransition: { (context) in
+            weakSelf?.updateStyles()
         }) { (context) in
             weakSelf?.mainView.showControlBar()
             weakSelf?.chatListView.reloadData()
         }
-    }
-    public override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        updateStyles()
     }
     deinit {
         print("---deinit", type(of: self))
