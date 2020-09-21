@@ -114,6 +114,7 @@ class DBYInteractionView: DBYNibView {
         if type == .video {
             label.text = "前方还有\(currentInfo.inqueueCount)人正在等待上台"
         }
+        print("currentInfo.models.count", currentInfo.models.count)
         tableView.reloadData()
     }
     //消息触发
@@ -126,6 +127,7 @@ class DBYInteractionView: DBYNibView {
             videoInfo.models = models
         }
         updateContent(type: type)
+        //当前tab页才更新
         if type == currentInfo.type {
             updateBottomButton(type: type)
         }
@@ -161,6 +163,7 @@ class DBYInteractionView: DBYNibView {
         if type == .video {
             currentInfo = videoInfo
         }
+        tableView.reloadData()
         for model in currentInfo.models {
             if model.state == .joined {
                 count += 1
@@ -207,7 +210,6 @@ extension DBYInteractionView: UITableViewDelegate {
     }
 }
 extension DBYInteractionView: UITableViewDataSource {
-    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return currentInfo.models.count
     }

@@ -175,7 +175,7 @@ public class DBYLiveController: DBY1VNController {
         chatListView.inputButton.dismiss()
         
         inputVC.dismiss(animated: true, completion: nil)
-        
+        announcementView.isHidden = (announcement?.count ?? 0) <= 0
         topBar.set(type: .portrait)
         bottomBar.set(type: .live)
         
@@ -251,9 +251,10 @@ public class DBYLiveController: DBY1VNController {
     //显示竖屏小公告
     func showAnnouncement(text: String) {
         announcement = text
-        if isLandscape() {
+        if isLandscape() || text.count < 1 {
             return
         }
+        
         segmentedView.addSubview(announcementView)
         announcementView.frame = CGRect(x: 0,
                                         y: segmentedView.titleViewHeight,
@@ -501,17 +502,19 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     public func clientOnline(_ liveManager: DBYLiveManager!, userId uid: String!, nickName: String!, userRole role: Int32) {
         mainView.hiddenLoadingView()
         let group = DispatchGroup()
+        group.enter()
         liveManager.getInteractionList(.audio) {[weak self] (list) in
             if let models = list {
                 self?.interactionView.set(models: models, for: .audio)
             }
-            group.enter()
+            group.leave()
         }
+        group.enter()
         liveManager.getInteractionList(.video) {[weak self] (list) in
             if let models = list {
                 self?.interactionView.set(models: models, for: .video)
             }
-            group.enter()
+            group.leave()
         }
         group.notify(queue: DispatchQueue.main) {
             self.interactionView.switchButton(.audio)
@@ -532,11 +535,8 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         chatListView.clearAll()
     }
     public func liveManager(_ manager: DBYLiveManager!, hasAnnounceContent announceContent: String!) {
-        if announceContent.count <= 0 {
-            announcementView.removeFromSuperview()
-        }else {
-            showAnnouncement(text: announceContent)
-        }
+        announcementView.removeFromSuperview()
+        showAnnouncement(text: announceContent)
     }
     public func liveManager(_ manager: DBYLiveManager!, onlineUserCountWith count: Int) {
         courseInfoView.setUserCount(count: count)
