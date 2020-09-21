@@ -67,11 +67,6 @@ public class DBYLiveController: DBY1VNController {
     var questions: [[String:Any]]?
     
     //MARK: - override functions
-    public override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        hangUpView.autoAdjustFrame()
-        micListView.autoAdjustFrame()
-    }
     override public func viewDidLoad() {
         super.viewDidLoad()
         
@@ -202,6 +197,8 @@ public class DBYLiveController: DBY1VNController {
     override func updateStyles() {
         super.updateStyles()
         interactionView.updateStyle()
+        hangUpView.autoAdjustFrame()
+        micListView.autoAdjustFrame()
     }
     override func reachabilityChanged(note:NSNotification) {
         if let reachability = note.object as? DBYReachability {

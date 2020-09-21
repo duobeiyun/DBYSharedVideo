@@ -58,18 +58,32 @@ class DBYHangUpView: DBYNibView {
             videoView?.center = position
             break
         case .ended:
-            autoAdjustFrame()
+            adjustFrame()
             break
         default:
             break
         }
     }
-    func autoAdjustFrame() {
-        guard let view = superview else {
+    func adjustFrame() {
+        guard let sv = superview else {
             return
         }
-        let y = view.bounds.midY
-        let viewW = view.bounds.width
+        let y = frame.origin.y
+        
+        let viewW = sv.bounds.width
+        let width = frame.width
+        let rect = CGRect(x: viewW - width, y: y, width: width, height: 32)
+        UIView.animate(withDuration: 0.25) {
+            self.frame = rect
+        }
+    }
+    func autoAdjustFrame() {
+        guard let sv = superview else {
+            return
+        }
+        let y = sv.bounds.midY
+        
+        let viewW = sv.bounds.width
         let width:CGFloat = 200
         let rect = CGRect(x: viewW - width, y: y, width: width, height: 32)
         

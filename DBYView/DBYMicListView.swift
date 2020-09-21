@@ -62,20 +62,33 @@ class DBYMicListView: DBYNibView {
             videoView?.center = position
             break
         case .ended:
-            autoAdjustFrame()
+            adjustFrame()
             break
         default:
             break
         }
     }
-    func autoAdjustFrame() {
-        guard let view = superview else {
+    func adjustFrame() {
+        guard let sv = superview else {
             return
         }
-        let y = view.bounds.midY - 40
+        let y = frame.origin.y
+        
+        let viewW = sv.bounds.width
+        let width = frame.width
+        let rect = CGRect(x: viewW - width, y: y, width: width, height: 32)
+        UIView.animate(withDuration: 0.25) {
+            self.frame = rect
+        }
+    }
+    func autoAdjustFrame() {
+        guard let sv = superview else {
+            return
+        }
+        let y = sv.bounds.midY - 40
+        let viewW = sv.bounds.width
         
         let width = getMessageWidth() + 50
-        let viewW = view.bounds.width
         let rect = CGRect(x: viewW - width, y: y, width: width, height: 32)
         UIView.animate(withDuration: 0.25) {
             self.frame = rect

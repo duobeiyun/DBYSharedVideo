@@ -184,12 +184,10 @@ class DBYChatListView: DBYView {
     func showInputView(offset: CGFloat) {
         chatBarOffset = offset
         let edge = getIphonexEdge()
-        let frame1 = chatBar.portraitFrame.offsetBy(dx: 0, dy: edge.bottom - offset)
-        let frame2 = tableView.frame.resizeBy(sub_w: 0, sub_h: offset - edge.bottom)
+        let frame1 = chatBar.frame.offsetBy(dx: 0, dy: edge.bottom - offset)
         
         UIView.animate(withDuration: 0.25) {
             self.chatBar.frame = frame1
-            self.tableView.frame = frame2
         }
         scrollToBottom()
     }
@@ -198,7 +196,6 @@ class DBYChatListView: DBYView {
         let chatBarHeight = 48 + edge.bottom
         
         chatBar.frame = CGRect(x: 0, y: bounds.height - chatBarHeight, width: bounds.width, height: chatBarHeight)
-        tableView.frame = bounds.resizeBy(sub_w: 0, sub_h: chatBarHeight)
         scrollToBottom()
     }
     func scrollToTop() {
