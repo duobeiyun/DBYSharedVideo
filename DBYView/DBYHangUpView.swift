@@ -23,7 +23,7 @@ class DBYHangUpView: DBYNibView {
 //    }
     @IBOutlet weak var hangUpBtn: DBYButton! {
         didSet {
-            let radius = hangUpBtn.bounds.height * 0.5
+            let radius:CGFloat = 14
             hangUpBtn.setBackgroundStyle(fillColor: DBYStyle.yellow,
                                          borderColor: DBYStyle.brown,
                                          radius: radius)

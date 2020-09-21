@@ -20,7 +20,6 @@ class ZFTimer {
         return obs
     }
     @objc func timerClock() {
-        print("timerClock")
         block?()
     }
     func stopTimer() {

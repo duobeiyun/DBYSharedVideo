@@ -175,7 +175,7 @@ public class DBYLiveController: DBY1VNController {
         chatListView.inputButton.dismiss()
         
         inputVC.dismiss(animated: true, completion: nil)
-        announcementView.isHidden = (announcement?.count ?? 0) <= 0
+        
         topBar.set(type: .portrait)
         bottomBar.set(type: .live)
         
@@ -196,9 +196,6 @@ public class DBYLiveController: DBY1VNController {
         hangUpView.portraitFrame = CGRect(x: size.width - 200, y: segmentedView.portraitFrame.minY + hangUpViewMinX, width: 200, height: tipViewHeight)
         hangUpView.landscapeFrame = CGRect(x: size.width - 200, y: hangUpViewMinX, width: 200, height: tipViewHeight)
         
-        announcementView.portraitFrame = CGRect(x: 0, y: 1, width: size.width, height: tipViewHeight)
-        announcementView.landscapeFrame = .zero
-        
         chatListView.setBackgroundColor(color: DBYStyle.lightAlpha, forState: .landscape)
         chatListView.setBackgroundColor(color: DBYStyle.lightGray, forState: .portrait)
     }
@@ -206,7 +203,6 @@ public class DBYLiveController: DBY1VNController {
         super.updateStyles()
         interactionView.updateStyle()
         hangUpView.updateStyle()
-        announcementView.updateStyle()
     }
     override func reachabilityChanged(note:NSNotification) {
         if let reachability = note.object as? DBYReachability {
@@ -255,17 +251,15 @@ public class DBYLiveController: DBY1VNController {
     //显示竖屏小公告
     func showAnnouncement(text: String) {
         announcement = text
-        announcementView.set(text: text)
-        let dy = tipViewHeight
-        announcementView.frame = announcementView.portraitFrame.offsetBy(dx: 0, dy: -dy)
-        UIView.animate(withDuration: 0.25) {
-            self.announcementView.frame = self.announcementView.portraitFrame
-        }
         if isLandscape() {
-            announcementView.isHidden = true
-        }else {
-            announcementView.isHidden = false
+            return
         }
+        segmentedView.addSubview(announcementView)
+        announcementView.frame = CGRect(x: 0,
+                                        y: segmentedView.titleViewHeight,
+                                        width: segmentedView.portraitFrame.width,
+                                        height: tipViewHeight)
+        announcementView.set(text: text)
     }
     
     @objc func enterRoom() {
@@ -506,16 +500,21 @@ public class DBYLiveController: DBY1VNController {
 extension DBYLiveController: DBYLiveManagerDelegate {
     public func clientOnline(_ liveManager: DBYLiveManager!, userId uid: String!, nickName: String!, userRole role: Int32) {
         mainView.hiddenLoadingView()
-        
+        let group = DispatchGroup()
         liveManager.getInteractionList(.audio) {[weak self] (list) in
             if let models = list {
                 self?.interactionView.set(models: models, for: .audio)
             }
+            group.enter()
         }
         liveManager.getInteractionList(.video) {[weak self] (list) in
             if let models = list {
                 self?.interactionView.set(models: models, for: .video)
             }
+            group.enter()
+        }
+        group.notify(queue: DispatchQueue.main) {
+            self.interactionView.switchButton(.audio)
         }
     }
     public func liveManagerClassOver(_ manager: DBYLiveManager!) {
@@ -534,7 +533,7 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     }
     public func liveManager(_ manager: DBYLiveManager!, hasAnnounceContent announceContent: String!) {
         if announceContent.count <= 0 {
-            announcementView.isHidden = true
+            announcementView.removeFromSuperview()
         }else {
             showAnnouncement(text: announceContent)
         }

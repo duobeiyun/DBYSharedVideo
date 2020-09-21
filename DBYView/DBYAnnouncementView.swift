@@ -73,13 +73,6 @@ class DBYAnnouncementView: DBYNibView {
         messgaeLabLeft.constant = x
         layoutIfNeeded()
     }
-    @objc override func dismiss() {
-        let dy = self.frame.height
-        UIView.animate(withDuration: 0.25) {
-            self.frame = self.frame.offsetBy(dx: 0, dy: -dy)
-            self.isHidden = true
-        }
-    }
 }
 extension DBYAnnouncementView: UIScrollViewDelegate {
     
