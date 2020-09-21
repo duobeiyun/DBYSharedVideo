@@ -67,6 +67,11 @@ public class DBYLiveController: DBY1VNController {
     var questions: [[String:Any]]?
     
     //MARK: - override functions
+    public override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        hangUpView.autoAdjustFrame()
+        micListView.autoAdjustFrame()
+    }
     override public func viewDidLoad() {
         super.viewDidLoad()
         
@@ -184,17 +189,12 @@ public class DBYLiveController: DBY1VNController {
     override func setViewFrameAndStyle() {
         super.setViewFrameAndStyle()
         
-        let size = UIScreen.main.bounds.size
         let edge = getIphonexEdge()
-        let hangUpViewMinX = 60 + tipViewHeight + 8
         
         tipViewSafeSize = CGSize(width: 0, height: -60 - edge.bottom)
         
         interactionView.portraitFrame = segmentedView.portraitFrame
         interactionView.landscapeFrame = .zero
-        
-        hangUpView.portraitFrame = CGRect(x: size.width - 200, y: segmentedView.portraitFrame.minY + hangUpViewMinX, width: 200, height: tipViewHeight)
-        hangUpView.landscapeFrame = CGRect(x: size.width - 200, y: hangUpViewMinX, width: 200, height: tipViewHeight)
         
         chatListView.setBackgroundColor(color: DBYStyle.lightAlpha, forState: .landscape)
         chatListView.setBackgroundColor(color: DBYStyle.lightGray, forState: .portrait)
@@ -202,7 +202,6 @@ public class DBYLiveController: DBY1VNController {
     override func updateStyles() {
         super.updateStyles()
         interactionView.updateStyle()
-        hangUpView.updateStyle()
     }
     override func reachabilityChanged(note:NSNotification) {
         if let reachability = note.object as? DBYReachability {
@@ -254,8 +253,8 @@ public class DBYLiveController: DBY1VNController {
         if isLandscape() || text.count < 1 {
             return
         }
-        
         segmentedView.addSubview(announcementView)
+        announcementView.isHidden = false
         announcementView.frame = CGRect(x: 0,
                                         y: segmentedView.titleViewHeight,
                                         width: segmentedView.portraitFrame.width,
@@ -304,21 +303,7 @@ public class DBYLiveController: DBY1VNController {
         bottomBar.hiddenVoteButton()
         segmentedView.removeData(with: "答题", animated: false)
     }
-    func updateMicListViewFrame() {
-        let messageLabWidth = micListView.getMessageWidth()
-        let width = 50 + messageLabWidth
-        let x = view.bounds.width - width
-        
-        micListView.portraitFrame = CGRect(x: x,
-                                           y: segmentedView.portraitFrame.minY + 60,
-                                           width: width,
-                                           height: tipViewHeight)
-        micListView.landscapeFrame = CGRect(x: x,
-                                            y: 60,
-                                            width: width,
-                                            height: tipViewHeight)
-        micListView.updateStyle()
-    }
+    
     func showWatermarkView() {
         guard let wk = roomConfig?.watermark else {
             return
@@ -592,7 +577,7 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         }else {
             micListView.remove(name: userName)
         }
-        updateMicListViewFrame()
+        micListView.autoAdjustFrame()
     }
     public func liveManager(_ manager: DBYLiveManager!, hasVideo: Bool, in view: UIView!) {
         if hasVideo {
@@ -766,7 +751,7 @@ extension DBYLiveController: DBYMicListViewDelegate {
         if micOpen {
             hangUpView.isHidden = !showMicList
         }
-        updateMicListViewFrame()
+        micListView.autoAdjustFrame()
     }
 }
 //MARK: - DBYBottomBarDelegate
@@ -988,6 +973,8 @@ extension DBYLiveController: DBYInteractionViewDelegate {
             }
             view.addSubview(hangUpView)
             view.addSubview(micListView)
+            hangUpView.autoAdjustFrame()
+            micListView.autoAdjustFrame()
         }
         if state == .quit && type == .audio {
             liveManager.openMic(false) { (message) in
