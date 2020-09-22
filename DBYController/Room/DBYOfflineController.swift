@@ -32,7 +32,9 @@ public class DBYOfflineController: DBYPlaybackController {
         }else {
             offlineManager.setTeacherViewWith(mainView.videoView)
         }
-        offlineManager.setStudentViewWith(UIView())
+        let videoView = createVideoView(uid: authinfo?.userId ?? "")
+        videoView.setUserName(name: authinfo?.nickName)
+        offlineManager.setStudentViewWith(videoView)
         offlineManager.delegate = self
         offlineManager.setPPTViewBackgroundImage(UIImage(name: "black-board"))
         offlineManager.roomID = roomID
