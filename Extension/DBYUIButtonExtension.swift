@@ -11,20 +11,6 @@ import UIKit
 private var backgroundLayerKey = "BackgroundLayerKey"
 
 extension UIButton {
-    public func setRoundCorner(radius: CGFloat) {
-        layer.cornerRadius = radius;
-        clipsToBounds = true;
-    }
-    ///根据宽高一半的最小值设置圆角
-    public func setRoundCorner() {
-        let xCenter = bounds.size.width * 0.5
-        let yCenter = bounds.size.height * 0.5
-        
-        let radius = min(xCenter, yCenter)
-        
-        layer.cornerRadius = radius;
-        clipsToBounds = true;
-    }
     public func setBackgroundStyle(fillColor: UIColor,
                          borderColor: UIColor,
                          radius: CGFloat) {

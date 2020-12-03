@@ -9,14 +9,16 @@
 import UIKit
 
 extension UIImageView {
-    func showImages(images: [UIImage?], stride: Int) -> UIImage? {
+    //stride 多远画一个
+    public func showImages(images: [UIImage?], stride: Int) {
         let size = bounds.size
-        UIGraphicsBeginImageContext(size)
+        UIGraphicsBeginImageContextWithOptions(size, false, UIScreen.main.scale)
         for (i,image) in images.enumerated() {
-            image?.draw(at: CGPoint(x: i * stride, y: 0))
+            let rect = CGRect(x: CGFloat(i * stride), y: 0, width: size.height, height: size.height)
+            image?.draw(in: rect)
         }
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
-        return image
+        self.image = image
     }
 }

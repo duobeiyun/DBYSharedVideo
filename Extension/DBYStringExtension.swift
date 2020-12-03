@@ -25,33 +25,33 @@ extension String {
         return dfmt.string(from: date)
     }
     
-    func height(withMaxWidth width: CGFloat, font: UIFont) -> CGFloat {
+    public func height(withMaxWidth width: CGFloat, font: UIFont) -> CGFloat {
         let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
         let boundingBox = self.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font: font], context: nil)
         
         return ceil(boundingBox.height)
     }
     
-    func width(withMaxHeight height: CGFloat, font: UIFont) -> CGFloat {
+    public func width(withMaxHeight height: CGFloat, font: UIFont) -> CGFloat {
         let constraintRect = CGSize(width: .greatestFiniteMagnitude, height: height)
         let boundingBox = self.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, attributes: [NSAttributedString.Key.font: font], context: nil)
         
         return ceil(boundingBox.width)
     }
-    func substring(with range: NSRange) -> String {
+    public func substring(with range: NSRange) -> String {
         let start = index(startIndex, offsetBy: range.location)
         let end = index(startIndex, offsetBy: range.location + range.length)
         return String(self[start..<end])
     }
 }
 extension NSAttributedString {
-    func height(withMaxWidth width: CGFloat) -> CGFloat {
+    public func height(withMaxWidth width: CGFloat) -> CGFloat {
         let size = CGSize(width: width, height: .greatestFiniteMagnitude)
         let framesetter = CTFramesetterCreateWithAttributedString(self)
         let frameSize = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, CFRangeMake(0, 0), nil, size, nil)
         return ceil(frameSize.height)
     }
-    func width(withMaxHeight height: CGFloat) -> CGFloat {
+    public func width(withMaxHeight height: CGFloat) -> CGFloat {
         let size = CGSize(width: .greatestFiniteMagnitude, height: height)
         let boundingBox = boundingRect(with: size, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
         

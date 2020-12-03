@@ -31,7 +31,7 @@ public protocol ZFViewStyleable {
     func backgroundColorforState(state:UIColorState) -> UIColor?
     func updateStyle()
 }
-protocol ZFNibLoader {
+public protocol ZFNibLoader {
     static func loadNibView() -> Self?
     static func loadViewsFromNib(name: String, bundle:Bundle) -> [UIView]?
 }
@@ -141,6 +141,19 @@ extension UIView: ZFViewAutoDismissable {
         UIView.animate(withDuration: 0.25, animations: animations ?? { self.alpha = 0 }) { (finished) in
             self.removeFromSuperview()
         }
+    }
+}
+extension UIView {
+    public func setRoundCorner() {
+        let xCenter = bounds.size.width * 0.5
+        let yCenter = bounds.size.height * 0.5
+
+        let radius = min(xCenter, yCenter)
+
+        layer.cornerRadius = radius
+    }
+    public func setRoundCorner(radius: CGFloat) {
+        layer.cornerRadius = radius
     }
 }
 extension CGRect {

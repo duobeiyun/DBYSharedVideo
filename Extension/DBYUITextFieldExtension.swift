@@ -17,3 +17,48 @@ extension UITextField {
         layer.borderColor = color.cgColor
     }
 }
+
+private var regexKey = "regexKey"
+private var maxCountKey = "maxCountKey"
+private var textChangeBlockKey = "textChangeBlockKey"
+
+extension UITextField {
+    public var regex:String? {
+        set (newValue) {
+            objc_setAssociatedObject(self, &regexKey, newValue, .OBJC_ASSOCIATION_ASSIGN)
+        }
+        get {
+            return objc_getAssociatedObject(self, &regexKey) as? String
+        }
+    }
+    public var maxCount:Int {
+        set (newValue) {
+            objc_setAssociatedObject(self, &maxCountKey, newValue, .OBJC_ASSOCIATION_ASSIGN)
+        }
+        get {
+            return objc_getAssociatedObject(self, &maxCountKey) as? Int ?? 0
+        }
+    }
+    public var textChangeBlock:((String?)->())? {
+        set (newValue) {
+            weak var weakSelf = self
+            addTarget(weakSelf, action: #selector(textChange(textField:)), for: .editingChanged)
+            objc_setAssociatedObject(self, &textChangeBlockKey, newValue, .OBJC_ASSOCIATION_COPY)
+        }
+        get {
+            return objc_getAssociatedObject(self, &textChangeBlockKey) as? ((String?)->())
+        }
+    }
+    @objc func textChange(textField: UITextField) {
+        let text = textField.text ?? ""
+        let count = text.count
+        if let _ = textField.markedTextRange {
+            return
+        }
+        if (maxCount > 0 && count > maxCount) {
+            let subIndex = text.index(text.startIndex, offsetBy: maxCount)
+            textField.text = String(text[..<subIndex])
+        }
+        textChangeBlock?(textField.text)
+    }
+}

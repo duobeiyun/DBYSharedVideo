@@ -10,7 +10,7 @@ import Foundation
 
 extension Date {
     ///hh:mm:ss
-    func shortString() -> String {
+    public func shortString() -> String {
         let dfmt = DateFormatter()
         dfmt.dateFormat = "HH:mm:ss";
         
@@ -18,9 +18,16 @@ extension Date {
         return str
     }
     ///yyyy.mm.dd hh:mm:ss
-    func longString() -> String {
+    public func longString() -> String {
         let dfmt = DateFormatter()
         dfmt.dateFormat = "yyyy.MM.dd HH:mm:ss";
+        let str = dfmt.string(from: self)
+        return str
+    }
+    ///some format like "yyyy.MM.dd HH:mm:ss"
+    public func formatString(_ format: String) -> String {
+        let dfmt = DateFormatter()
+        dfmt.dateFormat = format
         let str = dfmt.string(from: self)
         return str
     }

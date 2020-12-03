@@ -9,7 +9,7 @@
 import Foundation
 
 extension Int {
-    func tenThousandUnit() -> String {
+    public func tenThousandUnit() -> String {
         if self > 10000 {
             return String(format: "%.2f", (Float(self) / 10000))
         }else {

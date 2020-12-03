@@ -9,23 +9,23 @@
 import UIKit
 
 extension UIColor {
-    public convenience init(red: Int, green: Int, blue: Int) {
-        self.init(red: CGFloat(red) / 255.0, green: CGFloat(green) / 255.0, blue: CGFloat(blue) / 255.0, alpha: 1.0)
+    public convenience init(r: Int, g: Int, b: Int, a: CGFloat = 1.0) {
+        self.init(red: CGFloat(r) / 255.0, green: CGFloat(g) / 255.0, blue: CGFloat(b) / 255.0, alpha: a)
     }
     public convenience init(rgb: Int) {
         self.init(
-            red: (rgb >> 16) & 0xFF,
-            green: (rgb >> 8) & 0xFF,
-            blue: rgb & 0xFF
+            r: (rgb >> 16) & 0xFF,
+            g: (rgb >> 8) & 0xFF,
+            b: rgb & 0xFF
         )
     }
     public convenience init(hex: String) {
         let value = hex.replacingOccurrences(of: "#", with: "0x")
         let rgb:Int = Int(value) ?? 0x00
         self.init(
-            red: (rgb >> 16) & 0xFF,
-            green: (rgb >> 8) & 0xFF,
-            blue: rgb & 0xFF
+            r: (rgb >> 16) & 0xFF,
+            g: (rgb >> 8) & 0xFF,
+            b: rgb & 0xFF
         )
     }
 }
