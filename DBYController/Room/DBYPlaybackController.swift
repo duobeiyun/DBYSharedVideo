@@ -9,8 +9,7 @@
 import UIKit
 
 public class DBYPlaybackController: DBY1VNController {
-    let playRates:[Float] = [0.5, 0.8, 1.0, 1.5, 2.0]
-    let playRateTitles:[String] = ["0.5x", "0.8x", "1.0x", "1.5x", "2.0x"]
+    lazy var playRates:[Float] = [0.5, 0.8, 1.0, 1.5, 2.0]
     lazy var timeTipLab:UILabel = {
         let label = UILabel()
         label.text = "00:00:00"
@@ -47,7 +46,6 @@ public class DBYPlaybackController: DBY1VNController {
     override func setupStaticUI() {
         super.setupStaticUI()
         topBar.set(authinfo?.courseTitle)
-        settingView.set(speeds: playRateTitles)
         courseInfoView.set(title: authinfo?.courseTitle)
         chatListView.showChatbar = false
         

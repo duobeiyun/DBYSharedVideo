@@ -45,12 +45,13 @@ public class DBYOnlineController: DBYPlaybackController {
             if message != nil {
                 DBYGlobalMessage.shared().showText(message!)
             }
-            var lines = [String]()
+            var items = [DBYSettingItem]()
             let count = weakSelf?.playbackManager.linesCount() ?? 0
             for i in 0..<count {
-                lines.append("线路\(i)")
+                items.append(DBYSettingItem(name: "线路\(i)"))
             }
-            weakSelf?.settingView.set(lines: lines)
+            weakSelf?.settingView.models[2].items = items
+            weakSelf?.settingView.collectionView.reloadData()
         }
         
         if let reachability = internetReachability {
@@ -114,7 +115,30 @@ public class DBYOnlineController: DBYPlaybackController {
     override func setupStaticUI() {
         super.setupStaticUI()
         chatListView.chatBar.isHidden = true
-        settingView.set(buttons: [playbackBtn])
+        let settingModel1 = DBYSettingModel()
+        settingModel1.name = "通用设置"
+        settingModel1.resueId = "\(DBYSettingIconCell.self)"
+        settingModel1.items = [DBYSettingItem(name: "后台播放", defaultIcon: "playback-normal", selectedIcon: "playback-selected")]
+        
+        var items = [DBYSettingItem]()
+        for playRate in playRates {
+            items.append(DBYSettingItem(name: String(format: "%.1fx", playRate)))
+        }
+        
+        let settingModel2 = DBYSettingModel()
+        settingModel2.name = "倍速播放"
+        settingModel2.resueId = "\(DBYSettingLabelCell.self)"
+        settingModel2.items = items
+        
+        let settingModel3 = DBYSettingModel()
+        settingModel3.name = "线路切换"
+        settingModel3.resueId = "\(DBYSettingLabelCell.self)"
+        
+        settingView.models = [
+            settingModel1,
+            settingModel2,
+            settingModel3
+        ]
     }
     override func setupLandscapeUI() {
         super.setupLandscapeUI()
@@ -320,9 +344,8 @@ extension DBYOnlineController: DBYSettingViewDelegate {
             }
         }
         if indexPath.section == 2 {
-            weak var weakSelf = self
             playbackManager.changePlaybackLine(with: Int32(indexPath.item)) { (message) in
-                weakSelf?.settingView.set(speeds: weakSelf?.playRateTitles ?? [])
+                
             }
         }
     }

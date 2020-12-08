@@ -37,6 +37,8 @@ class DBYStyle {
     ///ffd45a
     static let yellow = UIColor(rgb: 0xffd45a)
     
+    static let font8 = UIFont.systemFont(ofSize: 8)
+    static let font10 = UIFont.systemFont(ofSize: 10)
     static let font12 = UIFont.systemFont(ofSize: 12)
     static let font14 = UIFont.systemFont(ofSize: 14)
     static let font18 = UIFont.systemFont(ofSize: 18)

@@ -7,91 +7,157 @@
 //
 
 import UIKit
+import SnapKit
 
 protocol DBYSettingViewDelegate: NSObjectProtocol {
     func settingView(owner: DBYSettingView, didSelectedItemAt indexPath: IndexPath)
 }
-class DBYSettingView: DBYView {
-    lazy var normalLab = UILabel()
-    lazy var lineLab = UILabel()
-    lazy var speedLab = UILabel()
-    lazy var normalGroup: DBYButtonGroup = DBYButtonGroup()
-    lazy var lineGroup: DBYButtonGroup = DBYButtonGroup()
-    lazy var speedGroup: DBYButtonGroup = DBYButtonGroup()
+class DBYSettingHeader: UICollectionReusableView {
+    lazy var nameLabel = UILabel()
     
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        setupUI()
+    }
+    func setupUI() {
+        nameLabel.textColor = UIColor.white
+        nameLabel.font = DBYStyle.font12
+        addSubview(nameLabel)
+        nameLabel.snp_makeConstraints { (make) in
+            make.edges.equalToSuperview()
+        }
+    }
+}
+class DBYSettingCell: UICollectionViewCell {
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        setupUI()
+    }
+    func setupUI() {
+        
+    }
+}
+class DBYSettingIconCell: DBYSettingCell {
+    lazy var nameLabel = UILabel()
+    lazy var iconView = UIImageView()
+    
+    override func setupUI() {
+        nameLabel.textColor = UIColor.white
+        nameLabel.font = DBYStyle.font8
+        nameLabel.textAlignment = .center
+        addSubview(nameLabel)
+        addSubview(iconView)
+        iconView.snp_makeConstraints { (make) in
+            make.height.width.equalTo(32)
+            make.top.equalTo(0)
+            make.centerX.equalToSuperview()
+        }
+        nameLabel.snp_makeConstraints { (make) in
+            make.left.right.equalTo(0)
+            make.bottom.equalTo(0)
+            make.height.equalTo(10)
+        }
+    }
+}
+class DBYSettingLabelCell: DBYSettingCell {
+    lazy var nameLabel = UILabel()
+    
+    override func setupUI() {
+        nameLabel.textColor = UIColor.white
+        nameLabel.font = DBYStyle.font12
+        nameLabel.textAlignment = .center
+        addSubview(nameLabel)
+        nameLabel.snp_makeConstraints { (make) in
+            make.left.right.equalTo(0)
+            make.centerY.equalToSuperview()
+        }
+    }
+}
+class DBYSettingView: DBYView {
+    lazy var collectionView:UICollectionView = {
+        let flowLayout = UICollectionViewFlowLayout()
+        let c = UICollectionView(frame: .zero, collectionViewLayout: flowLayout)
+        return c
+    }()
+    lazy var models = [DBYSettingModel]()
     weak var delegate: DBYSettingViewDelegate?
     
     override func setupUI() {
-        backgroundColor = DBYStyle.darkAlpha
-        
-        normalLab.textColor = UIColor.white
-        normalLab.font = UIFont.systemFont(ofSize: 12)
-        normalLab.text = "通用设置"
-        normalLab.isHidden = true
-        
-        lineLab.textColor = UIColor.white
-        lineLab.font = UIFont.systemFont(ofSize: 12)
-        lineLab.text = "线路切换"
-        lineLab.isHidden = true
-        
-        speedLab.textColor = UIColor.white
-        speedLab.font = UIFont.systemFont(ofSize: 12)
-        speedLab.text = "倍速播放"
-        speedLab.isHidden = true
-        
-        normalGroup.delegate = self
-        speedGroup.delegate = self
-        lineGroup.delegate = self
-        
-        addSubview(normalLab)
-        addSubview(lineLab)
-        addSubview(speedLab)
-        addSubview(normalGroup)
-        addSubview(speedGroup)
-        addSubview(lineGroup)
-    }
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        let size = bounds.size
-        
-        normalLab.frame = CGRect(x: 12, y: 16, width: 100, height: 20)
-        speedLab.frame = CGRect(x: 12, y: 136, width: 100, height: 20)
-        lineLab.frame = CGRect(x: 12, y: 256, width: 100, height: 20)
-        normalGroup.frame = CGRect(x: 0, y: 36, width: size.width, height: 60)
-        speedGroup.frame = CGRect(x: 0, y: 156, width: size.width, height: 100)
-        lineGroup.frame = CGRect(x: 0, y: 276, width: size.width, height: 100)
-    }
-    
-    func set(buttons:[UIButton]) {
-        normalLab.isHidden = false
-        normalGroup.setButtons(buttons: buttons)
-    }
-    func set(lines:[String]) {
-        lineLab.isHidden = false
-        lineGroup.setButtons(titles: lines, columns: 5, selectedIndex: 0)
-    }
-    func set(speeds:[String]) {
-        speedLab.isHidden = false
-        speedGroup.setButtons(titles: speeds, columns: 5, selectedIndex: 2)
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.register(DBYSettingIconCell.self, forCellWithReuseIdentifier: "\(DBYSettingIconCell.self)")
+        collectionView.register(DBYSettingLabelCell.self, forCellWithReuseIdentifier: "\(DBYSettingLabelCell.self)")
+        collectionView.register(DBYSettingHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: "\(DBYSettingHeader.self)")
+        collectionView.backgroundColor = UIColor.clear
+        addSubview(collectionView)
+        collectionView.snp_makeConstraints { (make) in
+            make.left.equalTo(16)
+            make.right.equalTo(-16)
+            make.bottom.equalTo(-16)
+            make.top.equalTo(16)
+        }
     }
 }
-extension DBYSettingView:DBYButtonGroupDelegate {
-    func buttonClick(owner: DBYButtonGroup, at index: Int) {
-        var section = -1
-        if owner == normalGroup {
-            section = 0
-        }
-        if owner == speedGroup {
-            section = 1
-        }
-        if owner == lineGroup {
-            section = 2
-        }
-        if section < 0 {
-            return
-        }
-        let indexPath = IndexPath(item: index, section: section)
+extension DBYSettingView: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let model = models[indexPath.section]
+        model.selectedIndex = indexPath.row
+        collectionView.reloadItems(at: [indexPath])
         delegate?.settingView(owner: self, didSelectedItemAt: indexPath)
+    }
+}
+extension DBYSettingView: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let model = models[indexPath.section]
+        return model.itemSize
+    }
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.bounds.width, height: 44)
+    }
+}
+extension DBYSettingView: UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return models.count
+    }
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        let model = models[section]
+        return model.items?.count ?? 0
+    }
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let model = models[indexPath.section]
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "\(DBYSettingHeader.self)", for: indexPath) as! DBYSettingHeader
+        header.nameLabel.text = model.name
+        return header
+    }
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let model = models[indexPath.section]
+        let item = model.items?[indexPath.row]
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: model.resueId, for: indexPath)
+        if let iconCell = cell as? DBYSettingIconCell {
+            iconCell.nameLabel.text = item?.name
+            let iconName = model.selectedIndex == indexPath.row ? item?.selectedIcon:item?.defaultIcon
+            iconCell.iconView.image = UIImage(name: iconName ?? "")
+        }
+        if let labelCell = cell as? DBYSettingLabelCell {
+            labelCell.nameLabel.text = item?.name
+        }
+        
+        return cell
     }
 }

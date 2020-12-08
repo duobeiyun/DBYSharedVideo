@@ -65,6 +65,7 @@ public class DBYLiveController: DBY1VNController {
     weak var animationTimer: ZFTimer?
     weak var zanTimer:ZFTimer?
     var questions: [[String:Any]]?
+    var videoPlayer: VideoPlayer?
     
     //MARK: - override functions
     override public func viewDidLoad() {
@@ -130,7 +131,24 @@ public class DBYLiveController: DBY1VNController {
         super.setupStaticUI()
         
         topBar.set(authinfo?.courseTitle)
-        settingView.set(buttons: [audioBtn])
+        let settingModel1 = DBYSettingModel()
+        settingModel1.name = "通用设置"
+        settingModel1.resueId = "\(DBYSettingIconCell.self)"
+        settingModel1.items = [DBYSettingItem(name: "音频播放", defaultIcon: "audio-only-normal", selectedIcon: "audio-only-selected")]
+        
+        let settingModel2 = DBYSettingModel()
+        settingModel2.name = "线路切换"
+        settingModel2.resueId = "\(DBYSettingLabelCell.self)"
+        settingModel2.items = [
+            DBYSettingItem(name: "sdk"),
+            DBYSettingItem(name: "ali"),
+            DBYSettingItem(name: "tencent")
+        ]
+        
+        settingView.models = [
+            settingModel1,
+            settingModel2
+        ]
         chatListView.showChatbar = true
         
         var models = [DBYSegmentedModel]()
@@ -398,6 +416,16 @@ public class DBYLiveController: DBY1VNController {
         liveManager.sendChatMessage(with: message) { (errorMessage) in
             print(errorMessage ?? "sendChatMessage")
         }
+    }
+    func changeQuickLine(index: Int) {
+        if let url = URL(string: "webrtc://htx-live.duobeiyun.net/duobei/zhonglaoban"), index == 1 {
+            videoPlayer = VideoPlayerFactory<TencentCreator>.getPlayer(url: url)
+        }
+        if let url = URL(string: "artc://fal-live.duobeiyun.com/duobei/zhonglaoban_opus-RTS"), index == 2 {
+            videoPlayer = VideoPlayerFactory<AliCreator>.getPlayer(url: url)
+        }
+        videoPlayer?.addPlayerView(mainView.videoView)
+        videoPlayer?.start()
     }
     //MARK: - objc functions
     @objc func updateAnimation() {
@@ -815,12 +843,7 @@ extension DBYLiveController: DBYTopBarDelegate {
 }
 extension DBYLiveController: DBYSettingViewDelegate {
     func settingView(owner: DBYSettingView, didSelectedItemAt indexPath: IndexPath) {
-        if indexPath.section == 0 {
-            
-        }
-        if indexPath.section == 1 {
-            
-        }
+        
     }
 }
 extension DBYLiveController: DBYVideoTipViewDelegate {
