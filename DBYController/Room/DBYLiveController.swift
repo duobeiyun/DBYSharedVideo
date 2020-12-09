@@ -87,7 +87,6 @@ public class DBYLiveController: DBY1VNController {
         
         liveManager.delegate = self
         
-        addObserver()
         guard let roomId = authinfo?.roomID else {
             return;
         }
@@ -114,6 +113,19 @@ public class DBYLiveController: DBY1VNController {
         animationTimer?.stopTimer()
         zanTimer?.stopTimer()
     }
+    override func addObserver() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(recoverManager),
+                                               name: UIApplication.didBecomeActiveNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(pauseManager),
+                                               name: UIApplication.willResignActiveNotification,
+                                               object: nil)
+    }
+    override func initSubViews() {
+        settingView = DBYSettingViewLiveFactory.create()
+    }
     override func addSubviews() {
         super.addSubviews()
         
@@ -131,24 +143,7 @@ public class DBYLiveController: DBY1VNController {
         super.setupStaticUI()
         
         topBar.set(authinfo?.courseTitle)
-        let settingModel1 = DBYSettingModel()
-        settingModel1.name = "通用设置"
-        settingModel1.resueId = "\(DBYSettingIconCell.self)"
-        settingModel1.items = [DBYSettingItem(name: "音频播放", defaultIcon: "audio-only-normal", selectedIcon: "audio-only-selected")]
         
-        let settingModel2 = DBYSettingModel()
-        settingModel2.name = "线路切换"
-        settingModel2.resueId = "\(DBYSettingLabelCell.self)"
-        settingModel2.items = [
-            DBYSettingItem(name: "sdk"),
-            DBYSettingItem(name: "ali"),
-            DBYSettingItem(name: "tencent")
-        ]
-        
-        settingView.models = [
-            settingModel1,
-            settingModel2
-        ]
         chatListView.showChatbar = true
         
         var models = [DBYSegmentedModel]()
@@ -231,16 +226,6 @@ public class DBYLiveController: DBY1VNController {
         }
     }
     //MARK: - private functions
-    func addObserver() {
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(recoverManager),
-                                               name: UIApplication.didBecomeActiveNotification,
-                                               object: nil)
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(pauseManager),
-                                               name: UIApplication.willResignActiveNotification,
-                                               object: nil)
-    }
     @objc func viewTap(tap: UITapGestureRecognizer) {
         chatListView.chatBar.endInput()
     }
@@ -419,10 +404,10 @@ public class DBYLiveController: DBY1VNController {
     }
     func changeQuickLine(index: Int) {
         if let url = URL(string: "webrtc://htx-live.duobeiyun.net/duobei/zhonglaoban"), index == 1 {
-            videoPlayer = VideoPlayerFactory<TencentCreator>.getPlayer(url: url)
+            videoPlayer = TencentPlayerFactory.create(url: url)
         }
         if let url = URL(string: "artc://fal-live.duobeiyun.com/duobei/zhonglaoban_opus-RTS"), index == 2 {
-            videoPlayer = VideoPlayerFactory<AliCreator>.getPlayer(url: url)
+            videoPlayer = AliPlayerFactory.create(url: url)
         }
         videoPlayer?.addPlayerView(mainView.videoView)
         videoPlayer?.start()

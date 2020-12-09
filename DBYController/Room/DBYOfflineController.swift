@@ -54,6 +54,9 @@ public class DBYOfflineController: DBYPlaybackController {
     override public func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
     }
+    override func initSubViews() {
+        settingView = DBYSettingViewOfflineFactory.create()
+    }
     override func setupStaticUI() {
         super.setupStaticUI()
         topBar.set(title)

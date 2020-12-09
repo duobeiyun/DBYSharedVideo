@@ -103,6 +103,19 @@ public class DBYOnlineController: DBYPlaybackController {
             return .commandFailed
         }
     }
+    override func addObserver() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(recoverApi),
+                                               name: UIApplication.didBecomeActiveNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(pauseApi),
+                                               name: UIApplication.willResignActiveNotification,
+                                               object: nil)
+    }
+    override func initSubViews() {
+        settingView = DBYSettingViewOnlineFactory.create()
+    }
     override public func addSubviews() {
         super.addSubviews()
     }
@@ -115,30 +128,6 @@ public class DBYOnlineController: DBYPlaybackController {
     override func setupStaticUI() {
         super.setupStaticUI()
         chatListView.chatBar.isHidden = true
-        let settingModel1 = DBYSettingModel()
-        settingModel1.name = "通用设置"
-        settingModel1.resueId = "\(DBYSettingIconCell.self)"
-        settingModel1.items = [DBYSettingItem(name: "后台播放", defaultIcon: "playback-normal", selectedIcon: "playback-selected")]
-        
-        var items = [DBYSettingItem]()
-        for playRate in playRates {
-            items.append(DBYSettingItem(name: String(format: "%.1fx", playRate)))
-        }
-        
-        let settingModel2 = DBYSettingModel()
-        settingModel2.name = "倍速播放"
-        settingModel2.resueId = "\(DBYSettingLabelCell.self)"
-        settingModel2.items = items
-        
-        let settingModel3 = DBYSettingModel()
-        settingModel3.name = "线路切换"
-        settingModel3.resueId = "\(DBYSettingLabelCell.self)"
-        
-        settingView.models = [
-            settingModel1,
-            settingModel2,
-            settingModel3
-        ]
     }
     override func setupLandscapeUI() {
         super.setupLandscapeUI()
@@ -156,16 +145,6 @@ public class DBYOnlineController: DBYPlaybackController {
     }
     
     //MARK: - private functions
-    func addObserver() {
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(recoverApi),
-                                               name: UIApplication.didBecomeActiveNotification,
-                                               object: nil)
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(pauseApi),
-                                               name: UIApplication.willResignActiveNotification,
-                                               object: nil)
-    }
     func dealWith(reachability: DBYReachability) {
         let netStatus = reachability.currentReachabilityStatus()
         switch netStatus{

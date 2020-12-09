@@ -12,6 +12,90 @@ import SnapKit
 protocol DBYSettingViewDelegate: NSObjectProtocol {
     func settingView(owner: DBYSettingView, didSelectedItemAt indexPath: IndexPath)
 }
+protocol DBYSettingViewFactory {
+    static func create() -> DBYSettingView
+}
+class DBYSettingViewLiveFactory: DBYSettingViewFactory {
+    static func create() -> DBYSettingView {
+        let settingView = DBYSettingView()
+        let settingModel1 = DBYSettingModel()
+        settingModel1.name = "通用设置"
+        settingModel1.resueId = "\(DBYSettingIconCell.self)"
+        settingModel1.items = [DBYSettingItem(name: "音频播放", defaultIcon: "audio-only-normal", selectedIcon: "audio-only-selected")]
+        
+        let settingModel2 = DBYSettingModel()
+        settingModel2.name = "线路切换"
+        settingModel2.resueId = "\(DBYSettingLabelCell.self)"
+        settingModel2.items = [
+            DBYSettingItem(name: "sdk"),
+            DBYSettingItem(name: "ali"),
+            DBYSettingItem(name: "tencent")
+        ]
+        
+        settingView.models = [
+            settingModel1,
+            settingModel2
+        ]
+        return settingView
+    }
+}
+class DBYSettingViewOnlineFactory: DBYSettingViewFactory {
+    static func create() -> DBYSettingView {
+        let settingView = DBYSettingView()
+        let settingModel1 = DBYSettingModel()
+        settingModel1.name = "通用设置"
+        settingModel1.resueId = "\(DBYSettingIconCell.self)"
+        settingModel1.items = [DBYSettingItem(name: "后台播放", defaultIcon: "playback-normal", selectedIcon: "playback-selected")]
+        
+        var items = [DBYSettingItem]()
+        
+        for playRate in playRates {
+            items.append(DBYSettingItem(name: String(format: "%.1fx", playRate)))
+        }
+        
+        let settingModel2 = DBYSettingModel()
+        settingModel2.name = "倍速播放"
+        settingModel2.resueId = "\(DBYSettingLabelCell.self)"
+        settingModel2.items = items
+        
+        let settingModel3 = DBYSettingModel()
+        settingModel3.name = "线路切换"
+        settingModel3.resueId = "\(DBYSettingLabelCell.self)"
+        
+        settingView.models = [
+            settingModel1,
+            settingModel2,
+            settingModel3
+        ]
+        return DBYSettingView()
+    }
+}
+class DBYSettingViewOfflineFactory: DBYSettingViewFactory {
+    static func create() -> DBYSettingView {
+        let settingView = DBYSettingView()
+        let settingModel1 = DBYSettingModel()
+        settingModel1.name = "通用设置"
+        settingModel1.resueId = "\(DBYSettingIconCell.self)"
+        settingModel1.items = [DBYSettingItem(name: "后台播放", defaultIcon: "playback-normal", selectedIcon: "playback-selected")]
+        
+        var items = [DBYSettingItem]()
+        
+        for playRate in playRates {
+            items.append(DBYSettingItem(name: String(format: "%.1fx", playRate)))
+        }
+        
+        let settingModel2 = DBYSettingModel()
+        settingModel2.name = "倍速播放"
+        settingModel2.resueId = "\(DBYSettingLabelCell.self)"
+        settingModel2.items = items
+        
+        settingView.models = [
+            settingModel1,
+            settingModel2
+        ]
+        return DBYSettingView()
+    }
+}
 class DBYSettingHeader: UICollectionReusableView {
     lazy var nameLabel = UILabel()
     

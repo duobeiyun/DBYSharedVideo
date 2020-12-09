@@ -23,22 +23,17 @@ protocol VideoPlayerViewable {
 protocol VideoPlayer: VideoPlayerViewable, VideoPlayerControl {
     
 }
-protocol Creator {
+protocol VideoPlayerFactory {
     static func create(url: URL) -> VideoPlayer
 }
-class TencentCreator: Creator {
+class TencentPlayerFactory: VideoPlayerFactory {
     static func create(url: URL) -> VideoPlayer {
         return TencentVideoPlayer(url: url)
     }
 }
-class AliCreator: Creator {
+class AliPlayerFactory: VideoPlayerFactory {
     static func create(url: URL) -> VideoPlayer {
         return AliVideoPlayer(url: url)
-    }
-}
-class VideoPlayerFactory<T> where T:Creator {
-    static func getPlayer(url: URL) -> VideoPlayer {
-        return T.create(url: url)
     }
 }
 class TencentVideoPlayer: VideoPlayer {
@@ -74,7 +69,7 @@ extension TencentVideoPlayer {
         playerView.removeFromSuperview()
     }
 }
-class AliVideoPlayer: VideoPlayer {
+class AliVideoPlayer: NSObject, VideoPlayer {
     var player: AliPlayer
     var urlSource: AVPUrlSource
     
@@ -109,5 +104,14 @@ extension AliVideoPlayer {
     
     func removePlayerView() {
         
+    }
+}
+extension AliVideoPlayer: AVPDelegate {
+    func onPlayerEvent(_ player: AliPlayer!, eventWithString: AVPEventWithString, description: String!) {
+        if eventWithString == EVENT_PLAYER_RTS_SERVER_MAYBE_DISCONNECT {
+            
+        }else if eventWithString == EVENT_PLAYER_RTS_SERVER_RECOVER {
+            
+        }
     }
 }

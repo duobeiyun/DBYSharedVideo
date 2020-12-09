@@ -9,7 +9,6 @@
 import UIKit
 
 public class DBYPlaybackController: DBY1VNController {
-    lazy var playRates:[Float] = [0.5, 0.8, 1.0, 1.5, 2.0]
     lazy var timeTipLab:UILabel = {
         let label = UILabel()
         label.text = "00:00:00"

@@ -50,7 +50,7 @@ public class DBY1VNController: UIViewController {
     lazy var mainView = DBYMainView()
     lazy var courseInfoView = DBYCourseInfoView()
     lazy var segmentedView = DBYSegmentedView()
-    lazy var settingView = DBYSettingView()
+    var settingView:DBYSettingView!
     lazy var chatListView = DBYChatListView()
     
     lazy var netTipView = DBYNetworkTipView()
@@ -77,16 +77,9 @@ public class DBY1VNController: UIViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(reachabilityChanged),
-                                               name: NSNotification.Name.dbyReachabilityChanged,
-                                               object: nil)
-        
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(volumeChange(notification:)),
-                                               name: volumeChangeNotification,
-                                               object: nil)
         mainView.delegate = self
+        addObserver()
+        initSubViews()
         addSubviews()
         setViewFrameAndStyle()
         addActions()
@@ -114,6 +107,20 @@ public class DBY1VNController: UIViewController {
         NotificationCenter.default.removeObserver(self)
     }
     //MARK: - private functions
+    func addObserver() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(reachabilityChanged),
+                                               name: NSNotification.Name.dbyReachabilityChanged,
+                                               object: nil)
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(volumeChange(notification:)),
+                                               name: volumeChangeNotification,
+                                               object: nil)
+    }
+    func initSubViews() {
+        
+    }
     func addSubviews() {
         view.addSubview(mainView)
         view.addSubview(topBar)
