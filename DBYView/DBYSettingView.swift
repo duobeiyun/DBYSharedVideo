@@ -57,6 +57,7 @@ class DBYSettingViewOnlineFactory: DBYSettingViewFactory {
         settingModel2.name = "倍速播放"
         settingModel2.resueId = "\(DBYSettingLabelCell.self)"
         settingModel2.items = items
+        settingModel2.selectedIndex = 2
         
         let settingModel3 = DBYSettingModel()
         settingModel3.name = "线路切换"
@@ -67,7 +68,7 @@ class DBYSettingViewOnlineFactory: DBYSettingViewFactory {
             settingModel2,
             settingModel3
         ]
-        return DBYSettingView()
+        return settingView
     }
 }
 class DBYSettingViewOfflineFactory: DBYSettingViewFactory {
@@ -88,6 +89,7 @@ class DBYSettingViewOfflineFactory: DBYSettingViewFactory {
         settingModel2.name = "倍速播放"
         settingModel2.resueId = "\(DBYSettingLabelCell.self)"
         settingModel2.items = items
+        settingModel2.selectedIndex = 2
         
         settingView.models = [
             settingModel1,
@@ -202,7 +204,7 @@ extension DBYSettingView: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let model = models[indexPath.section]
         model.selectedIndex = indexPath.row
-        collectionView.reloadItems(at: [indexPath])
+        collectionView.reloadSections([indexPath.section])
         delegate?.settingView(owner: self, didSelectedItemAt: indexPath)
     }
 }
@@ -239,7 +241,9 @@ extension DBYSettingView: UICollectionViewDataSource {
             iconCell.iconView.image = UIImage(name: iconName ?? "")
         }
         if let labelCell = cell as? DBYSettingLabelCell {
+            let color = model.selectedIndex == indexPath.row ? DBYStyle.yellow:UIColor.white
             labelCell.nameLabel.text = item?.name
+            labelCell.nameLabel.textColor = color
         }
         
         return cell

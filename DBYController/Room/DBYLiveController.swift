@@ -403,11 +403,13 @@ public class DBYLiveController: DBY1VNController {
         }
     }
     func changeQuickLine(index: Int) {
-        if let url = URL(string: "webrtc://htx-live.duobeiyun.net/duobei/zhonglaoban"), index == 1 {
-            videoPlayer = TencentPlayerFactory.create(url: url)
-        }
-        if let url = URL(string: "artc://fal-live.duobeiyun.com/duobei/zhonglaoban_opus-RTS"), index == 2 {
-            videoPlayer = AliPlayerFactory.create(url: url)
+        if let str = liveManager.getNextPriorityQuickLine(),
+           let url = URL(string: str) {
+            if url.scheme == "webrtc" {
+                videoPlayer = TencentPlayerFactory.create(url: url)
+            } else {
+                videoPlayer = AliPlayerFactory.create(url: url)
+            }
         }
         videoPlayer?.addPlayerView(mainView.videoView)
         videoPlayer?.start()

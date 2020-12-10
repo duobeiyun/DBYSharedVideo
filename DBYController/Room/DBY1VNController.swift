@@ -142,6 +142,7 @@ public class DBY1VNController: UIViewController {
     }
     func setupPortraitUI() {
         segmentedView.isHidden = false
+        settingView.isHidden = true
     }
     func setupLandscapeUI() {
         segmentedView.isHidden = true
