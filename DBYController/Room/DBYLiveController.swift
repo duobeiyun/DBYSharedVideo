@@ -830,7 +830,9 @@ extension DBYLiveController: DBYTopBarDelegate {
 }
 extension DBYLiveController: DBYSettingViewDelegate {
     func settingView(owner: DBYSettingView, didSelectedItemAt indexPath: IndexPath) {
-        
+        if indexPath.section == 1 {
+            changeQuickLine(index: indexPath.row)
+        }
     }
 }
 extension DBYLiveController: DBYVideoTipViewDelegate {
