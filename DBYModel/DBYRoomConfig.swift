@@ -20,6 +20,7 @@ class DBYRoomConfig: NSObject {
     var watermark: DBYWatermark?
     var marquee: DBYMarquee?
     var extends: [DBYExtendModel]?
+    var leb: Bool?
     var sensitiveWords: String?
     var studentVideo: [String: Any]?
     
@@ -63,6 +64,7 @@ class DBYRoomConfig: NSObject {
                 extends?.append(model)
             }
         }
+        leb = dict["leb"] as? Bool
         sensitiveWords = dict["sensitiveWords"] as? String
     }
 }

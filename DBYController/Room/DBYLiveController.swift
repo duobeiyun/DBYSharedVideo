@@ -66,6 +66,7 @@ public class DBYLiveController: DBY1VNController {
     weak var zanTimer:ZFTimer?
     var questions: [[String:Any]]?
     var videoPlayer: VideoPlayer?
+    var quickLines:[DBYQuickLine]?
     
     //MARK: - override functions
     override public func viewDidLoad() {
@@ -96,6 +97,9 @@ public class DBYLiveController: DBY1VNController {
             let name = roomConfig?.sensitiveWords
             DBYRoomConfigUtil.shared.getSensitiveWord(name: name) { (array) in
                 self.sensitiveWords = array
+            }
+            if roomConfig?.leb == true {
+                self.liveManager.disabelMedia()
             }
             DispatchQueue.main.async {
                 self.questionView.roomConfig = roomConfig
@@ -403,16 +407,48 @@ public class DBYLiveController: DBY1VNController {
         }
     }
     func changeQuickLine(index: Int) {
-        if let str = liveManager.getNextPriorityQuickLine(),
-           let url = URL(string: str) {
-            if url.scheme == "webrtc" {
-                videoPlayer = TencentPlayerFactory.create(url: url)
-            } else {
-                videoPlayer = AliPlayerFactory.create(url: url)
-            }
+        videoPlayer?.removePlayerView()
+        videoPlayer?.stop()
+        if index == 0 {
+            videoPlayer = nil
+            //恢复sdk播放
+            liveManager.enabelMedia()
+            return
         }
+        if let count = quickLines?.count, index >= count {
+            return
+        }
+        guard let line = quickLines?[index], let url = URL(string: line.url) else {
+            return
+        }
+        if line.type == .tencent {
+            videoPlayer = TencentPlayerFactory.create(url: url)
+        } else if line.type == .ali {
+            videoPlayer = AliPlayerFactory.create(url: url)
+        }
+        liveManager.disabelMedia()
         videoPlayer?.addPlayerView(mainView.videoView)
         videoPlayer?.start()
+    }
+    func getPriorityLine(lines: [DBYQuickLine]) -> Int {
+        var leng:Int = 0
+        //获取总数
+        for i in 0..<lines.count {
+            leng += lines[i].weight
+        }
+        for i in 0..<lines.count {
+            //获取 0-总数 之间的一个随随机整数
+            let random = Int.random(in: 0..<100)
+            if(random < lines[i].weight) {
+                //如果在当前的概率范围内,得到的就是当前概率
+                return i
+            }
+            else {
+                //否则减去当前的概率范围,进入下一轮循环
+                leng -= lines[i].weight
+            }
+        }
+        return -1
     }
     //MARK: - objc functions
     @objc func updateAnimation() {
@@ -497,25 +533,11 @@ public class DBYLiveController: DBY1VNController {
 }
 extension DBYLiveController: DBYLiveManagerDelegate {
     public func clientOnline(_ liveManager: DBYLiveManager!, userId uid: String!, nickName: String!, userRole role: Int32) {
+        if uid != authinfo?.userId {
+            return
+        }
+        
         mainView.hiddenLoadingView()
-        let group = DispatchGroup()
-        group.enter()
-        liveManager.getInteractionList(.audio) {[weak self] (list) in
-            if let models = list {
-                self?.interactionView.set(models: models, for: .audio)
-            }
-            group.leave()
-        }
-        group.enter()
-        liveManager.getInteractionList(.video) {[weak self] (list) in
-            if let models = list {
-                self?.interactionView.set(models: models, for: .video)
-            }
-            group.leave()
-        }
-        group.notify(queue: DispatchQueue.main) {
-            self.interactionView.switchButton(.audio)
-        }
     }
     public func liveManagerClassOver(_ manager: DBYLiveManager!) {
         DBYGlobalMessage.shared().showText(.LM_ClassOver)
@@ -690,6 +712,9 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         ]
         chatListView.append(dict: dict)
     }
+    public func liveManager(_ manager: DBYLiveManager!, quickLinesChanged lines: [DBYQuickLine]!) {
+        quickLines = lines
+    }
 }
 extension DBYLiveController:DBYNetworkTipViewDelegate {
     func confirmClick(_ owner: DBYNetworkTipView) {
@@ -709,7 +734,27 @@ extension DBYLiveController: DBYChatBarDelegate {
         send(message: message)
     }
     func chatBar(owner: DBYChatBar, buttonClickWith target: UIButton) {
-        interactionView.isHidden = false
+        TLTipViewController.showLoading(message: "获取交互列表")
+        let group = DispatchGroup()
+        group.enter()
+        liveManager.getInteractionList(.audio) {[weak self] (list) in
+            if let models = list {
+                self?.interactionView.set(models: models, for: .audio)
+            }
+            group.leave()
+        }
+        group.enter()
+        liveManager.getInteractionList(.video) {[weak self] (list) in
+            if let models = list {
+                self?.interactionView.set(models: models, for: .video)
+            }
+            group.leave()
+        }
+        group.notify(queue: DispatchQueue.main) {
+            TLTipViewController.dismiss()
+            self.interactionView.switchButton(.audio)
+            self.interactionView.isHidden = false
+        }
     }
     func chatBarWillShowInputView(rect: CGRect, duration: TimeInterval) {
         if isLandscape() {
