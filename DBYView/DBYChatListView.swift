@@ -8,6 +8,7 @@
 
 import UIKit
 import DBYSDK_dylib
+import SnapKit
 
 let emojiImageDict: [String:String] = [
     "hello": "[:问好]",
@@ -51,9 +52,11 @@ let emojiNameDict: [String:String] = [
 ]
 
 class DBYChatListView: DBYView {
-    let fromIdentifier: String = "DBYCommentFromCell"
-    let toIdentifier: String = "DBYCommentToCell"
-    let zanCell = "DBYZanCell"
+    let fromCellReuseId: String = "DBYCommentFromCell"
+    let toCellReuseId: String = "DBYCommentToCell"
+    let zanCellReuseId: String = "DBYZanCell"
+    let msgCellReuseId: String = "DBYMessageCell"
+    
     let estimatedRowHeight: CGFloat = 44
     
     lazy var chatBar = DBYChatBar()
@@ -94,17 +97,19 @@ class DBYChatListView: DBYView {
         let t = UITableView(frame: .zero, style: .plain)
         let classType = type(of: self)
         let bundle = Bundle(for: classType)
-        let fromNib = UINib(nibName: fromIdentifier, bundle: currentBundle)
-        let toNib = UINib(nibName: toIdentifier, bundle: currentBundle)
-        let zanNib = UINib(nibName: zanCell, bundle: currentBundle)
+        let fromNib = UINib(nibName: fromCellReuseId, bundle: currentBundle)
+        let toNib = UINib(nibName: toCellReuseId, bundle: currentBundle)
+        let zanNib = UINib(nibName: zanCellReuseId, bundle: currentBundle)
+        let msgNib = UINib(nibName: msgCellReuseId, bundle: currentBundle)
         
         t.backgroundColor = .clear
         t.separatorStyle = .none
         t.allowsSelection = false
         t.estimatedRowHeight = estimatedRowHeight;
-        t.register(fromNib, forCellReuseIdentifier: fromIdentifier)
-        t.register(toNib, forCellReuseIdentifier: toIdentifier)
-        t.register(zanNib, forCellReuseIdentifier: zanCell)
+        t.register(fromNib, forCellReuseIdentifier: fromCellReuseId)
+        t.register(toNib, forCellReuseIdentifier: toCellReuseId)
+        t.register(zanNib, forCellReuseIdentifier: zanCellReuseId)
+        t.register(msgNib, forCellReuseIdentifier: msgCellReuseId)
         
         return t
     }()
@@ -298,9 +303,14 @@ extension DBYChatListView: UITableViewDataSource {
         }
         var chatDict = allChatList[indexPath.row]
         if let type:String = chatDict["type"] as? String, type == "thumbup" {
-            let thumbCell = tableView.dequeueReusableCell(withIdentifier: zanCell, for: indexPath) as! DBYZanCell
+            let thumbCell = tableView.dequeueReusableCell(withIdentifier: zanCellReuseId, for: indexPath) as! DBYZanCell
             thumbCell.set(text: chatDict["name"] as? String)
             return thumbCell
+        }
+        if let type:String = chatDict["type"] as? String, type == "message" {
+            let msgCell = tableView.dequeueReusableCell(withIdentifier: msgCellReuseId, for: indexPath) as! DBYMessageCell
+            msgCell.messageLabel.text = chatDict["message"] as? String
+            return msgCell
         }
         let size = UIScreen.main.bounds.size
         chatDict["size"] = size

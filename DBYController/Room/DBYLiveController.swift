@@ -34,17 +34,6 @@ public class DBYLiveController: DBY1VNController {
     lazy var micListView = DBYMicListView()
     lazy var hangUpView = DBYHangUpView()
     
-    lazy var audioBtn:DBYVerticalButton = {
-        let btn = DBYVerticalButton()
-        btn.setImage(UIImage(name:"audio-only-normal"), for: .normal)
-        btn.setImage(UIImage(name:"audio-only-selected"), for: .selected)
-        btn.setTitle("只听音频", for: .normal)
-        btn.titleLabel?.font = UIFont.systemFont(ofSize: 8)
-        btn.titleLabel?.textColor = UIColor.white
-        btn.titleLabel?.textAlignment = .center
-        btn.imageView?.contentMode = .center
-        return btn
-    }()
     lazy var images:[UIImage] = {
         var arr = [UIImage]()
         for i in 0..<30 {
@@ -89,7 +78,7 @@ public class DBYLiveController: DBY1VNController {
         liveManager.delegate = self
         
         guard let roomId = authinfo?.roomID else {
-            return;
+            return
         }
         
         DBYRoomConfigUtil.shared.getRoomConfig(roomId: roomId) { (roomConfig) in
@@ -100,6 +89,8 @@ public class DBYLiveController: DBY1VNController {
             }
             if roomConfig?.leb == true {
                 self.liveManager.disabelMedia()
+            } else {
+                self.liveManager.enabelMedia()
             }
             DispatchQueue.main.async {
                 self.questionView.roomConfig = roomConfig
@@ -141,7 +132,6 @@ public class DBYLiveController: DBY1VNController {
     override func addActions() {
         super.addActions()
         chatListView.inputButton.addTarget(self, action: #selector(showInputController), for: .touchUpInside)
-        audioBtn.addTarget(self, action: #selector(audioOnly), for: .touchUpInside)
     }
     override func setupStaticUI() {
         super.setupStaticUI()
@@ -448,7 +438,7 @@ public class DBYLiveController: DBY1VNController {
                 leng -= lines[i].weight
             }
         }
-        return -1
+        return 0
     }
     //MARK: - objc functions
     @objc func updateAnimation() {
@@ -533,14 +523,27 @@ public class DBYLiveController: DBY1VNController {
 }
 extension DBYLiveController: DBYLiveManagerDelegate {
     public func clientOnline(_ liveManager: DBYLiveManager!, userId uid: String!, nickName: String!, userRole role: Int32) {
+        if uid == authinfo?.teacherId {
+            liveManager.openCam(true) { (message) in
+                
+            }
+            liveManager.openMic(true) { (message) in
+                
+            }
+            return
+        }
         if uid != authinfo?.userId {
             return
         }
-        
         mainView.hiddenLoadingView()
     }
     public func liveManagerClassOver(_ manager: DBYLiveManager!) {
         DBYGlobalMessage.shared().showText(.LM_ClassOver)
+        let dict:[String : Any] = [
+            "type": "message",
+            "message": "本次课程已结束，感谢大家的积极参与。"
+        ]
+        chatListView.append(dict: dict)
     }
     public func liveManager(_ manager: DBYLiveManager!, hasNewChatMessageWithChatArray newChatDictArray: [Any]!) {
         guard let array = newChatDictArray as? [[String:Any]] else {
@@ -602,22 +605,18 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         }
     }
 
-    public func liveManager(_ manager: DBYLiveManager!, teacherGiveMicToStudentWithUserInfo userInfo: [AnyHashable : Any]! = [:], canSpeak: Bool) {
-        guard let userName = userInfo?["userName"] as? String else {
-            return
-        }
+    public func liveManager(_ manager: DBYLiveManager!, teacherGiveMicToStudentWith userInfo: DBYUserInfo, canSpeak: Bool) {
         if canSpeak {
-            micListView.append(name: userName)
+            micListView.append(name: userInfo.nickName)
+            let dict:[String : Any] = [
+                "type": "message",
+                "message": openMicMessage(userInfo: userInfo)
+            ]
+            chatListView.append(dict: dict)
         }else {
-            micListView.remove(name: userName)
+            micListView.remove(name: userInfo.nickName)
         }
         micListView.autoAdjustFrame()
-    }
-    public func liveManager(_ manager: DBYLiveManager!, hasVideo: Bool, in view: UIView!) {
-        if hasVideo {
-            //切换到最前面
-            showMarqueeView()
-        }
     }
     public func liveManagerDidKickedOff(_ manager: DBYLiveManager!) {
         let actionSheetView = DBYActionSheetView()
@@ -637,9 +636,7 @@ extension DBYLiveController: DBYLiveManagerDelegate {
             weakSelf?.exitRoom()
         }
         
-        actionSheetView.show(title: "提示",
-                        message: "检测到你在其他设备上登录",
-                        actions: [button1, button2])
+        actionSheetView.show(title: "提示", message: "检测到你在其他设备上登录", actions: [button1, button2])
     }
     public func liveManagerTeacherAskStudentOpenCamera(_ manager: DBYLiveManager!) {
         liveManager.responseTeacherOpenCamRequest(withOpenCamera: true, completeHandler: { (message) in
@@ -672,10 +669,11 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         let videoView = createVideoView(uid: uid)
         liveManager.setLocalVideoView(videoView.video)
         videoView.setUserName(name: authinfo?.nickName)
+        //切回sdk
+        changeQuickLine(index: 0)
     }
     public func destroyVideoRecorder(_ liveManager: DBYLiveManager!, userId uid: String!) {
-        let videoView = videoDict.removeValue(forKey: uid)
-        videoView?.removeFromSuperview()
+        removeVideoView(uid: uid)
     }
     public func liveManager(_ manager: DBYLiveManager!, interActionListChange list: [DBYInteractionModel]!, type: DBYInteractionType) {
         self.interactionView.set(models: list, for: type)
@@ -684,28 +682,30 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         if uid == authinfo?.teacherId || uid == liveManager.assitantId {
             return
         }
+        //切回sdk
+        changeQuickLine(index: 0)
         let videoView = createVideoView(uid: uid)
         liveManager.setStudentView(videoView.video, withUserId: uid)
-        liveManager.getUserInfo(uid) { (dict) in
-            guard let userInfo = dict as? [String: Any] else {
+        liveManager.getUserInfo(uid) { (userInfo) in
+            guard let info = userInfo else {
                 return
             }
-            guard let userName = userInfo["userName"] as? String else {
-                return
-            }
-            videoView.setUserName(name: userName)
+            let dict:[String : Any] = [
+                "type": "message",
+                "message": openCamMessage(userInfo: info)
+            ]
+            self.chatListView.append(dict: dict)
+            videoView.setUserName(name: userInfo?.nickName)
         }
     }
     public func willInterruptVideoData(_ liveManager: DBYLiveManager!, userId uid: String!) {
-        let videoView = videoDict.removeValue(forKey: uid)
-        videoView?.removeFromSuperview()
+        removeVideoView(uid: uid)
     }
     public func liveManager(_ manager: DBYLiveManager!, thumbupWithCount count: Int, userName: String!) {
         if userName.count < 1 {
             courseInfoView.setThumbCount(count: count)
             return
         }
-        print("\(userName ?? "")为教师点了\(count)个赞");
         let dict = [
             "type": "thumbup",
             "name": "\(userName ?? "")为教师点了\(count)个赞"
@@ -714,6 +714,8 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     }
     public func liveManager(_ manager: DBYLiveManager!, quickLinesChanged lines: [DBYQuickLine]!) {
         quickLines = lines
+        let index = getPriorityLine(lines: lines)
+        changeQuickLine(index: index)
     }
 }
 extension DBYLiveController:DBYNetworkTipViewDelegate {
@@ -887,7 +889,6 @@ extension DBYLiveController: DBYVideoTipViewDelegate {
     
     func buttonClick(owner: DBYVideoTipView1, type: DBYTipType) {
         if type == .audio {
-            audioBtn.isSelected = true
             liveManager.setReceiveVideoWith(true) { (message) in
                 print(message ?? "setReceiveVideoWith")
             }

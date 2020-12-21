@@ -10,6 +10,31 @@ import UIKit
 import MediaPlayer
 import DBYSDK_dylib
 
+///1:老师 2:学生 3:管理员 4:助教 6:家长
+func roleString(role: Int) -> String {
+    var str = ""
+    switch role {
+        case 1:
+            str = "老师"
+        case 2:
+            str = "学生"
+        case 3:
+            str = "管理员"
+        case 4:
+            str = "助教"
+        case 6:
+            str = "家长"
+        default:
+            str = ""
+    }
+    return str
+}
+func openCamMessage(userInfo: DBYUserInfo) -> String {
+    return roleString(role: userInfo.userRole) + userInfo.nickName + " 正在上台发言"
+}
+func openMicMessage(userInfo: DBYUserInfo) -> String {
+    return roleString(role: userInfo.userRole) + userInfo.nickName + " 正在上麦发言"
+}
 func badgeUrl(role: Int, badgeDict:[String: Any]?) -> (String?, String?) {
     let disable = badgeDict?["disabled"] as? Bool ?? false
     if disable {
@@ -232,6 +257,10 @@ public class DBY1VNController: UIViewController {
         videoView.addGestureRecognizer(pinch)
         
         return videoView
+    }
+    func removeVideoView(uid: String) {
+        let videoView = videoDict.removeValue(forKey: uid)
+        videoView?.removeFromSuperview()
     }
     func adjustVideoViewFrame(videoView: UIView?) {
         let viewW = view.bounds.width

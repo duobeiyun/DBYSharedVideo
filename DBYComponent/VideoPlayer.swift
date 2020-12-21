@@ -38,10 +38,12 @@ class AliPlayerFactory: VideoPlayerFactory {
 }
 class TencentVideoPlayer: VideoPlayer {
     var playerView: LiveEBVideoView
+    let pullStream = "https://overseas-webrtc.liveplay.myqcloud.com/webrtc/v1/pullstream"
+    let stopStream = "https://overseas-webrtc.liveplay.myqcloud.com/webrtc/v1/stopstream"
     
     required init(url: URL) {
         playerView = LiveEBVideoView()
-        playerView.liveEBURL = url.absoluteString
+        playerView.setLiveURL(url.absoluteString, pullStream: pullStream, stopStream: stopStream)
     }
 }
 extension TencentVideoPlayer {
@@ -95,6 +97,7 @@ extension AliVideoPlayer {
     
     func stop() {
         player.stop()
+        player.destroy()
     }
 }
 extension AliVideoPlayer {

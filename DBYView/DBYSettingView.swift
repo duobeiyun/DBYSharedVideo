@@ -27,9 +27,9 @@ class DBYSettingViewLiveFactory: DBYSettingViewFactory {
         settingModel2.name = "线路切换"
         settingModel2.resueId = "\(DBYSettingLabelCell.self)"
         settingModel2.items = [
-            DBYSettingItem(name: "sdk"),
-            DBYSettingItem(name: "ali"),
-            DBYSettingItem(name: "tencent")
+            DBYSettingItem(name: "线路1"),
+            DBYSettingItem(name: "线路2"),
+            DBYSettingItem(name: "线路3")
         ]
         
         settingView.models = [

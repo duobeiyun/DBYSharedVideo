@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -23,11 +23,11 @@
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="怎么“既和善又坚定”地改掉宝贝的“坏”习惯？" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="j1B-1g-CcO">
                     <rect key="frame" x="24" y="24" width="339" height="17"/>
                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                    <color key="textColor" systemColor="darkTextColor"/>
                     <nil key="highlightedColor"/>
                 </label>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="主讲教师：" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Obw-kk-EEf">
-                    <rect key="frame" x="24" y="53" width="339" height="14.5"/>
+                    <rect key="frame" x="24" y="53" width="61.5" height="14.5"/>
                     <fontDescription key="fontDescription" type="system" pointSize="12"/>
                     <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                     <nil key="highlightedColor"/>
@@ -58,7 +58,7 @@
                 <constraint firstAttribute="trailing" secondItem="j1B-1g-CcO" secondAttribute="trailing" constant="24" id="TsD-Tu-cAZ"/>
                 <constraint firstItem="4cS-EK-qdZ" firstAttribute="centerY" secondItem="qA5-qD-8Wy" secondAttribute="centerY" id="awf-Fw-tBM"/>
                 <constraint firstItem="Obw-kk-EEf" firstAttribute="leading" secondItem="30R-gu-10V" secondAttribute="leading" constant="24" id="cPC-bE-3J9"/>
-                <constraint firstAttribute="trailing" secondItem="Obw-kk-EEf" secondAttribute="trailing" constant="24" id="uHm-f5-VKX"/>
+                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="Obw-kk-EEf" secondAttribute="trailing" constant="24" id="uHm-f5-VKX"/>
             </constraints>
             <nil key="simulatedTopBarMetrics"/>
             <nil key="simulatedBottomBarMetrics"/>
@@ -69,5 +69,8 @@
     <resources>
         <image name="thumb-small" width="12" height="12"/>
         <image name="user-count" width="12" height="11"/>
+        <systemColor name="darkTextColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
     </resources>
 </document>
