@@ -226,14 +226,14 @@ public class DBYLiveController: DBY1VNController {
     func dealWith(reachability: DBYReachability) {
         let netStatus = internetReachability?.currentReachabilityStatus()
         switch netStatus {
-        case NotReachable:
+        case DBYNetworkStatusNotReachable:
             pauseManager()
             break
-        case ReachableViaWWAN:
+        case DBYNetworkStatusViaWWAN:
             mainView.addSubview(netTipView)
             pauseManager()
             break
-        case ReachableViaWiFi:
+        case DBYNetworkStatusViaWiFi:
             netTipView.dismiss()
             recoverManager()
             break
@@ -411,6 +411,7 @@ public class DBYLiveController: DBY1VNController {
         guard let line = quickLines?[index], let url = URL(string: line.url) else {
             return
         }
+        print("---", url.absoluteString)
         if line.type == .tencent {
             videoPlayer = TencentPlayerFactory.create(url: url)
         } else if line.type == .ali {
@@ -523,17 +524,16 @@ public class DBYLiveController: DBY1VNController {
 }
 extension DBYLiveController: DBYLiveManagerDelegate {
     public func clientOnline(_ liveManager: DBYLiveManager!, userId uid: String!, nickName: String!, userRole role: Int32) {
-        if uid == authinfo?.teacherId {
+        if uid != authinfo?.userId {
+            return
+        }
+        if authinfo?.userId == authinfo?.teacherId {
             liveManager.openCam(true) { (message) in
                 
             }
             liveManager.openMic(true) { (message) in
                 
             }
-            return
-        }
-        if uid != authinfo?.userId {
-            return
         }
         mainView.hiddenLoadingView()
     }

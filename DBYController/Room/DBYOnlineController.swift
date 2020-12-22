@@ -148,13 +148,13 @@ public class DBYOnlineController: DBYPlaybackController {
     func dealWith(reachability: DBYReachability) {
         let netStatus = reachability.currentReachabilityStatus()
         switch netStatus{
-        case NotReachable:
+        case DBYNetworkStatusNotReachable:
             break
-        case ReachableViaWWAN:
+        case DBYNetworkStatusViaWWAN:
             mainView.addSubview(netTipView)
             playbackManager.pausePlay()
             break
-        case ReachableViaWiFi:
+        case DBYNetworkStatusViaWiFi:
             mainView.hiddenNetworkTipView()
             playbackManager.resumePlay()
             break

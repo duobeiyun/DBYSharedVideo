@@ -20,6 +20,11 @@ protocol VideoPlayerViewable {
     func addPlayerView(_ view: UIView)
     func removePlayerView()
 }
+protocol VideoPlayerState {
+    func connected()
+    func connecting()
+    func disconnected()
+}
 protocol VideoPlayer: VideoPlayerViewable, VideoPlayerControl {
     
 }
@@ -36,13 +41,15 @@ class AliPlayerFactory: VideoPlayerFactory {
         return AliVideoPlayer(url: url)
     }
 }
-class TencentVideoPlayer: VideoPlayer {
+class TencentVideoPlayer: NSObject, VideoPlayer {
     var playerView: LiveEBVideoView
     let pullStream = "https://overseas-webrtc.liveplay.myqcloud.com/webrtc/v1/pullstream"
     let stopStream = "https://overseas-webrtc.liveplay.myqcloud.com/webrtc/v1/stopstream"
     
     required init(url: URL) {
         playerView = LiveEBVideoView()
+        super.init()
+        playerView.delegate = self
         playerView.setLiveURL(url.absoluteString, pullStream: pullStream, stopStream: stopStream)
     }
 }
@@ -71,6 +78,15 @@ extension TencentVideoPlayer {
         playerView.removeFromSuperview()
     }
 }
+extension TencentVideoPlayer: LiveEBVideoViewDelegate {
+    func videoView(_ videoView: LiveEBVideoView, didError error: Error) {
+        
+    }
+    
+    func videoView(_ videoView: LiveEBVideoView, didChangeVideoSize size: CGSize) {
+        
+    }
+}
 class AliVideoPlayer: NSObject, VideoPlayer {
     var player: AliPlayer
     var urlSource: AVPUrlSource
@@ -78,8 +94,11 @@ class AliVideoPlayer: NSObject, VideoPlayer {
     required init(url: URL) {
         player = AliPlayer()
         urlSource = AVPUrlSource()
+        super.init()
         urlSource.playerUrl = url
         player.setUrlSource(urlSource)
+        player.delegate = self
+        player.prepare()
     }
 }
 extension AliVideoPlayer {
@@ -110,11 +129,23 @@ extension AliVideoPlayer {
     }
 }
 extension AliVideoPlayer: AVPDelegate {
+    func onPlayerEvent(_ player: AliPlayer!, eventType: AVPEventType) {
+        
+    }
     func onPlayerEvent(_ player: AliPlayer!, eventWithString: AVPEventWithString, description: String!) {
         if eventWithString == EVENT_PLAYER_RTS_SERVER_MAYBE_DISCONNECT {
             
         }else if eventWithString == EVENT_PLAYER_RTS_SERVER_RECOVER {
             
         }
+    }
+    func onError(_ player: AliPlayer!, errorModel: AVPErrorModel!) {
+        
+    }
+    func onVideoSizeChanged(_ player: AliPlayer!, width: Int32, height: Int32, rotation: Int32) {
+        
+    }
+    func onPlayerStatusChanged(_ player: AliPlayer!, oldStatus: AVPStatus, newStatus: AVPStatus) {
+        
     }
 }
