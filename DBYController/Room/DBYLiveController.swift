@@ -55,7 +55,7 @@ public class DBYLiveController: DBY1VNController {
     weak var zanTimer:ZFTimer?
     var questions: [[String:Any]]?
     var videoPlayer: VideoPlayer?
-    var quickLines:[DBYQuickLine]?
+    var quickLines:[DBYPlayLine]?
     
     //MARK: - override functions
     override public func viewDidLoad() {
@@ -68,6 +68,7 @@ public class DBYLiveController: DBY1VNController {
         bottomBar.delegate = self
         settingView.delegate = self
         interactionView.delegate = self
+        videoPlayer?.delegate = self
         
         if authinfo?.classType == .sharedVideo {
             liveManager.setSharedVideoView(mainView.videoView)
@@ -125,6 +126,7 @@ public class DBYLiveController: DBY1VNController {
         super.addSubviews()
         
         view.addSubview(interactionView)
+        view.addSubview(changeLineButton)
         
         mainView.addSubview(marqueeView)
         mainView.addSubview(watermarkView)
@@ -132,6 +134,7 @@ public class DBYLiveController: DBY1VNController {
     override func addActions() {
         super.addActions()
         chatListView.inputButton.addTarget(self, action: #selector(showInputController), for: .touchUpInside)
+        changeLineButton.addTarget(self, action: #selector(showChangeLineView), for: .touchUpInside)
     }
     override func setupStaticUI() {
         super.setupStaticUI()
@@ -200,10 +203,14 @@ public class DBYLiveController: DBY1VNController {
         
         chatListView.setBackgroundColor(color: DBYStyle.lightAlpha, forState: .landscape)
         chatListView.setBackgroundColor(color: DBYStyle.lightGray, forState: .portrait)
+        
+        changeLineButton.portraitFrame = CGRect(x: segmentedView.portraitFrame.width - 44, y: segmentedView.portraitFrame.minY, width: 44, height: 44)
+        changeLineButton.landscapeFrame = .zero
     }
-    override func updateStyles() {
-        super.updateStyles()
-        interactionView.updateStyle()
+    override func updateFrameAndStyle() {
+        super.updateFrameAndStyle()
+        interactionView.updateFrameAndStyle()
+        changeLineButton.updateFrameAndStyle()
         hangUpView.autoAdjustFrame()
         micListView.autoAdjustFrame()
     }
@@ -277,6 +284,12 @@ public class DBYLiveController: DBY1VNController {
     func clearChatMessage() {
         chatListView.clearAll()
     }
+    @objc func showChangeLineView() {
+        guard let lines = quickLines else {
+            return
+        }
+        DBYQuickLinesController.show(lines: lines)
+    }
     func showVoteView(title:String, votes:[String]) {
         voteView.setVotes(votes: votes)
         voteView.delegate = self
@@ -297,7 +310,29 @@ public class DBYLiveController: DBY1VNController {
         bottomBar.hiddenVoteButton()
         segmentedView.removeData(with: "答题", animated: false)
     }
-    
+    func showInteractionView() {
+        TLTipViewController.showLoading(message: "获取交互列表")
+        let group = DispatchGroup()
+        group.enter()
+        liveManager.getInteractionList(.audio) {[weak self] (list) in
+            if let models = list {
+                self?.interactionView.set(models: models, for: .audio)
+            }
+            group.leave()
+        }
+        group.enter()
+        liveManager.getInteractionList(.video) {[weak self] (list) in
+            if let models = list {
+                self?.interactionView.set(models: models, for: .video)
+            }
+            group.leave()
+        }
+        group.notify(queue: DispatchQueue.main) {
+            TLTipViewController.dismiss()
+            self.interactionView.switchButton(.audio)
+            self.interactionView.isHidden = false
+        }
+    }
     func showWatermarkView() {
         guard let wk = roomConfig?.watermark else {
             return
@@ -392,6 +427,15 @@ public class DBYLiveController: DBY1VNController {
             chatListView.appendChats(array:[chatDict])
             return
         }
+        
+        let condition = (message.contains("卡") || message.contains("听不清")) && !message.contains("不卡")
+
+        if condition {
+            let tipView = TLLineTipView.loadNibView()
+            tipView?.show()
+            tipView?.changLineBlock = changeLineAccordToPriority
+            tipView?.dismiss(after: 2)
+        }
         liveManager.sendChatMessage(with: message) { (errorMessage) in
             print(errorMessage ?? "sendChatMessage")
         }
@@ -421,7 +465,14 @@ public class DBYLiveController: DBY1VNController {
         videoPlayer?.addPlayerView(mainView.videoView)
         videoPlayer?.start()
     }
-    func getPriorityLine(lines: [DBYQuickLine]) -> Int {
+    func changeLineAccordToPriority() {
+        guard let lines = quickLines else {
+            return
+        }
+        let index = getPriorityLine(lines: lines)
+        changeQuickLine(index: index)
+    }
+    func getPriorityLine(lines: [DBYPlayLine]) -> Int {
         var leng:Int = 0
         //获取总数
         for i in 0..<lines.count {
@@ -712,10 +763,15 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         ]
         chatListView.append(dict: dict)
     }
-    public func liveManager(_ manager: DBYLiveManager!, quickLinesChanged lines: [DBYQuickLine]!) {
+    public func liveManager(_ manager: DBYLiveManager!, quickLinesChanged lines: [DBYPlayLine]!) {
         quickLines = lines
         let index = getPriorityLine(lines: lines)
         changeQuickLine(index: index)
+        var items = [DBYSettingItem]()
+        for line in lines {
+            items.append(DBYSettingItem(name: line.name))
+        }
+        settingView.models[1].items = items
     }
 }
 extension DBYLiveController:DBYNetworkTipViewDelegate {
@@ -736,27 +792,7 @@ extension DBYLiveController: DBYChatBarDelegate {
         send(message: message)
     }
     func chatBar(owner: DBYChatBar, buttonClickWith target: UIButton) {
-        TLTipViewController.showLoading(message: "获取交互列表")
-        let group = DispatchGroup()
-        group.enter()
-        liveManager.getInteractionList(.audio) {[weak self] (list) in
-            if let models = list {
-                self?.interactionView.set(models: models, for: .audio)
-            }
-            group.leave()
-        }
-        group.enter()
-        liveManager.getInteractionList(.video) {[weak self] (list) in
-            if let models = list {
-                self?.interactionView.set(models: models, for: .video)
-            }
-            group.leave()
-        }
-        group.notify(queue: DispatchQueue.main) {
-            TLTipViewController.dismiss()
-            self.interactionView.switchButton(.audio)
-            self.interactionView.isHidden = false
-        }
+        showInteractionView()
     }
     func chatBarWillShowInputView(rect: CGRect, duration: TimeInterval) {
         if isLandscape() {
@@ -1044,4 +1080,24 @@ extension DBYLiveController: DBYInteractionViewDelegate {
         
     }
     
+}
+extension DBYLiveController: VideoPlayerStateDelegate {
+    func connected() {
+        
+    }
+    
+    func connecting() {
+        
+    }
+    
+    func disconnected() {
+        
+    }
+    
+    func stutter() {
+        let tipView = TLLineTipView.loadNibView()
+        tipView?.show()
+        tipView?.changLineBlock = changeLineAccordToPriority
+        tipView?.dismiss(after: 2)
+    }
 }

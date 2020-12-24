@@ -118,9 +118,12 @@ public class DBYOnlineController: DBYPlaybackController {
     }
     override public func addSubviews() {
         super.addSubviews()
+        
+        view.addSubview(changeLineButton)
     }
     override func addActions() {
         playbackBtn.addTarget(self, action: #selector(playbackEnable), for: .touchUpInside)
+        changeLineButton.addTarget(self, action: #selector(showChangeLineView), for: .touchUpInside)
     }
     func registerBlocks() {
         
@@ -137,7 +140,15 @@ public class DBYOnlineController: DBYPlaybackController {
         super.setupPortraitUI()
         topBar.set(type: .portrait)
     }
-    
+    override func setViewFrameAndStyle() {
+        super.setViewFrameAndStyle()
+        changeLineButton.portraitFrame = CGRect(x: segmentedView.portraitFrame.width - 44, y: segmentedView.portraitFrame.minY, width: 44, height: 44)
+        changeLineButton.landscapeFrame = .zero
+    }
+    override func updateFrameAndStyle() {
+        super.updateFrameAndStyle()
+        changeLineButton.updateFrameAndStyle()
+    }
     override func reachabilityChanged(note:NSNotification) {
         if let reachability = note.object as? DBYReachability {
             dealWith(reachability: reachability)
@@ -195,6 +206,16 @@ public class DBYOnlineController: DBYPlaybackController {
     }
     func recoverManager() {
         playbackManager.resumePlay()
+    }
+    @objc func showChangeLineView() {
+        var lines = [DBYPlayLine]()
+        let count = playbackManager.linesCount()
+        for i in 0..<count {
+            let line = DBYPlayLine()
+            line.name = "线路\(i)"
+            lines.append(line)
+        }
+        DBYQuickLinesController.show(lines: lines)
     }
 }
 extension DBYOnlineController:DBYOnlinePlayBackManagerDelegate {

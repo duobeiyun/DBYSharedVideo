@@ -16,17 +16,48 @@ protocol VideoPlayerControl {
     func resume()
     func stop()
 }
+extension VideoPlayerControl {
+    func start() {
+        
+    }
+    
+    func pause() {
+        
+    }
+    
+    func resume() {
+        
+    }
+    
+    func stop() {
+        
+    }
+}
 protocol VideoPlayerViewable {
     func addPlayerView(_ view: UIView)
     func removePlayerView()
 }
-protocol VideoPlayerState {
+extension VideoPlayerViewable {
+    func addPlayerView(_ view: UIView) {
+        
+    }
+    
+    func removePlayerView() {
+        
+    }
+}
+protocol VideoPlayerStateDelegate: NSObjectProtocol {
     func connected()
     func connecting()
     func disconnected()
+    func stutter()
 }
-protocol VideoPlayer: VideoPlayerViewable, VideoPlayerControl {
+class VideoPlayer: NSObject, VideoPlayerControl, VideoPlayerViewable {
+    weak var delegate: VideoPlayerStateDelegate?
     
+    required init(url: URL) {
+        
+    }
 }
 protocol VideoPlayerFactory {
     static func create(url: URL) -> VideoPlayer
@@ -41,14 +72,14 @@ class AliPlayerFactory: VideoPlayerFactory {
         return AliVideoPlayer(url: url)
     }
 }
-class TencentVideoPlayer: NSObject, VideoPlayer {
+class TencentVideoPlayer: VideoPlayer {
     var playerView: LiveEBVideoView
     let pullStream = "https://overseas-webrtc.liveplay.myqcloud.com/webrtc/v1/pullstream"
     let stopStream = "https://overseas-webrtc.liveplay.myqcloud.com/webrtc/v1/stopstream"
     
     required init(url: URL) {
         playerView = LiveEBVideoView()
-        super.init()
+        super.init(url: url)
         playerView.delegate = self
         playerView.setLiveURL(url.absoluteString, pullStream: pullStream, stopStream: stopStream)
     }
@@ -86,15 +117,20 @@ extension TencentVideoPlayer: LiveEBVideoViewDelegate {
     func videoView(_ videoView: LiveEBVideoView, didChangeVideoSize size: CGSize) {
         
     }
+    func showStats(_ videoView: LiveEBVideoView, statReport: LEBStatReport) {
+        if statReport.fps < 5 {
+            delegate?.stutter()
+        }
+    }
 }
-class AliVideoPlayer: NSObject, VideoPlayer {
+class AliVideoPlayer: VideoPlayer {
     var player: AliPlayer
     var urlSource: AVPUrlSource
     
     required init(url: URL) {
         player = AliPlayer()
         urlSource = AVPUrlSource()
-        super.init()
+        super.init(url: url)
         urlSource.playerUrl = url
         player.setUrlSource(urlSource)
         player.delegate = self
@@ -146,6 +182,8 @@ extension AliVideoPlayer: AVPDelegate {
         
     }
     func onPlayerStatusChanged(_ player: AliPlayer!, oldStatus: AVPStatus, newStatus: AVPStatus) {
-        
+        if oldStatus == AVPStatusError {
+            delegate?.stutter()
+        }
     }
 }

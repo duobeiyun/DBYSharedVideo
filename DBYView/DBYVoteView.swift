@@ -107,8 +107,8 @@ class DBYVoteView: DBYView {
                                  y: 40,
                                  width: bounds.width,
                                  height: bounds.height - 20)
-        tipLab.updateStyle()
-        tableView.updateStyle()
+        tipLab.updateFrameAndStyle()
+        tableView.updateFrameAndStyle()
         tableView.reloadData()
     }
     func setVotes(votes: [String]) {

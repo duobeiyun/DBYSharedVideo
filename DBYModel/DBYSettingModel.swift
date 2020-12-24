@@ -17,7 +17,7 @@ class DBYSettingModel<T> where T:UICollectionViewCell {
     var resueId: String
     var itemSize: CGSize
     var items: [DBYSettingItem]?
-    var selectedIndex: Int = 0
+    var selectedIndex: Int = -1
     
     init() {
         itemSize = CGSize(width: 44, height: 44)

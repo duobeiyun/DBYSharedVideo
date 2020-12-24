@@ -80,7 +80,11 @@ public class DBY1VNController: UIViewController {
     
     lazy var netTipView = DBYNetworkTipView()
     lazy var internetReachability = DBYReachability.forInternetConnection()
-
+    lazy var changeLineButton: UIButton = {
+        let b = UIButton(type: .custom)
+        b.setImage(UIImage(name: "icon-lines"), for: .normal)
+        return b
+    }()
     //MARK: - override functions
     public override var preferredStatusBarStyle: UIStatusBarStyle {
         return .default
@@ -93,7 +97,7 @@ public class DBY1VNController: UIViewController {
         navigationController?.setNavigationBarHidden(true, animated: animated)
         DBYSystemControl.shared.beginControl()
         mainView.showControlBar()
-        updateStyles()
+        updateFrameAndStyle()
     }
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
@@ -121,7 +125,7 @@ public class DBY1VNController: UIViewController {
         }
         weak var weakSelf = self
         coordinator.animate(alongsideTransition: { (context) in
-            weakSelf?.updateStyles()
+            weakSelf?.updateFrameAndStyle()
         }) { (context) in
             weakSelf?.mainView.showControlBar()
             weakSelf?.chatListView.reloadData()
@@ -186,7 +190,7 @@ public class DBY1VNController: UIViewController {
         segmentedView.landscapeFrame = CGRect(x: size.height, y: -44, width: size.width, height: size.width + 44)
         
         settingView.portraitFrame = segmentedView.portraitFrame
-        settingView.landscapeFrame = CGRect(x: size.height - size.width - edge.right, y: 0, width: size.width, height: size.width)
+        settingView.landscapeFrame = CGRect(x: size.height - 246 - edge.right, y: 0, width: 246, height: size.width)
         
         chatListView.setBackgroundColor(color: DBYStyle.lightGray, forState: .portrait)
         chatListView.setBackgroundColor(color: DBYStyle.lightAlpha, forState: .landscape)
@@ -202,13 +206,13 @@ public class DBY1VNController: UIViewController {
             make.bottom.left.right.equalTo(mainView)
             make.height.equalTo(60)
         }
-        updateStyles()
+        updateFrameAndStyle()
     }
-    func updateStyles() {
-        mainView.updateStyle()
-        segmentedView.updateStyle()
-        chatListView.updateStyle()
-        settingView.updateStyle()
+    func updateFrameAndStyle() {
+        mainView.updateFrameAndStyle()
+        segmentedView.updateFrameAndStyle()
+        chatListView.updateFrameAndStyle()
+        settingView.updateFrameAndStyle()
     }
     func showSettingView() {
         view.addSubview(settingView)
@@ -246,7 +250,7 @@ public class DBY1VNController: UIViewController {
         videoView.portraitFrame = CGRect(x: mainView.frame.minX, y: mainView.frame.maxY + segmentedView.titleViewHeight, width: 172, height: 150)
         videoView.landscapeFrame = CGRect(x: mainView.frame.minX, y: topBar.bounds.height, width: 172, height: 150)
         view.addSubview(videoView)
-        videoView.updateStyle()
+        videoView.updateFrameAndStyle()
         
         let drag = UIPanGestureRecognizer(target: self,
                                           action: #selector(dragVideoView(pan:)))

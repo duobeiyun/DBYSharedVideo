@@ -24,7 +24,7 @@ DBYSharedVideo主要是封装了直播和回放的界面，方便开发者快速
   s.dependency "DBYSDK_dylib"
   s.dependency "SDWebImage"
   s.dependency "SnapKit"
-  s.dependency "AliPlayerSDK_iOS"
+  s.dependency "AliPlayer"
   s.dependency "LiveEB_IOS"
   
   s.info_plist = {

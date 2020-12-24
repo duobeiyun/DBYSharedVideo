@@ -22,11 +22,6 @@ public class DBYButton: UIButton {
         super.awakeFromNib()
         setupUI()
     }
-    override public func layoutSubviews() {
-        super.layoutSubviews()
-        
-        updateStyle()
-    }
     
     func setupUI() {
     }

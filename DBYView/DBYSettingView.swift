@@ -26,15 +26,11 @@ class DBYSettingViewLiveFactory: DBYSettingViewFactory {
         let settingModel2 = DBYSettingModel()
         settingModel2.name = "线路切换"
         settingModel2.resueId = "\(DBYSettingLabelCell.self)"
-        settingModel2.items = [
-            DBYSettingItem(name: "线路1"),
-            DBYSettingItem(name: "线路2"),
-            DBYSettingItem(name: "线路3")
-        ]
+        settingModel2.itemSize = CGSize(width: 50, height: 20)
         
         settingView.models = [
             settingModel1,
-            settingModel2
+            settingModel2,
         ]
         return settingView
     }
@@ -66,7 +62,7 @@ class DBYSettingViewOnlineFactory: DBYSettingViewFactory {
         settingView.models = [
             settingModel1,
             settingModel2,
-            settingModel3
+            settingModel3,
         ]
         return settingView
     }
@@ -168,10 +164,12 @@ class DBYSettingLabelCell: DBYSettingCell {
         nameLabel.textColor = UIColor.white
         nameLabel.font = DBYStyle.font12
         nameLabel.textAlignment = .center
+        nameLabel.layer.borderWidth = 1
+        nameLabel.layer.borderColor = UIColor.white.cgColor
+        nameLabel.layer.cornerRadius = 2
         addSubview(nameLabel)
         nameLabel.snp_makeConstraints { (make) in
-            make.left.right.equalTo(0)
-            make.centerY.equalToSuperview()
+            make.edges.equalToSuperview()
         }
     }
 }
@@ -244,6 +242,7 @@ extension DBYSettingView: UICollectionViewDataSource {
             let color = model.selectedIndex == indexPath.row ? DBYStyle.yellow:UIColor.white
             labelCell.nameLabel.text = item?.name
             labelCell.nameLabel.textColor = color
+            labelCell.nameLabel.layer.borderColor = color.cgColor
         }
         
         return cell

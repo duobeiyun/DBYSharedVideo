@@ -8,7 +8,6 @@
 import UIKit
 import CoreImage
 
-
 extension UIImage {
     convenience init?(name: String) {
         self.init(named: name, in: currentBundle, compatibleWith: nil)

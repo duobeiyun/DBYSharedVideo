@@ -29,7 +29,6 @@ public protocol ZFViewAutoDismissable {
 public protocol ZFViewStyleable {
     func setBackgroundColor(color: UIColor, forState state:UIColorState)
     func backgroundColorforState(state:UIColorState) -> UIColor?
-    func updateStyle()
 }
 public protocol ZFNibLoader {
     static func loadNibView() -> Self?
@@ -91,7 +90,7 @@ extension UIView:ZFViewStyleable {
         return colors[key] ?? backgroundColor
     }
     
-    @objc public func updateStyle() {
+    func updateFrameAndStyle() {
         let orientation = UIApplication.shared.statusBarOrientation
         if orientation == .portrait {
             if let label = self as? UILabel {

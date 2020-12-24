@@ -287,7 +287,7 @@ extension DBYChatListView: UITableViewDataSource {
         if count > 0 {
             tableView.backgroundView = nil
         }else {
-            let chatTipView = DBYEmptyView(image: UIImage(name: "icon-empty-status-1"), message: "聊天消息为空")
+            let chatTipView = DBYEmptyView(image: UIImage(name: "icon-empty-status"), message: "聊天消息为空")
             tableView.backgroundView = chatTipView
         }
         return count
