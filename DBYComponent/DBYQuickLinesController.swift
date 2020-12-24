@@ -14,6 +14,8 @@ class DBYQuickLinesController: UIViewController {
             tableView.reloadData()
         }
     }
+    var selectedIndex: Int = 0
+    
     private var reuseId: String = "DBYLineCell"
     
     @IBOutlet weak var contentView: UIView! {
@@ -44,13 +46,18 @@ class DBYQuickLinesController: UIViewController {
 }
 extension DBYQuickLinesController {
     private static let shared = DBYQuickLinesController()
-    static func show(lines: [DBYPlayLine]) {
+    static var didSelectedBlock: ((Int)->())?
+    
+    static func show(lines: [DBYPlayLine], selectedIndex: Int) {
         guard let window = UIApplication.shared.keyWindow else {
             return
         }
         window.addSubview(shared.view)
         shared.view.frame = window.bounds
         shared.lines = lines
+        shared.selectedIndex = selectedIndex
+        shared.tableView.reloadData()
+        shared.tableView.selectRow(at: IndexPath(row: selectedIndex, section: 0), animated: false, scrollPosition: .none)
     }
     /// after in seconds
     static func dismiss(after: TimeInterval) {
@@ -72,6 +79,9 @@ extension DBYQuickLinesController: UITableViewDataSource {
         cell.label.text = lines[indexPath.row].name
         
         return cell
+    }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        DBYQuickLinesController.didSelectedBlock?(indexPath.row)
     }
 }
 extension DBYQuickLinesController: UITableViewDelegate {

@@ -20,6 +20,7 @@ public class DBYLiveController: DBY1VNController {
     var micOpen:Bool = false
     var zanCount = 0
     var inviteIndex = 0
+    var lineIndex = 0
     
     let btnWidth: CGFloat = 60
     let btnHeight: CGFloat = 30
@@ -106,8 +107,8 @@ public class DBYLiveController: DBY1VNController {
         enterRoom()
     }
     deinit {
-        animationTimer?.stopTimer()
-        zanTimer?.stopTimer()
+        animationTimer?.stop()
+        zanTimer?.stop()
     }
     override func addObserver() {
         NotificationCenter.default.addObserver(self,
@@ -125,8 +126,8 @@ public class DBYLiveController: DBY1VNController {
     override func addSubviews() {
         super.addSubviews()
         
-        view.addSubview(interactionView)
         view.addSubview(changeLineButton)
+        view.addSubview(interactionView)
         
         mainView.addSubview(marqueeView)
         mainView.addSubview(watermarkView)
@@ -226,6 +227,18 @@ public class DBYLiveController: DBY1VNController {
             toPortrait()
         }
     }
+    override func showSettingView() {
+        super.showSettingView()
+        guard let lines = quickLines else {
+            return
+        }
+        var items = [DBYSettingItem]()
+        for line in lines {
+            items.append(DBYSettingItem(name: line.name))
+        }
+        settingView.models[1].items = items
+        settingView.models[1].selectedIndex = lineIndex
+    }
     //MARK: - private functions
     @objc func viewTap(tap: UITapGestureRecognizer) {
         chatListView.chatBar.endInput()
@@ -288,7 +301,8 @@ public class DBYLiveController: DBY1VNController {
         guard let lines = quickLines else {
             return
         }
-        DBYQuickLinesController.show(lines: lines)
+        DBYQuickLinesController.show(lines: lines, selectedIndex: lineIndex)
+        DBYQuickLinesController.didSelectedBlock = changeQuickLine(index:)
     }
     func showVoteView(title:String, votes:[String]) {
         voteView.setVotes(votes: votes)
@@ -370,7 +384,7 @@ public class DBYLiveController: DBY1VNController {
         marqueeView.frame = CGRect(x: x, y: y, width: width, height: 30)
         mainView.bringSubviewToFront(marqueeView)
         marqueeView.set(marquee: mq)
-        animationTimer?.stopTimer()
+        animationTimer?.stop()
         animationTimer = ZFTimer.startTimer(interval: 1, repeats: true) {[weak self] in
             self?.updateAnimation()
         }
@@ -441,6 +455,7 @@ public class DBYLiveController: DBY1VNController {
         }
     }
     func changeQuickLine(index: Int) {
+        lineIndex = index
         videoPlayer?.removePlayerView()
         videoPlayer?.stop()
         if index == 0 {
@@ -767,11 +782,6 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         quickLines = lines
         let index = getPriorityLine(lines: lines)
         changeQuickLine(index: index)
-        var items = [DBYSettingItem]()
-        for line in lines {
-            items.append(DBYSettingItem(name: line.name))
-        }
-        settingView.models[1].items = items
     }
 }
 extension DBYLiveController:DBYNetworkTipViewDelegate {

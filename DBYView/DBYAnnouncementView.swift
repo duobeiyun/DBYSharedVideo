@@ -45,7 +45,7 @@ class DBYAnnouncementView: DBYNibView {
         layer.shadowOffset = CGSize(width: 0, height: 4)
     }
     deinit {
-        timer?.stopTimer()
+        timer?.stop()
     }
     func set(text:String) {
         self.messageLab.text = text
@@ -60,7 +60,7 @@ class DBYAnnouncementView: DBYNibView {
         if delta <= 0 {
             return
         }
-        timer?.stopTimer()
+        timer?.stop()
         timer = ZFTimer.startTimer(interval: 0.1, repeats: true, block: {[weak self] in
             self?.updateMessage(delta: delta)
         })

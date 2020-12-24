@@ -154,7 +154,7 @@ extension DBYOfflineController: DBYBottomBarDelegate {
         }
     }
     func progressWillChange(owner: DBYBottomBar, value: Float) {
-        mainView.stopTimer()
+        mainView.timer?.stop()
     }
     func progressDidChange(owner: DBYBottomBar, value: Float) {
         beginInteractive = true

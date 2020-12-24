@@ -22,7 +22,7 @@ class ZFTimer {
     @objc func timerClock() {
         block?()
     }
-    func stopTimer() {
+    func stop() {
         timer?.invalidate()
         timer = nil
     }

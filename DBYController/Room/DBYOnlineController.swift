@@ -12,6 +12,7 @@ import DBYSDK_dylib
 
 public class DBYOnlineController: DBYPlaybackController {
     var roomConfig: DBYRoomConfig?
+    var lineIndex = 0
     lazy var playbackManager:DBYOnlinePlayBackManager = DBYOnlinePlayBackManager()
     lazy var playbackBtn:DBYVerticalButton = {
         let btn = DBYVerticalButton()
@@ -32,8 +33,6 @@ public class DBYOnlineController: DBYPlaybackController {
         bottomBar.delegate = self
         settingView.delegate = self
         
-        weak var weakSelf = self
-        
         if authinfo?.classType == .sharedVideo {
             playbackManager.setSharedVideoView(mainView.videoView)
         }else {
@@ -42,16 +41,7 @@ public class DBYOnlineController: DBYPlaybackController {
         playbackManager.delegate = self
         playbackManager.setPPTViewBackgroundImage(UIImage(name: "black-board"))
         playbackManager.startPlayback(with: authinfo, seekTime: 0) { (message, type) in
-            if message != nil {
-                DBYGlobalMessage.shared().showText(message!)
-            }
-            var items = [DBYSettingItem]()
-            let count = weakSelf?.playbackManager.linesCount() ?? 0
-            for i in 0..<count {
-                items.append(DBYSettingItem(name: "线路\(i)"))
-            }
-            weakSelf?.settingView.models[2].items = items
-            weakSelf?.settingView.collectionView.reloadData()
+            print(message ?? "")
         }
         
         if let reachability = internetReachability {
@@ -154,7 +144,17 @@ public class DBYOnlineController: DBYPlaybackController {
             dealWith(reachability: reachability)
         }
     }
-    
+    override func showSettingView() {
+        super.showSettingView()
+        var items = [DBYSettingItem]()
+        let count = playbackManager.linesCount()
+        for i in 0..<count {
+            items.append(DBYSettingItem(name: "线路\(i)"))
+        }
+        settingView.models[2].items = items
+        settingView.models[2].selectedIndex = lineIndex
+        settingView.collectionView.reloadData()
+    }
     //MARK: - private functions
     func dealWith(reachability: DBYReachability) {
         let netStatus = reachability.currentReachabilityStatus()
@@ -215,7 +215,7 @@ public class DBYOnlineController: DBYPlaybackController {
             line.name = "线路\(i)"
             lines.append(line)
         }
-        DBYQuickLinesController.show(lines: lines)
+        DBYQuickLinesController.show(lines: lines, selectedIndex: lineIndex)
     }
 }
 extension DBYOnlineController:DBYOnlinePlayBackManagerDelegate {
@@ -307,7 +307,7 @@ extension DBYOnlineController: DBYBottomBarDelegate {
         }
     }
     func progressWillChange(owner: DBYBottomBar, value: Float) {
-        mainView.stopTimer()
+        mainView.timer?.stop()
     }
     func progressDidChange(owner: DBYBottomBar, value: Float) {
         beginInteractive = true
@@ -344,6 +344,7 @@ extension DBYOnlineController: DBYSettingViewDelegate {
             }
         }
         if indexPath.section == 2 {
+            lineIndex = indexPath.item
             playbackManager.changePlaybackLine(with: Int32(indexPath.item)) { (message) in
                 
             }

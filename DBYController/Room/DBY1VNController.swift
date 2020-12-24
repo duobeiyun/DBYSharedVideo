@@ -90,13 +90,15 @@ public class DBY1VNController: UIViewController {
         return .default
     }
     public override var prefersStatusBarHidden: Bool {
-        return mainView.controlBarIsHidden
+        return topBar.isHidden
     }
     override public func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)
         DBYSystemControl.shared.beginControl()
-        mainView.showControlBar()
+        topBar.isHidden = false
+        bottomBar.isHidden = false
+        mainView.startTimer()
         updateFrameAndStyle()
     }
     public override func viewDidDisappear(_ animated: Bool) {
@@ -127,7 +129,9 @@ public class DBY1VNController: UIViewController {
         coordinator.animate(alongsideTransition: { (context) in
             weakSelf?.updateFrameAndStyle()
         }) { (context) in
-            weakSelf?.mainView.showControlBar()
+            weakSelf?.topBar.isHidden = false
+            weakSelf?.bottomBar.isHidden = false
+            weakSelf?.mainView.startTimer()
             weakSelf?.chatListView.reloadData()
         }
     }
@@ -366,26 +370,17 @@ extension DBY1VNController: DBYMainViewDelegate {
     func lightnessChange(owner: DBYMainView, volume: CGFloat) {
         
     }
-    
-    func willHiddenControlBar(owner: DBYMainView) {
-        if !segmentedView.isHidden && isLandscape() {
-            let rect = segmentedView.landscapeFrame
-            UIView.animate(withDuration: 0.25) {
-                self.segmentedView.frame = rect
-                self.segmentedView.isHidden = true
-            }
-            return
+    func didClick() {
+        topBar.isHidden = !topBar.isHidden
+        bottomBar.isHidden = !bottomBar.isHidden
+        if !topBar.isHidden {
+            mainView.startTimer()
+        } else {
+            mainView.timer?.stop()
         }
-        if !settingView.isHidden && isLandscape() {
-            settingView.isHidden = true
-            return
-        }
-        
+    }
+    func timerOut() {
         topBar.isHidden = true
         bottomBar.isHidden = true
-    }
-    func willShowControlBar(owner: DBYMainView) {
-        topBar.isHidden = false
-        bottomBar.isHidden = false
     }
 }

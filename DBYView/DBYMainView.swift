@@ -10,8 +10,8 @@ import UIKit
 protocol DBYMainViewDelegate: NSObjectProtocol {
     func volumeChange(owner:DBYMainView, volume: CGFloat)
     func lightnessChange(owner:DBYMainView, volume: CGFloat)
-    func willHiddenControlBar(owner:DBYMainView)
-    func willShowControlBar(owner:DBYMainView)
+    func timerOut()
+    func didClick()
 }
 
 class DBYMainView: DBYView {
@@ -24,9 +24,8 @@ class DBYMainView: DBYView {
     var beganPosition:CGPoint = .zero
     var brightness:CGFloat = 0
     var volume:Float = 0
-    var controlBarIsHidden: Bool = false
     
-    weak var voiceTimer: ZFTimer?
+    weak var timer: ZFTimer?
     
     override func setupUI() {
         addSubview(videoView)
@@ -54,20 +53,14 @@ class DBYMainView: DBYView {
             make.height.equalTo(150)
             make.width.equalTo(20)
         }
-        let oneTap = UITapGestureRecognizer(target: self,
-                                            action: #selector(oneTap(tap:)))
+        let oneTap = UITapGestureRecognizer(target: self, action: #selector(oneTap(tap:)))
         addGestureRecognizer(oneTap)
         
-        let pan = UIPanGestureRecognizer(target: self,
-                                         action: #selector(gestureControl(pan:)))
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(gestureControl(pan:)))
         addGestureRecognizer(pan)
     }
     @objc func oneTap(tap:UITapGestureRecognizer) {
-        if controlBarIsHidden {
-            showControlBar()
-        }else {
-            hiddenControlBar()
-        }
+        delegate?.didClick()
     }
     @objc func gestureControl(pan:UIPanGestureRecognizer) {
         switch pan.state {
@@ -132,24 +125,10 @@ class DBYMainView: DBYView {
         viewWithTag(tag + 3)?.removeFromSuperview()
     }
     func startTimer() {
-        voiceTimer = ZFTimer.startTimer(interval: 5, repeats: false, block: {[weak self] in
-            self?.hiddenControlBar()
+        timer?.stop()
+        timer = ZFTimer.startTimer(interval: 5, repeats: false, block: {[weak self] in
+            self?.delegate?.timerOut()
         })
-    }
-    func stopTimer() {
-        voiceTimer?.stopTimer()
-    }
-    @objc func hiddenControlBar() {
-        controlBarIsHidden = true
-        delegate?.willHiddenControlBar(owner: self)
-        stopTimer()
-    }
-    
-    @objc func showControlBar() {
-        controlBarIsHidden = false
-        delegate?.willShowControlBar(owner: self)
-        stopTimer()
-        startTimer()
     }
     func changeVolume(value: CGFloat) {
         DBYSystemControl.shared.setVolume(value: volume + Float(value))
