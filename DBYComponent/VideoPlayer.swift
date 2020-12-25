@@ -10,13 +10,20 @@ import Foundation
 import AliyunPlayer
 import LiveEB_IOS
 
-protocol VideoPlayerControl {
-    func start()
-    func pause()
-    func resume()
-    func stop()
+protocol VideoPlayerStateDelegate: NSObjectProtocol {
+    func connected()
+    func connecting()
+    func disconnected()
+    func stutter()
 }
-extension VideoPlayerControl {
+
+class VideoPlayer: NSObject {
+    weak var delegate: VideoPlayerStateDelegate?
+    
+    required init(url: URL) {
+        
+    }
+    
     func start() {
         
     }
@@ -32,30 +39,12 @@ extension VideoPlayerControl {
     func stop() {
         
     }
-}
-protocol VideoPlayerViewable {
-    func addPlayerView(_ view: UIView)
-    func removePlayerView()
-}
-extension VideoPlayerViewable {
+    
     func addPlayerView(_ view: UIView) {
         
     }
     
     func removePlayerView() {
-        
-    }
-}
-protocol VideoPlayerStateDelegate: NSObjectProtocol {
-    func connected()
-    func connecting()
-    func disconnected()
-    func stutter()
-}
-class VideoPlayer: NSObject, VideoPlayerControl, VideoPlayerViewable {
-    weak var delegate: VideoPlayerStateDelegate?
-    
-    required init(url: URL) {
         
     }
 }
@@ -83,29 +72,25 @@ class TencentVideoPlayer: VideoPlayer {
         playerView.delegate = self
         playerView.setLiveURL(url.absoluteString, pullStream: pullStream, stopStream: stopStream)
     }
-}
-extension TencentVideoPlayer {
-    func start() {
+    override func start() {
         playerView.start()
     }
-    func pause() {
+    override func pause() {
         playerView.pause()
     }
-    func resume() {
+    override func resume() {
         playerView.resume()
     }
-    func stop() {
+    override func stop() {
         playerView.stop()
     }
-}
-extension TencentVideoPlayer {
-    func addPlayerView(_ view: UIView) {
+    override func addPlayerView(_ view: UIView) {
         view.addSubview(playerView)
         playerView.frame = view.bounds
         playerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     }
     
-    func removePlayerView() {
+    override func removePlayerView() {
         playerView.removeFromSuperview()
     }
 }
@@ -136,31 +121,29 @@ class AliVideoPlayer: VideoPlayer {
         player.delegate = self
         player.prepare()
     }
-}
-extension AliVideoPlayer {
-    func start() {
+    
+    override func start() {
         player.start()
     }
     
-    func pause() {
+    override func pause() {
         player.pause()
     }
     
-    func resume() {
+    override func resume() {
         player.start()
     }
     
-    func stop() {
+    override func stop() {
         player.stop()
         player.destroy()
     }
-}
-extension AliVideoPlayer {
-    func addPlayerView(_ view: UIView) {
+    
+    override func addPlayerView(_ view: UIView) {
         player.playerView = view
     }
     
-    func removePlayerView() {
+    override func removePlayerView() {
         
     }
 }
