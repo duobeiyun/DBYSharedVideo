@@ -21,22 +21,24 @@ class DBYAnnouncementView: DBYNibView {
     
     @IBAction func tap(gesture: UITapGestureRecognizer) {
         isExpend = !isExpend
-        if messageLab.text == nil {
+        guard let text = messageLab.text else {
             return
         }
-        let width = messageLab.text!.width(withMaxHeight: constHeight, font: messageLab.font)
+        let width = text.width(withMaxHeight: constHeight, font: messageLab.font)
         let maxWidth = bounds.width - constLeft
         if width < maxWidth {
             return
         }
         if isExpend {
-            let height = messageLab.text!.height(withMaxWidth: maxWidth, font: messageLab.font)
+            let height = text.height(withMaxWidth: maxWidth, font: messageLab.font)
             messgaeLabWidth.constant = maxWidth
             messgaeLabLeft.constant = minLeft
             frame.size.height = height + 16
+            timer?.stop()
         }else {
             messgaeLabWidth.constant = width
             frame.size.height = constHeight
+            set(text: text)
         }
     }
     override func setupUI() {

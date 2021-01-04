@@ -17,7 +17,6 @@ public class DBYLiveController: DBY1VNController {
     var announcement:String?
     var isHandsup:Bool = false
     var sendMessageEnable:Bool = true
-    var micOpen:Bool = false
     var zanCount = 0
     var inviteIndex = 0
     var lineIndex = 0
@@ -32,7 +31,6 @@ public class DBYLiveController: DBY1VNController {
     lazy var interactionView = DBYInteractionView()
     lazy var voteView:DBYVoteView = DBYVoteView()
     lazy var announcementView = DBYAnnouncementView()
-    lazy var micListView = DBYMicListView()
     lazy var hangUpView = DBYHangUpView()
     
     lazy var images:[UIImage] = {
@@ -63,7 +61,6 @@ public class DBYLiveController: DBY1VNController {
         super.viewDidLoad()
         
         chatListView.chatBar.delegate = self
-        micListView.delegate = self
         hangUpView.delegate = self
         topBar.delegate = self
         bottomBar.delegate = self
@@ -92,6 +89,7 @@ public class DBYLiveController: DBY1VNController {
             if roomConfig?.leb == true {
                 self.liveManager.disabelMedia()
             } else {
+                self.changeLineButton.isHidden = true
                 self.liveManager.enabelMedia()
             }
             DispatchQueue.main.async {
@@ -213,7 +211,6 @@ public class DBYLiveController: DBY1VNController {
         interactionView.updateFrameAndStyle()
         changeLineButton.updateFrameAndStyle()
         hangUpView.autoAdjustFrame()
-        micListView.autoAdjustFrame()
     }
     override func reachabilityChanged(note:NSNotification) {
         if let reachability = note.object as? DBYReachability {
@@ -601,6 +598,17 @@ extension DBYLiveController: DBYLiveManagerDelegate {
                 
             }
         }
+        //获取互动列表
+        liveManager.getInteractionList(.audio) {[weak self] (list) in
+            if let models = list {
+                self?.interactionView.set(models: models, for: .audio)
+            }
+        }
+        liveManager.getInteractionList(.video) {[weak self] (list) in
+            if let models = list {
+                self?.interactionView.set(models: models, for: .video)
+            }
+        }
         mainView.hiddenLoadingView()
     }
     public func liveManagerClassOver(_ manager: DBYLiveManager!) {
@@ -628,9 +636,6 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     }
     public func liveManager(_ manager: DBYLiveManager!, onlineUserCountWith count: Int) {
         courseInfoView.setUserCount(count: count)
-    }
-    public func liveManager(_ manager: DBYLiveManager!, studentCanSpeak canSpeak: Bool) {
-        micOpen = canSpeak
     }
     public func liveManagerTeacherDownHands(_ manager: DBYLiveManager!) {
         
@@ -669,20 +674,6 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         if online {
             courseInfoView.setTeacherName(name: name)
         }
-    }
-
-    public func liveManager(_ manager: DBYLiveManager!, teacherGiveMicToStudentWith userInfo: DBYUserInfo, canSpeak: Bool) {
-        if canSpeak {
-            micListView.append(name: userInfo.nickName)
-            let dict:[String : Any] = [
-                "type": "message",
-                "message": openMicMessage(userInfo: userInfo)
-            ]
-            chatListView.append(dict: dict)
-        }else {
-            micListView.remove(name: userInfo.nickName)
-        }
-        micListView.autoAdjustFrame()
     }
     public func liveManagerDidKickedOff(_ manager: DBYLiveManager!) {
         let actionSheetView = DBYActionSheetView()
@@ -731,25 +722,18 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     public func liveManager(_ manager: DBYLiveManager!, removedQuestion questionId: String!) {
         removeQustion(questionId: questionId)
     }
-    public func initVideoRecorder(_ liveManager: DBYLiveManager!, userId uid: String!) {
+    public func liveManager(_ liveManager: DBYLiveManager!, willRecordVideoDataWithUserId uid: String!) {
         let videoView = createVideoView(uid: uid)
         liveManager.setLocalVideoView(videoView.video)
         videoView.setUserName(name: authinfo?.nickName)
-        //切回sdk
-        changeQuickLine(index: 0)
     }
-    public func destroyVideoRecorder(_ liveManager: DBYLiveManager!, userId uid: String!) {
+    public func liveManager(_ liveManager: DBYLiveManager!, endRecordVideoDataWithUserId uid: String!) {
         removeVideoView(uid: uid)
     }
-    public func liveManager(_ manager: DBYLiveManager!, interActionListChange list: [DBYInteractionModel]!, type: DBYInteractionType) {
-        self.interactionView.set(models: list, for: type)
-    }
-    public func willReceivedVideoData(_ liveManager: DBYLiveManager!, userId uid: String!) {
+    public func liveManager(_ liveManager: DBYLiveManager!, willReceiveVideoDataWithUserId uid: String!) {
         if uid == authinfo?.teacherId || uid == liveManager.assitantId {
             return
         }
-        //切回sdk
-        changeQuickLine(index: 0)
         let videoView = createVideoView(uid: uid)
         liveManager.setStudentView(videoView.video, withUserId: uid)
         liveManager.getUserInfo(uid) { (userInfo) in
@@ -758,14 +742,38 @@ extension DBYLiveController: DBYLiveManagerDelegate {
             }
             let dict:[String : Any] = [
                 "type": "message",
-                "message": openCamMessage(userInfo: info)
+                "message": roleString(role: info.userRole) + info.nickName + " 正在上台发言"
             ]
             self.chatListView.append(dict: dict)
             videoView.setUserName(name: userInfo?.nickName)
         }
     }
-    public func willInterruptVideoData(_ liveManager: DBYLiveManager!, userId uid: String!) {
+    public func liveManager(_ liveManager: DBYLiveManager!, endReceiveVideoDataWithUserId uid: String!) {
         removeVideoView(uid: uid)
+    }
+    public func liveManager(_ liveManager: DBYLiveManager!, willRecordAudioDataWithUserId uid: String!) {
+        
+    }
+    public func liveManager(_ liveManager: DBYLiveManager!, endRecordAudioDataWithUserId uid: String!) {
+        
+    }
+    public func liveManager(_ liveManager: DBYLiveManager!, willReceiveAudioDataWithUserId uid: String!) {
+        liveManager.getUserInfo(uid) { (userInfo) in
+            guard let info = userInfo else {
+                return
+            }
+            let dict:[String : Any] = [
+                "type": "message",
+                "message": roleString(role: info.userRole) + info.nickName + " 正在上麦发言"
+            ]
+            self.chatListView.append(dict: dict)
+        }
+    }
+    public func liveManager(_ liveManager: DBYLiveManager!, endReceiveAudioDataWithUserId uid: String!) {
+        
+    }
+    public func liveManager(_ manager: DBYLiveManager!, interActionListChange list: [DBYInteractionModel]!, type: DBYInteractionType) {
+        interactionView.set(models: list, for: type)
     }
     public func liveManager(_ manager: DBYLiveManager!, thumbupWithCount count: Int, userName: String!) {
         if userName.count < 1 {
@@ -779,6 +787,12 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         chatListView.append(dict: dict)
     }
     public func liveManager(_ manager: DBYLiveManager!, quickLinesChanged lines: [DBYPlayLine]!) {
+        if lines.count == 1 {
+            liveManager.enabelMedia()
+            changeLineButton.isHidden = true
+            settingView.models[1].items = nil
+            return
+        }
         quickLines = lines
         let index = getPriorityLine(lines: lines)
         changeQuickLine(index: index)
@@ -849,14 +863,6 @@ extension DBYLiveController: DBYHangUpViewDelegate {
         actionSheetView.show(title: "提示",
                              message: "你确定要挂断上麦么？",
                              actions: [button1, button2])
-    }
-}
-extension DBYLiveController: DBYMicListViewDelegate {
-    func micListView(owner: DBYMicListView, showMicList: Bool) {
-        if micOpen {
-            hangUpView.isHidden = !showMicList
-        }
-        micListView.autoAdjustFrame()
     }
 }
 //MARK: - DBYBottomBarDelegate
@@ -1020,7 +1026,7 @@ extension DBYLiveController: DBYInteractionViewDelegate {
                 message = userInfo.fromUserName + "邀请你上麦"
             }
             if type == .video {
-                name = "camera-request-icon"
+                name = "camera-small"
                 message = userInfo.fromUserName + "邀请你上台"
             }
             let image = UIImage(name: name)
@@ -1059,9 +1065,17 @@ extension DBYLiveController: DBYInteractionViewDelegate {
             DBYTipView.removeTipViews(type: .invite, on: view)
         }
         if state == .joined && type == .video {
+            print("---openCam")
             liveManager.openCam(true) { (message) in
-                
             }
+            guard let userInfo = model else {
+                return
+            }
+            let dict:[String : Any] = [
+                "type": "message",
+                "message": roleString(role: userInfo.userRole) + userInfo.userName + " 正在上台发言"
+            ]
+            chatListView.append(dict: dict)
         }
         if state == .quit && type == .video {
             liveManager.openCam(false) { (message) in
@@ -1069,20 +1083,26 @@ extension DBYLiveController: DBYInteractionViewDelegate {
             }
         }
         if state == .joined && type == .audio {
+            print("---openMic")
             liveManager.openMic(true) { (message) in
                 
             }
+            guard let userInfo = model else {
+                return
+            }
+            let dict:[String : Any] = [
+                "type": "message",
+                "message": roleString(role: userInfo.userRole) + userInfo.userName + " 正在上麦发言"
+            ]
+            chatListView.append(dict: dict)
             view.addSubview(hangUpView)
-            view.addSubview(micListView)
             hangUpView.autoAdjustFrame()
-            micListView.autoAdjustFrame()
         }
         if state == .quit && type == .audio {
             liveManager.openMic(false) { (message) in
                 
             }
             hangUpView.removeFromSuperview()
-            micListView.removeFromSuperview()
         }
     }
     

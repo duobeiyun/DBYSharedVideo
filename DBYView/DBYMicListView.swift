@@ -97,12 +97,14 @@ class DBYMicListView: DBYNibView {
     func append(name: String) {
         names.append(name)
         updateTipMessage()
+        autoAdjustFrame()
     }
     func remove(name: String) {
         if let index = names.firstIndex(of: name) {
             names.remove(at: index)
         }
         updateTipMessage()
+        autoAdjustFrame()
     }
     func updateTipMessage() {
         if names.count <= 0 {

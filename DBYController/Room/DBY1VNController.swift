@@ -29,12 +29,6 @@ func roleString(role: Int) -> String {
     }
     return str
 }
-func openCamMessage(userInfo: DBYUserInfo) -> String {
-    return roleString(role: userInfo.userRole) + userInfo.nickName + " 正在上台发言"
-}
-func openMicMessage(userInfo: DBYUserInfo) -> String {
-    return roleString(role: userInfo.userRole) + userInfo.nickName + " 正在上麦发言"
-}
 func badgeUrl(role: Int, badgeDict:[String: Any]?) -> (String?, String?) {
     let disable = badgeDict?["disabled"] as? Bool ?? false
     if disable {
@@ -373,10 +367,12 @@ extension DBY1VNController: DBYMainViewDelegate {
     func didClick() {
         topBar.isHidden = !topBar.isHidden
         bottomBar.isHidden = !bottomBar.isHidden
-        if !topBar.isHidden {
-            mainView.startTimer()
-        } else {
+        
+        if topBar.isHidden {
             mainView.timer?.stop()
+            settingView.isHidden = true
+        } else {
+            mainView.startTimer()
         }
     }
     func timerOut() {
