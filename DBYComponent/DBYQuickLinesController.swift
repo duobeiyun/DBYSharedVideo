@@ -82,6 +82,7 @@ extension DBYQuickLinesController: UITableViewDataSource {
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         DBYQuickLinesController.didSelectedBlock?(indexPath.row)
+        DBYQuickLinesController.dismiss()
     }
 }
 extension DBYQuickLinesController: UITableViewDelegate {

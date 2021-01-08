@@ -11,6 +11,7 @@ import DBYSDK_dylib
 protocol DBYInteractionViewDelegate: NSObjectProtocol {
     func requestInteraction(owner: DBYInteractionView, state: DBYInteractionState, type: DBYInteractionType)
     func receiveInteraction(owner: DBYInteractionView, state: DBYInteractionState, type: DBYInteractionType, model: DBYInteractionModel?)
+    func interactionStateChanged(owner: DBYInteractionView, old: DBYInteractionModel, new: DBYInteractionModel)
     
     func switchInteraction(owner: DBYInteractionView, type: DBYInteractionType)
     func closeInteraction(owner: DBYInteractionView, type: DBYInteractionType)
@@ -41,6 +42,8 @@ class DBYInteractionView: DBYNibView {
     lazy var audioInfo = DBYInteractionInfo(type: .audio)
     lazy var videoInfo = DBYInteractionInfo(type: .video)
     lazy var currentInfo = DBYInteractionInfo(type: .audio)
+    lazy var models = [DBYInteractionModel]()
+    var currentModel: DBYInteractionModel?
     
     var userId:String?
     var userName:String?
@@ -50,10 +53,10 @@ class DBYInteractionView: DBYNibView {
     let cellId = "DBYInteractionCell"
     
     @IBAction func audioAction(sender: UIButton) {
-        switchButton(.audio)
+        switchToAudio()
     }
     @IBAction func videoAction(sender: UIButton) {
-        switchButton(.video)
+        switchToVideo()
     }
     @IBAction func closeAction(sender: UIButton) {
         delegate?.closeInteraction(owner: self, type: currentInfo.type)
@@ -87,83 +90,83 @@ class DBYInteractionView: DBYNibView {
         videoButton.setTitleColor(.white, for: .normal)
         applyButton.setBackgroundStyle(fillColor: DBYStyle.yellow, borderColor: DBYStyle.brown, radius: 20)
     }
+    //
+    func switchToAudio() {
+        currentInfo = audioInfo
+        delegate?.switchInteraction(owner: self, type: .audio)
+        videoButton.setBackgroundStyle(fillColor: DBYStyle.middleGray, borderColor: DBYStyle.middleGray, radius: btnHeight * 0.5)
+        videoButton.setTitleColor(UIColor.white, for: .normal)
+        audioButton.setBackgroundStyle(fillColor: DBYStyle.yellow, borderColor: DBYStyle.yellow, radius: btnHeight * 0.5)
+        audioButton.setTitleColor(DBYStyle.brown, for: .normal)
+        label.text = "\(currentInfo.joinedCount)人正在上麦"
+    }
+    func switchToVideo() {
+        currentInfo = videoInfo
+        delegate?.switchInteraction(owner: self, type: .video)
+        videoButton.setBackgroundStyle(fillColor: DBYStyle.yellow, borderColor: DBYStyle.yellow, radius: btnHeight * 0.5)
+        videoButton.setTitleColor(DBYStyle.brown, for: .normal)
+        audioButton.setBackgroundStyle(fillColor: DBYStyle.middleGray, borderColor: DBYStyle.middleGray, radius: btnHeight * 0.5)
+        audioButton.setTitleColor(UIColor.white, for: .normal)
+        label.text = "前方还有\(currentInfo.inqueueCount)人正在等待上台"
+    }
     //本地触发
-    func switchButton(_ type: DBYInteractionType) {
-        if type == .audio {
-            currentInfo = audioInfo
-            videoButton.setBackgroundStyle(fillColor: DBYStyle.middleGray, borderColor: DBYStyle.middleGray, radius: btnHeight * 0.5)
-            videoButton.setTitleColor(UIColor.white, for: .normal)
-            audioButton.setBackgroundStyle(fillColor: DBYStyle.yellow, borderColor: DBYStyle.yellow, radius: btnHeight * 0.5)
-            audioButton.setTitleColor(DBYStyle.brown, for: .normal)
-            delegate?.switchInteraction(owner: self, type: .audio)
-        }
-        if type == .video {
-            currentInfo = videoInfo
-            videoButton.setBackgroundStyle(fillColor: DBYStyle.yellow, borderColor: DBYStyle.yellow, radius: btnHeight * 0.5)
-            videoButton.setTitleColor(DBYStyle.brown, for: .normal)
-            audioButton.setBackgroundStyle(fillColor: DBYStyle.middleGray, borderColor: DBYStyle.middleGray, radius: btnHeight * 0.5)
-            audioButton.setTitleColor(UIColor.white, for: .normal)
-            delegate?.switchInteraction(owner: self, type: .video)
-        }
+    func updateUI() {
+        updateContent()
+        updateBottomButton()
         
-        updateContent(type: type)
-        updateBottomButton(type: type)
-        if type == .audio {
-            label.text = "\(currentInfo.joinedCount)人正在上麦"
-        }
-        if type == .video {
-            label.text = "前方还有\(currentInfo.inqueueCount)人正在等待上台"
-        }
-        print("currentInfo.models.count", currentInfo.models.count)
         tableView.reloadData()
     }
     //消息触发
     func set(models:[DBYInteractionModel], for type:DBYInteractionType) {
         //更新数据
         if type == .audio {
+            diffModels(oldModels: audioInfo.models, newModels: models)
             audioInfo.models = models
         }
         if type == .video {
+            diffModels(oldModels: videoInfo.models, newModels: models)
             videoInfo.models = models
         }
-        updateContent(type: type)
         //当前tab页才更新
         if type == currentInfo.type {
-            updateBottomButton(type: type)
+            updateUI()
         }
     }
-    func updateBottomButton(type: DBYInteractionType) {
-        if currentInfo.state == .normal && type == .audio {
+    func updateBottomButton() {
+        if currentInfo.state == .normal && currentInfo.type == .audio {
             applyButton.setTitle("申请语音上麦", for: .normal)
         }
-        if currentInfo.state == .inqueue && type == .audio {
+        if currentInfo.state == .inqueue && currentInfo.type == .audio {
             applyButton.setTitle("正在申请上麦，点击取消", for: .normal)
         }
-        if currentInfo.state == .joined && type == .audio {
+        if currentInfo.state == .joined && currentInfo.type == .audio {
             applyButton.setTitle("正在上麦中，点击挂断", for: .normal)
         }
-        if currentInfo.state == .normal && type == .video {
+        if currentInfo.state == .normal && currentInfo.type == .video {
             applyButton.setTitle("申请视频上台", for: .normal)
         }
-        if currentInfo.state == .inqueue && type == .video {
+        if currentInfo.state == .inqueue && currentInfo.type == .video {
             applyButton.setTitle("正在申请上台，点击取消", for: .normal)
         }
-        if currentInfo.state == .joined && type == .video {
+        if currentInfo.state == .joined && currentInfo.type == .video {
             applyButton.setTitle("正在上台中，点击挂断", for: .normal)
         }
     }
-    func updateContent(type: DBYInteractionType) {
+    func diffModels(oldModels: [DBYInteractionModel], newModels: [DBYInteractionModel]) {
+        for old in oldModels {
+            for new in newModels {
+                if (old.state != new.state) {
+                    //state change
+                    delegate?.interactionStateChanged(owner: self, old: old, new: new)
+                }
+            }
+        }
+    }
+    func updateContent() {
         var count = 0
         var inqueueCount = 0
         var userModel:DBYInteractionModel?
         
-        if type == .audio {
-            currentInfo = audioInfo
-        }
-        if type == .video {
-            currentInfo = videoInfo
-        }
-        tableView.reloadData()
         for model in currentInfo.models {
             if model.state == .joined {
                 count += 1
@@ -180,26 +183,26 @@ class DBYInteractionView: DBYNibView {
         
         //被邀请上台或上麦
         if userModel != nil && userModel?.state == .inqueue && currentInfo.state == .normal {
-            delegate?.receiveInteraction(owner: self, state: .inqueue, type: type, model: userModel)
+            delegate?.receiveInteraction(owner: self, state: .inqueue, type: currentInfo.type, model: userModel)
             currentInfo.state = .inqueue
         }else
         //上台或上麦
         if userModel != nil && userModel?.state == .joined {
-            delegate?.receiveInteraction(owner: self, state: .joined, type: type, model: userModel)
+            delegate?.receiveInteraction(owner: self, state: .joined, type: currentInfo.type, model: userModel)
             currentInfo.state = .joined
         }else
         //被取消上台或上麦
         if userModel == nil && currentInfo.state == .joined {
-            delegate?.receiveInteraction(owner: self, state: .quit, type: type, model: userModel)
+            delegate?.receiveInteraction(owner: self, state: .quit, type: currentInfo.type, model: userModel)
             currentInfo.state = .normal
         }else
         //拒绝上台或上麦
         if userModel == nil && currentInfo.state == .inqueue {
-            delegate?.receiveInteraction(owner: self, state: .abort, type: type, model: nil)
+            delegate?.receiveInteraction(owner: self, state: .abort, type: currentInfo.type, model: nil)
             currentInfo.state = .normal
         }
         // 等待上台
-        if currentInfo.state == .inqueue && type == .video && inqueueCount > 0 {
+        if currentInfo.state == .inqueue && currentInfo.type == .video && inqueueCount > 0 {
             delegate?.waittingForVideo(owner: self, count: inqueueCount)
         }
     }

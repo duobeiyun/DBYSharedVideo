@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import DBYSDK_dylib
 
 let currentBundle = Bundle(identifier: "com.duobei.DBYSharedVideo")
 let regexString = "(\\[:(.*?)\\])"
@@ -92,29 +93,49 @@ func beautifyMessage(message: String, maxWidth: CGFloat) -> NSAttributedString {
     }
     return attMessage
 }
-func beautifyUserName(role:Int, name:String, showBadge: Bool) -> NSAttributedString? {
-    var imageName:String = ""
-    let attName = NSMutableAttributedString()
+///1:老师 2:学生 3:管理员 4:助教 6:家长
+func roleString(role: Int) -> String {
+    var str = ""
     switch role {
-    case 1:
-        imageName = "icon-teacher"
-    case 2:
-        imageName = "icon-student"
-    case 4:
-        imageName = "icon-assistant"
-    default:
-        break
+        case 1:
+            str = "老师"
+        case 2:
+            str = "学生"
+        case 3:
+            str = "管理员"
+        case 4:
+            str = "助教"
+        case 6:
+            str = "家长"
+        default:
+            str = ""
     }
-    if showBadge {
-        let attachment = NSTextAttachment()
-        attachment.bounds = CGRect(x: 0, y: -2.5, width: 48, height: 13)
-        attachment.image = UIImage(name: imageName)
-        let iconString = NSAttributedString(attachment: attachment)
-        attName.append(iconString)
+    return str
+}
+func badgeUrl(role: Int, badgeDict:[String: Any]?) -> (String?, String?) {
+    let disable = badgeDict?["disabled"] as? Bool ?? false
+    if disable {
+        return (nil, nil)
     }
-    let nameString = NSAttributedString(string: " \(name)")
-    attName.append(nameString)
-    return attName
+    var imageKey:String = ""
+    switch role {
+        case 1:
+            imageKey = "teacher"
+        case 2:
+            imageKey = "student"
+        case 4:
+            imageKey = "assistant"
+        default:
+            break
+    }
+    let placeHolderName = "icon-" + imageKey
+    
+    var resourceName: String = ""
+    if let items = badgeDict?["items"] as? [String: String] {
+        resourceName = items[imageKey] ?? ""
+    }
+    let serverUrl = DBYUrlConfig.shared().staticUrl(withSourceName: resourceName)
+    return (serverUrl, placeHolderName)
 }
 func isPortrait() -> Bool {
     let orientation = UIApplication.shared.statusBarOrientation

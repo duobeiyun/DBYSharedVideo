@@ -52,7 +52,6 @@ public class DBYLiveController: DBY1VNController {
     var sensitiveWords: [String]?
     weak var animationTimer: ZFTimer?
     weak var zanTimer:ZFTimer?
-    var questions: [[String:Any]]?
     var videoPlayer: VideoPlayer?
     var quickLines:[DBYPlayLine]?
     
@@ -88,12 +87,13 @@ public class DBYLiveController: DBY1VNController {
             }
             if roomConfig?.leb == true {
                 self.liveManager.disabelMedia()
+                self.changeLineButton.isHidden = false
             } else {
-                self.changeLineButton.isHidden = true
                 self.liveManager.enabelMedia()
             }
             DispatchQueue.main.async {
                 self.questionView.roomConfig = roomConfig
+                self.chatListView.roomConfig = roomConfig
                 self.showMarqueeView()
                 self.showExtendView()
             }
@@ -322,27 +322,8 @@ public class DBYLiveController: DBY1VNController {
         segmentedView.removeData(with: "答题", animated: false)
     }
     func showInteractionView() {
-        TLTipViewController.showLoading(message: "获取交互列表")
-        let group = DispatchGroup()
-        group.enter()
-        liveManager.getInteractionList(.audio) {[weak self] (list) in
-            if let models = list {
-                self?.interactionView.set(models: models, for: .audio)
-            }
-            group.leave()
-        }
-        group.enter()
-        liveManager.getInteractionList(.video) {[weak self] (list) in
-            if let models = list {
-                self?.interactionView.set(models: models, for: .video)
-            }
-            group.leave()
-        }
-        group.notify(queue: DispatchQueue.main) {
-            TLTipViewController.dismiss()
-            self.interactionView.switchButton(.audio)
-            self.interactionView.isHidden = false
-        }
+        self.interactionView.switchToAudio()
+        self.interactionView.isHidden = false
     }
     func showWatermarkView() {
         guard let wk = roomConfig?.watermark else {
@@ -413,7 +394,6 @@ public class DBYLiveController: DBY1VNController {
         segmentedView.scrollToIndex(index: 0, animated: false)
     }
     func setQuestions(list: [[String:Any]]) {
-        questions = list
         questionView.set(list: list)
     }
     func appendQuestion(dict: [String:Any]) {
@@ -609,6 +589,13 @@ extension DBYLiveController: DBYLiveManagerDelegate {
                 self?.interactionView.set(models: models, for: .video)
             }
         }
+        //获取问答列表
+        liveManager.getQuestionList {[weak self] (questions) in
+            guard let list = questions as? [[String: Any]] else {
+                return
+            }
+            self?.setQuestions(list: list)
+        }
         mainView.hiddenLoadingView()
     }
     public func liveManagerClassOver(_ manager: DBYLiveManager!) {
@@ -660,6 +647,7 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     }
     public func liveManagerShouldStopVote(_ manager: DBYLiveManager!) {
         segmentedView.removeData(with: "答题", animated: true)
+        segmentedView.scrollToIndex(index: 0, animated: true)
     }
     public func liveManagerShouldHideVote(_ manager: DBYLiveManager!) {
         hiddenVoteView()
@@ -707,12 +695,6 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     public func liveManager(_ manager: DBYLiveManager!, canChat: Bool) {
         sendMessageEnable = canChat
     }
-    public func liveManager(_ manager: DBYLiveManager!, receivedQuestions array: [[AnyHashable : Any]]!) {
-        guard let list = array as? [[String: Any]] else {
-            return
-        }
-        setQuestions(list: list)
-    }
     public func liveManager(_ manager: DBYLiveManager!, receivedQuestion dict: [AnyHashable : Any]!) {
         guard let questionDict = dict as? [String: Any] else {
             return
@@ -734,17 +716,10 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         if uid == authinfo?.teacherId || uid == liveManager.assitantId {
             return
         }
+        changeQuickLine(index: 0)
         let videoView = createVideoView(uid: uid)
         liveManager.setStudentView(videoView.video, withUserId: uid)
         liveManager.getUserInfo(uid) { (userInfo) in
-            guard let info = userInfo else {
-                return
-            }
-            let dict:[String : Any] = [
-                "type": "message",
-                "message": roleString(role: info.userRole) + info.nickName + " 正在上台发言"
-            ]
-            self.chatListView.append(dict: dict)
             videoView.setUserName(name: userInfo?.nickName)
         }
     }
@@ -789,10 +764,10 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     public func liveManager(_ manager: DBYLiveManager!, quickLinesChanged lines: [DBYPlayLine]!) {
         if lines.count == 1 {
             liveManager.enabelMedia()
-            changeLineButton.isHidden = true
             settingView.models[1].items = nil
             return
         }
+        changeLineButton.isHidden = false
         quickLines = lines
         let index = getPriorityLine(lines: lines)
         changeQuickLine(index: index)
@@ -968,12 +943,12 @@ extension DBYLiveController: DBYInteractionViewDelegate {
             return
         }
         view.addSubview(tipView)
-        let icon = UIImage(name: "camera-request-icon")
+        let icon = UIImage(name: "camera-small")
         let message = "还有 1 人等待上台，请你做好准备"
         if let p = tipView as? DBYTipViewUIProtocol {
-            p.show(icon: icon, message: message)
-            p.setPosition(position: tipViewPosition)
-            p.setContentOffset(size: tipViewSafeSize)
+            p.setIcon(icon, message: message)
+            p.setPosition(tipViewPosition)
+            p.setContentOffset(tipViewSafeSize)
         }
         tipView.dismiss(after: 3)
         guard let closeView = tipView as? DBYTipCloseView else {
@@ -1001,9 +976,9 @@ extension DBYLiveController: DBYInteractionViewDelegate {
         }
         view.addSubview(tipView)
         if let p = tipView as? DBYTipViewUIProtocol {
-            p.show(icon: icon, message: message)
-            p.setPosition(position: tipViewPosition)
-            p.setContentOffset(size: tipViewSafeSize)
+            p.setIcon(icon, message: message)
+            p.setPosition(tipViewPosition)
+            p.setContentOffset(tipViewSafeSize)
         }
         tipView.dismiss(after: 3)
     }
@@ -1038,10 +1013,11 @@ extension DBYLiveController: DBYInteractionViewDelegate {
             view.addSubview(tipView)
             //设置ui
             if let p = tipView as? DBYTipViewUIProtocol {
-                p.show(icon: image, message: message)
-                p.setPosition(position: tipViewPosition)
-                p.setContentOffset(size: tipViewSafeSize)
+                p.setIcon(image, message: message)
+                p.setPosition(tipViewPosition)
+                p.setContentOffset(tipViewSafeSize)
             }
+            tipView.dismiss(after: 15)
             //动作
             guard let inviteView = tipView as? DBYTipInviteView else {
                 return
@@ -1109,7 +1085,17 @@ extension DBYLiveController: DBYInteractionViewDelegate {
     func switchInteraction(owner: DBYInteractionView, type: DBYInteractionType) {
         
     }
-    
+    func interactionStateChanged(owner: DBYInteractionView, old: DBYInteractionModel, new: DBYInteractionModel) {
+        if new.state != .joined {
+            return
+        }
+        let message = new.type == .audio ? " 正在上麦发言":" 正在上台发言"
+        let dict:[String : Any] = [
+            "type": "message",
+            "message": roleString(role: new.userRole) + new.userName + message
+        ]
+        self.chatListView.append(dict: dict)
+    }
 }
 extension DBYLiveController: VideoPlayerStateDelegate {
     func connected() {
@@ -1128,6 +1114,6 @@ extension DBYLiveController: VideoPlayerStateDelegate {
         let tipView = TLLineTipView.loadNibView()
         tipView?.show()
         tipView?.changLineBlock = changeLineAccordToPriority
-        tipView?.dismiss(after: 2)
+        tipView?.dismiss(after: 10)
     }
 }

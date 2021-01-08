@@ -10,51 +10,6 @@ import UIKit
 import MediaPlayer
 import DBYSDK_dylib
 
-///1:老师 2:学生 3:管理员 4:助教 6:家长
-func roleString(role: Int) -> String {
-    var str = ""
-    switch role {
-        case 1:
-            str = "老师"
-        case 2:
-            str = "学生"
-        case 3:
-            str = "管理员"
-        case 4:
-            str = "助教"
-        case 6:
-            str = "家长"
-        default:
-            str = ""
-    }
-    return str
-}
-func badgeUrl(role: Int, badgeDict:[String: Any]?) -> (String?, String?) {
-    let disable = badgeDict?["disabled"] as? Bool ?? false
-    if disable {
-        return (nil, nil)
-    }
-    var imageKey:String = ""
-    switch role {
-    case 1:
-        imageKey = "teacher"
-    case 2:
-        imageKey = "student"
-    case 4:
-        imageKey = "assistant"
-    default:
-        break
-    }
-    let placeHolderName = "icon-" + imageKey
-    
-    var resourceName: String = ""
-    if let items = badgeDict?["items"] as? [String: String] {
-        resourceName = items[imageKey] ?? ""
-    }
-    let serverUrl = DBYUrlConfig.shared().staticUrl(withSourceName: resourceName)
-    return (serverUrl, placeHolderName)
-}
-
 public class DBY1VNController: UIViewController {
     @objc public var authinfo: DBYAuthInfo?
     
@@ -77,6 +32,7 @@ public class DBY1VNController: UIViewController {
     lazy var changeLineButton: UIButton = {
         let b = UIButton(type: .custom)
         b.setImage(UIImage(name: "icon-lines"), for: .normal)
+        b.isHidden = true
         return b
     }()
     //MARK: - override functions
@@ -370,7 +326,10 @@ extension DBY1VNController: DBYMainViewDelegate {
         
         if topBar.isHidden {
             mainView.timer?.stop()
-            settingView.isHidden = true
+            if isLandscape() {
+                settingView.isHidden = true
+                segmentedView.isHidden = true
+            }
         } else {
             mainView.startTimer()
         }

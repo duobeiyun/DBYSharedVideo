@@ -112,6 +112,7 @@ class DBYVoteView: DBYView {
         tableView.reloadData()
     }
     func setVotes(votes: [String]) {
+        tipLab.text = "正在答题中"
         countDict.removeAll()
         selectedIndex = -1
         dataSource = votes

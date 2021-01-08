@@ -66,7 +66,7 @@ class DBYChatListView: DBYView {
         let btn = DBYButton()
         btn.setBackgroundStyle(fillColor: DBYStyle.halfBlack,
                                borderColor: UIColor.clear,
-                               radius: 15)
+                               radius: 12)
         btn.setImage(UIImage(name: "btn-chat"), for: .normal)
         let att = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12),
                    NSAttributedString.Key.foregroundColor: UIColor.white]
@@ -233,9 +233,9 @@ class DBYChatListView: DBYView {
             }
             addSubview(tipView)
             if let p = tipView as? DBYTipViewUIProtocol {
-                p.show(icon: image, message: message)
-                p.setPosition(position: tipViewPosition)
-                p.setContentOffset(size: tipViewSafeSize)
+                p.setIcon(image, message: message)
+                p.setPosition(tipViewPosition)
+                p.setContentOffset(tipViewSafeSize)
             }
             guard let clickView = tipView as? DBYTipClickView else {
                 return

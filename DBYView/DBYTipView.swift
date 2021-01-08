@@ -8,9 +8,9 @@
 
 import UIKit
 protocol DBYTipViewUIProtocol {
-    func show(icon:UIImage?, message: String?)
-    func setPosition(position: DBYTipView.Position)
-    func setContentOffset(size: CGSize)
+    func setIcon(_ icon:UIImage?, message: String?)
+    func setPosition(_ position: DBYTipView.Position)
+    func setContentOffset(_ offset: CGSize)
 }
 protocol DBYTipViewInviteable {
     
@@ -83,18 +83,18 @@ class DBYTipNormalView: DBYTipBaseView, DBYTipViewUIProtocol {
         minWidth += 64
         return CGSize(width: minWidth, height: height)
     }
-    func setPosition(position: DBYTipView.Position) {
+    func setPosition(_ position: DBYTipView.Position) {
         self.position = position
         let size = self.contentSize()
         updateFrame(contentSize: size)
     }
-    func show(icon:UIImage?, message: String?) {
+    func setIcon(_ icon:UIImage?, message: String?) {
         iconView.image = icon
         messageLabel.text = message
     }
-    func setContentOffset(size: CGSize) {
-        offset = size
-        frame = frame.offsetBy(dx: size.width, dy: size.height)
+    func setContentOffset(_ offset: CGSize) {
+        self.offset = offset
+        frame = frame.offsetBy(dx: offset.width, dy: offset.height)
     }
 }
 class DBYTipClickView: DBYTipBaseView, DBYTipViewUIProtocol {
@@ -117,18 +117,18 @@ class DBYTipClickView: DBYTipBaseView, DBYTipViewUIProtocol {
         minWidth += 64
         return CGSize(width: minWidth, height: height)
     }
-    func setPosition(position: DBYTipView.Position) {
+    func setPosition(_ position: DBYTipView.Position) {
         self.position = position
         let size = self.contentSize()
         updateFrame(contentSize: size)
     }
-    func show(icon:UIImage?, message: String?) {
+    func setIcon(_ icon:UIImage?, message: String?) {
         iconView.image = icon
         messageLabel.text = message
     }
-    func setContentOffset(size: CGSize) {
-        offset = size
-        frame = frame.offsetBy(dx: size.width, dy: size.height)
+    func setContentOffset(_ offset: CGSize) {
+        self.offset = offset
+        frame = frame.offsetBy(dx: offset.width, dy: offset.height)
     }
 }
 class DBYTipCloseView: DBYTipBaseView, DBYTipViewUIProtocol {
@@ -147,18 +147,18 @@ class DBYTipCloseView: DBYTipBaseView, DBYTipViewUIProtocol {
         minWidth += 102
         return CGSize(width: minWidth, height: height)
     }
-    func setPosition(position: DBYTipView.Position) {
+    func setPosition(_ position: DBYTipView.Position) {
         self.position = position
         let contentSize = self.contentSize()
         updateFrame(contentSize: contentSize)
     }
-    func show(icon:UIImage?, message: String?) {
+    func setIcon(_ icon:UIImage?, message: String?) {
         iconView.image = icon
         messageLabel.text = message
     }
-    func setContentOffset(size: CGSize) {
-        offset = size
-        frame = frame.offsetBy(dx: size.width, dy: size.height)
+    func setContentOffset(_ offset: CGSize) {
+        self.offset = offset
+        frame = frame.offsetBy(dx: offset.width, dy: offset.height)
     }
 }
 class DBYTipInviteView: DBYTipBaseView, DBYTipViewUIProtocol {
@@ -203,18 +203,18 @@ class DBYTipInviteView: DBYTipBaseView, DBYTipViewUIProtocol {
         minWidth += 200
         return CGSize(width: minWidth, height: height)
     }
-    func setPosition(position: DBYTipView.Position) {
+    func setPosition(_ position: DBYTipView.Position) {
         self.position = position
         let contentSize = self.contentSize()
         updateFrame(contentSize: contentSize)
     }
-    func show(icon:UIImage?, message: String?) {
+    func setIcon(_ icon:UIImage?, message: String?) {
         iconView.image = icon
         messageLabel.text = message
     }
-    func setContentOffset(size: CGSize) {
-        offset = size
-        frame = frame.offsetBy(dx: size.width, dy: size.height)
+    func setContentOffset(_ offset: CGSize) {
+        self.offset = offset
+        frame = frame.offsetBy(dx: offset.width, dy: offset.height)
     }
 }
 class DBYTipView {
