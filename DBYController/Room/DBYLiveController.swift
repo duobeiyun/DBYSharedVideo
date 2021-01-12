@@ -716,7 +716,7 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         if uid == authinfo?.teacherId || uid == liveManager.assitantId {
             return
         }
-        changeQuickLine(index: 0)
+        
         let videoView = createVideoView(uid: uid)
         liveManager.setStudentView(videoView.video, withUserId: uid)
         liveManager.getUserInfo(uid) { (userInfo) in
@@ -1095,6 +1095,7 @@ extension DBYLiveController: DBYInteractionViewDelegate {
             "message": roleString(role: new.userRole) + new.userName + message
         ]
         self.chatListView.append(dict: dict)
+        changeQuickLine(index: 0)
     }
 }
 extension DBYLiveController: VideoPlayerStateDelegate {

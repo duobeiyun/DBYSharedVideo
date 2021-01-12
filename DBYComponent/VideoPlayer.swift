@@ -165,7 +165,7 @@ extension AliVideoPlayer: AVPDelegate {
         
     }
     func onPlayerStatusChanged(_ player: AliPlayer!, oldStatus: AVPStatus, newStatus: AVPStatus) {
-        if oldStatus == AVPStatusError {
+        if newStatus == AVPStatusError {
             delegate?.stutter()
         }
     }
