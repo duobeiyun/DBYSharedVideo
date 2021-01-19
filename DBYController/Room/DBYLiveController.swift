@@ -504,27 +504,16 @@ public class DBYLiveController: DBY1VNController {
         if chatListView.isChatForbidden {
             return
         }
-        inputVC.textChangeBlock = {[weak self] text in
-            self?.chatListView.chatBar.setText(text ?? "")
-        }
         inputVC.sendTextBlock = {[weak self] text in
             self?.send(message: text)
+            self?.chatListView.chatBar.clearText()
+        }
+        inputVC.textChangeBlock = {[weak self] text in
+            self?.chatListView.chatBar.setText(text ?? "")
         }
         present(inputVC, animated: true, completion: nil)
     }
     
-    @objc func audioOnly(sender:UIButton) {
-        sender.isSelected = !sender.isSelected
-        if sender.isSelected {
-            mainView.showAudioTipView(delegate: self)
-        }else {
-            mainView.hiddenAudioTipView()
-        }
-        
-        liveManager.setReceiveVideoWith(!sender.isSelected) { (message) in
-            print(message ?? "setReceiveVideoWith")
-        }
-    }
     @objc func announcementClick() {
         
     }
@@ -763,6 +752,10 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         
     }
     public func liveManager(_ manager: DBYLiveManager!, interActionListChange list: [DBYInteractionModel]!, type: DBYInteractionType) {
+        interactionView.set(models: list, for: type)
+        if type == .audio {
+            return
+        }
         var hasJoined = false
         for model in list {
             if model.state == .joined {
@@ -774,7 +767,6 @@ extension DBYLiveController: DBYLiveManagerDelegate {
             manager.enabelMedia()
         }
         changeLineButton.isHidden = hasJoined
-        interactionView.set(models: list, for: type)
     }
     public func liveManager(_ manager: DBYLiveManager!, thumbupWithCount count: Int, userName: String!) {
         if userName.count < 1 {
@@ -790,7 +782,7 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     public func liveManager(_ manager: DBYLiveManager!, quickLinesChanged lines: [DBYPlayLine]!) {
         if lines.count == 1 {
             liveManager.enabelMedia()
-            settingView.models[1].items = nil
+            settingView.models[1].items.removeAll()
             return
         }
         changeLineButton.isHidden = false
@@ -810,6 +802,7 @@ extension DBYLiveController: DBYChatBarDelegate {
     func chatBarDidClickEmojiButton(owner: DBYChatBar) {
         inputVC.sendTextBlock = {[weak self] text in
             self?.send(message: text)
+            self?.chatListView.chatBar.clearText()
         }
         inputVC.textChangeBlock = {[weak self] text in
             self?.chatListView.chatBar.setText(text ?? "")
@@ -821,6 +814,7 @@ extension DBYLiveController: DBYChatBarDelegate {
     func chatBarDidClickTextButton(owner: DBYChatBar) {
         inputVC.sendTextBlock = {[weak self] text in
             self?.send(message: text)
+            self?.chatListView.chatBar.clearText()
         }
         inputVC.textChangeBlock = {[weak self] text in
             self?.chatListView.chatBar.setText(text ?? "")
@@ -930,6 +924,17 @@ extension DBYLiveController: DBYTopBarDelegate {
 }
 extension DBYLiveController: DBYSettingViewDelegate {
     func settingView(owner: DBYSettingView, didSelectedItemAt indexPath: IndexPath) {
+        if indexPath.section == 0 {
+            let receiveVideo = settingView.models[0].items[indexPath.row].selectedIndex == -1
+            liveManager.setReceiveVideoWith(receiveVideo) { (message) in
+                
+            }
+            if receiveVideo {
+                mainView.hiddenAudioTipView()
+            }else {
+                mainView.showAudioTipView(delegate: self)
+            }
+        }
         if indexPath.section == 1 {
             changeQuickLine(index: indexPath.row)
         }
@@ -1136,5 +1141,15 @@ extension DBYLiveController: VideoPlayerStateDelegate {
         tipView?.show()
         tipView?.changLineBlock = changeLineAccordToPriority
         tipView?.dismiss(after: 10)
+    }
+}
+//MARK: - DBYAudioTipViewDelegate
+extension DBYLiveController: DBYAudioTipViewDelegate {
+    func switchButtonClick(_ owner: DBYAudioTipView) {
+        mainView.hiddenAudioTipView()
+        liveManager.setReceiveVideoWith(true) { (message) in
+            
+        }
+        settingView.models[0].items[0].selectedIndex = -1
     }
 }

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -141,8 +141,57 @@
             </connections>
             <point key="canvasLocation" x="297.10144927536237" y="464.0625"/>
         </view>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="seu-rn-DHh" userLabel="Audio Tip View" customClass="DBYAudioTipView" customModule="DBYSharedVideo" customModuleProvider="target">
+            <rect key="frame" x="0.0" y="0.0" width="515" height="292"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="audio-tip" translatesAutoresizingMaskIntoConstraints="NO" id="oMa-cd-iRl">
+                    <rect key="frame" x="97.5" y="86" width="160" height="120"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="120" id="6Xv-hV-Pcq"/>
+                        <constraint firstAttribute="width" constant="160" id="BSe-h6-enO"/>
+                    </constraints>
+                </imageView>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kZy-ze-sD5">
+                    <rect key="frame" x="262.5" y="148" width="150" height="42"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="150" id="lyR-j6-f8L"/>
+                    </constraints>
+                    <fontDescription key="fontDescription" type="system" pointSize="25"/>
+                    <state key="normal" title="返回视频">
+                        <color key="titleColor" red="1" green="0.83137254900000002" blue="0.35294117650000001" alpha="1" colorSpace="calibratedRGB"/>
+                    </state>
+                    <connections>
+                        <action selector="confirmClick" destination="seu-rn-DHh" eventType="touchUpInside" id="dxX-r7-Xqh"/>
+                    </connections>
+                </button>
+                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="音频播放模式" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1Dz-u1-nUH">
+                    <rect key="frame" x="261.5" y="110" width="152" height="30"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="25"/>
+                    <color key="textColor" red="1" green="0.83137254901960778" blue="0.3529411764705882" alpha="1" colorSpace="calibratedRGB"/>
+                    <nil key="highlightedColor"/>
+                </label>
+            </subviews>
+            <color key="backgroundColor" red="0.25108450650000003" green="0.24697166679999999" blue="0.27988693120000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="kZy-ze-sD5" firstAttribute="bottom" secondItem="oMa-cd-iRl" secondAttribute="bottom" constant="-16" id="KPh-ac-ydD"/>
+                <constraint firstItem="oMa-cd-iRl" firstAttribute="centerX" secondItem="seu-rn-DHh" secondAttribute="centerX" constant="-80" id="KhA-Tl-9dv"/>
+                <constraint firstItem="oMa-cd-iRl" firstAttribute="centerY" secondItem="seu-rn-DHh" secondAttribute="centerY" id="TnI-cF-0w1"/>
+                <constraint firstItem="1Dz-u1-nUH" firstAttribute="centerX" secondItem="kZy-ze-sD5" secondAttribute="centerX" id="X0F-zf-vIN"/>
+                <constraint firstItem="kZy-ze-sD5" firstAttribute="centerX" secondItem="seu-rn-DHh" secondAttribute="centerX" constant="80" id="iXh-gv-Ehe"/>
+                <constraint firstItem="1Dz-u1-nUH" firstAttribute="top" secondItem="oMa-cd-iRl" secondAttribute="top" constant="24" id="y7C-DQ-tPD"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <connections>
+                <outlet property="switchButton" destination="kZy-ze-sD5" id="qhC-aF-ueO"/>
+            </connections>
+            <point key="canvasLocation" x="396.37681159420293" y="699.77678571428567"/>
+        </view>
     </objects>
     <resources>
+        <image name="audio-tip" width="211" height="175"/>
         <image name="btn-play" width="24" height="24"/>
         <image name="icon-video-loading" width="68" height="12"/>
         <image name="pause-bg" width="375" height="211"/>

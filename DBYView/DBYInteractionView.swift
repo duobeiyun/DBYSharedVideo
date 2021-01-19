@@ -60,6 +60,9 @@ class DBYInteractionView: DBYNibView {
     }
     @IBAction func applyAction(sender: UIButton) {
         if currentInfo.state == .normal {
+            if audioInfo.state != .normal || videoInfo.state != .normal {
+                return
+            }
             delegate?.requestInteraction(owner: self, state: .inqueue, type: currentInfo.type)
         }
         if currentInfo.state == .inqueue {

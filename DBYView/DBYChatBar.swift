@@ -54,6 +54,9 @@ class DBYChatBar: DBYNibView {
         
         roundLayer.path = roundPath.cgPath
     }
+    func clearText() {
+        textButton.setTitle("快来和大家一起参与讨论吧", for: .normal)
+    }
     func setText(_ text: String) {
         textButton.setTitle(text, for: .normal)
     }

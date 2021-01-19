@@ -32,6 +32,10 @@ class DBYMainView: DBYView {
         let v = DBYLoadingTipView.loadNibView()!
         return v
     }()
+    lazy var audioTipView: DBYAudioTipView = {
+        let v = DBYAudioTipView.loadNibView()!
+        return v
+    }()
     
     var beganPosition:CGPoint = .zero
     var brightness:CGFloat = 0
@@ -97,14 +101,14 @@ class DBYMainView: DBYView {
                 break
         }
     }
-    func showAudioTipView(delegate: DBYVideoTipViewDelegate?) {
-        pauseTipView.delegate = delegate
-        pauseTipView.frame = bounds
-        pauseTipView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        addSubview(pauseTipView)
+    func showAudioTipView(delegate: DBYAudioTipViewDelegate) {
+        audioTipView.delegate = delegate
+        audioTipView.frame = bounds
+        audioTipView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addSubview(audioTipView)
     }
     func hiddenAudioTipView() {
-        pauseTipView.removeFromSuperview()
+        audioTipView.removeFromSuperview()
     }
     func showVideoTipView(delegate: DBYVideoTipViewDelegate?) {
         pauseTipView.delegate = delegate

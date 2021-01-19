@@ -21,6 +21,7 @@ class DBYSettingViewLiveFactory: DBYSettingViewFactory {
         let settingModel1 = DBYSettingModel()
         settingModel1.name = "通用设置"
         settingModel1.resueId = "\(DBYSettingIconCell.self)"
+        settingModel1.selectType = .multiple
         settingModel1.items = [DBYSettingItem(name: "音频播放", defaultIcon: "audio-only-normal", selectedIcon: "audio-only-selected")]
         
         let settingModel2 = DBYSettingModel()
@@ -201,7 +202,12 @@ class DBYSettingView: DBYView {
 extension DBYSettingView: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let model = models[indexPath.section]
-        model.selectedIndex = indexPath.row
+        let item = model.items[indexPath.row]
+        if model.selectType == .multiple {
+            item.selectedIndex = item.selectedIndex == -1 ? indexPath.row:-1
+        } else {
+            model.selectedIndex = indexPath.row
+        }
         collectionView.reloadSections([indexPath.section])
         delegate?.settingView(owner: self, didSelectedItemAt: indexPath)
     }
@@ -221,7 +227,7 @@ extension DBYSettingView: UICollectionViewDataSource {
     }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         let model = models[section]
-        return model.items?.count ?? 0
+        return model.items.count
     }
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let model = models[indexPath.section]
@@ -231,16 +237,16 @@ extension DBYSettingView: UICollectionViewDataSource {
     }
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let model = models[indexPath.section]
-        let item = model.items?[indexPath.row]
+        let item = model.items[indexPath.row]
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: model.resueId, for: indexPath)
         if let iconCell = cell as? DBYSettingIconCell {
-            iconCell.nameLabel.text = item?.name
-            let iconName = model.selectedIndex == indexPath.row ? item?.selectedIcon:item?.defaultIcon
+            iconCell.nameLabel.text = item.name
+            let iconName = item.selectedIndex == indexPath.row ? item.selectedIcon:item.defaultIcon
             iconCell.iconView.image = UIImage(name: iconName ?? "")
         }
         if let labelCell = cell as? DBYSettingLabelCell {
             let color = model.selectedIndex == indexPath.row ? DBYStyle.yellow:UIColor.white
-            labelCell.nameLabel.text = item?.name
+            labelCell.nameLabel.text = item.name
             labelCell.nameLabel.textColor = color
             labelCell.nameLabel.layer.borderColor = color.cgColor
         }

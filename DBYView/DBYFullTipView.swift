@@ -16,6 +16,9 @@ protocol DBYVideoTipViewDelegate: NSObjectProtocol {
 protocol DBYLoadingTipViewDelegate: NSObjectProtocol {
     func changeLineClick(_ owner: DBYLoadingTipView)
 }
+protocol DBYAudioTipViewDelegate: NSObjectProtocol {
+    func switchButtonClick(_ owner: DBYAudioTipView)
+}
 
 class DBYPauseTipView: DBYView, ZFNibLoader {
     @IBOutlet weak var iconView: UIImageView!
@@ -72,6 +75,27 @@ class DBYNetworkTipView: DBYView, ZFNibLoader {
     public static func loadNibView() -> Self? {
         let views = loadViewsFromNib(name: "DBYFullTipView", bundle: Bundle(for: Self.self))
         let tipView = views?[2] as? Self
+        
+        return tipView
+    }
+}
+class DBYAudioTipView: DBYView, ZFNibLoader {
+    @IBOutlet weak var switchButton: UIButton! {
+        didSet {
+            switchButton.layer.cornerRadius = 21
+            switchButton.layer.borderWidth = 0.6
+            switchButton.layer.borderColor = DBYStyle.yellow.cgColor
+        }
+    }
+    @IBAction func confirmClick() {
+        delegate?.switchButtonClick(self)
+    }
+    
+    weak var delegate:DBYAudioTipViewDelegate?
+    
+    public static func loadNibView() -> Self? {
+        let views = loadViewsFromNib(name: "DBYFullTipView", bundle: Bundle(for: Self.self))
+        let tipView = views?[3] as? Self
         
         return tipView
     }
