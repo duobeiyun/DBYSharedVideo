@@ -1,5 +1,5 @@
 //
-//  DBYCommentCell.swift
+//  DBYChatCell.swift
 //  DBY1VN
 //
 //  Created by 钟凡 on 2018/10/15.
@@ -9,10 +9,10 @@
 import UIKit
 import SDWebImage
 
-protocol DBYCommentCellDelegate: NSObjectProtocol {
-    func commentCell(cell: UITableViewCell, didPressWith index: IndexPath)
+protocol DBYChatCellDelegate: NSObjectProtocol {
+    func chatCell(cell: UITableViewCell, didPressWith index: IndexPath)
 }
-class DBYCommentCell: UITableViewCell {
+class DBYChatCell: UITableViewCell {
     @IBOutlet weak var badgeWidth: NSLayoutConstraint!
     @IBOutlet weak var nameLab: UILabel!
     @IBOutlet weak var avatarView: UIImageView! {
@@ -25,7 +25,7 @@ class DBYCommentCell: UITableViewCell {
     @IBOutlet weak var messageLab: UILabel!
     
     var indexPath: IndexPath?
-    weak var delegate: DBYCommentCellDelegate?
+    weak var delegate: DBYChatCellDelegate?
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -67,7 +67,7 @@ class DBYCommentCell: UITableViewCell {
             return
         }
         if let index = indexPath {
-            delegate?.commentCell(cell: self, didPressWith: index)
+            delegate?.chatCell(cell: self, didPressWith: index)
         }
     }
 }

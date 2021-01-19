@@ -20,6 +20,18 @@ class DBYMainView: DBYView {
     lazy var videoView = DBYVideoView()
     lazy var volumeProgressView = DBYProgressView()
     lazy var brightnessProgressView = DBYProgressView()
+    lazy var pauseTipView: DBYPauseTipView = {
+        let v = DBYPauseTipView.loadNibView()!
+        return v
+    }()
+    lazy var networkTipView: DBYNetworkTipView = {
+        let v = DBYNetworkTipView.loadNibView()!
+        return v
+    }()
+    lazy var loadingTipView: DBYLoadingTipView = {
+        let v = DBYLoadingTipView.loadNibView()!
+        return v
+    }()
     
     var beganPosition:CGPoint = .zero
     var brightness:CGFloat = 0
@@ -85,44 +97,41 @@ class DBYMainView: DBYView {
                 break
         }
     }
-    func showVideoTipView(type: DBYTipType, delegate: DBYVideoTipViewDelegate?) {
-        guard let pauseTipView = DBYPauseTipView.loadNibView() else {
-            return
-        }
+    func showAudioTipView(delegate: DBYVideoTipViewDelegate?) {
         pauseTipView.delegate = delegate
-        pauseTipView.tag = tag + 1
+        pauseTipView.frame = bounds
+        pauseTipView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addSubview(pauseTipView)
+    }
+    func hiddenAudioTipView() {
+        pauseTipView.removeFromSuperview()
+    }
+    func showVideoTipView(delegate: DBYVideoTipViewDelegate?) {
+        pauseTipView.delegate = delegate
         pauseTipView.frame = bounds
         pauseTipView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         addSubview(pauseTipView)
     }
     func hiddenVideoTipView() {
-        viewWithTag(tag + 1)?.removeFromSuperview()
+        pauseTipView.removeFromSuperview()
     }
     func showNetworkTipView(delegate: DBYNetworkTipViewDelegate?) {
-        guard let networkView = DBYNetworkTipView.loadNibView() else {
-            return
-        }
-        networkView.delegate = delegate
-        networkView.tag = tag + 2
-        networkView.frame = bounds
-        networkView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        addSubview(networkView)
+        networkTipView.delegate = delegate
+        networkTipView.frame = bounds
+        networkTipView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addSubview(networkTipView)
     }
     func hiddenNetworkTipView() {
-        viewWithTag(tag + 2)?.removeFromSuperview()
+        networkTipView.removeFromSuperview()
     }
     func showLoadingView(delegate: DBYLoadingTipViewDelegate?) {
-        guard let loadingView = DBYLoadingTipView.loadNibView() else {
-            return
-        }
-        loadingView.delegate = delegate
-        loadingView.tag = tag + 3
-        loadingView.frame = bounds
-        loadingView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        addSubview(loadingView)
+        loadingTipView.delegate = delegate
+        loadingTipView.frame = bounds
+        loadingTipView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        addSubview(loadingTipView)
     }
     func hiddenLoadingView() {
-        viewWithTag(tag + 3)?.removeFromSuperview()
+        loadingTipView.removeFromSuperview()
     }
     func startTimer() {
         timer?.stop()

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="DBYInputController" customModule="DBYSharedVideo" customModuleProvider="target">
+            <connections>
+                <outlet property="bottomView" destination="OaG-7k-TJC" id="6Ao-PN-gLr"/>
+                <outlet property="bottomViewBottom" destination="MUo-Dq-bDO" id="czz-AB-aaa"/>
+                <outlet property="emojiButton" destination="rgd-sf-LYv" id="1Tr-Qy-0e2"/>
+                <outlet property="sendButton" destination="eom-HS-EkO" id="Gaa-Ru-a1y"/>
+                <outlet property="textField" destination="dLe-gx-PTr" id="mPP-nF-f3g"/>
+                <outlet property="view" destination="iN0-l3-epB" id="UDR-oE-Cwe"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB">
+            <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="BxC-em-1vg" userLabel="Back View">
+                    <rect key="frame" x="0.0" y="852" width="414" height="44"/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="44" id="JBU-uc-f4F"/>
+                    </constraints>
+                </view>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="OaG-7k-TJC">
+                    <rect key="frame" x="0.0" y="852" width="414" height="44"/>
+                    <subviews>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rgd-sf-LYv">
+                            <rect key="frame" x="4" y="4" width="40" height="40"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="40" id="65U-nr-p4z"/>
+                                <constraint firstAttribute="width" constant="40" id="YBI-V3-XFI"/>
+                            </constraints>
+                            <state key="normal" image="chat-emoji"/>
+                            <state key="selected" image="chat-keyboard"/>
+                            <connections>
+                                <action selector="emojiButtonClickWithSender:" destination="-1" eventType="touchUpInside" id="LGA-11-ZMN"/>
+                            </connections>
+                        </button>
+                        <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="快来和大家一起参与讨论吧" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="dLe-gx-PTr">
+                            <rect key="frame" x="44" y="4" width="306" height="40"/>
+                            <color key="textColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                            <textInputTraits key="textInputTraits" returnKeyType="send"/>
+                            <connections>
+                                <outlet property="delegate" destination="-1" id="1LT-eg-e84"/>
+                            </connections>
+                        </textField>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eom-HS-EkO">
+                            <rect key="frame" x="358" y="2" width="48" height="48"/>
+                            <constraints>
+                                <constraint firstAttribute="width" constant="48" id="G2h-o0-c1d"/>
+                                <constraint firstAttribute="height" constant="48" id="TlH-1I-JMe"/>
+                            </constraints>
+                            <state key="normal" title="发送">
+                                <color key="titleColor" systemColor="systemGrayColor"/>
+                            </state>
+                            <state key="selected" image="interaction-highlight"/>
+                            <connections>
+                                <action selector="sendButtonClickWithSender:" destination="-1" eventType="touchUpInside" id="wbl-eS-xXR"/>
+                            </connections>
+                        </button>
+                    </subviews>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="44" id="AFe-PC-7Ww"/>
+                        <constraint firstItem="dLe-gx-PTr" firstAttribute="top" secondItem="rgd-sf-LYv" secondAttribute="top" id="CA4-yG-Ruw"/>
+                        <constraint firstItem="dLe-gx-PTr" firstAttribute="height" secondItem="rgd-sf-LYv" secondAttribute="height" id="KIw-0W-YkY"/>
+                        <constraint firstAttribute="trailing" secondItem="eom-HS-EkO" secondAttribute="trailing" constant="8" id="VeD-lh-LhW"/>
+                        <constraint firstItem="eom-HS-EkO" firstAttribute="leading" secondItem="dLe-gx-PTr" secondAttribute="trailing" constant="8" id="YnU-0o-nP6"/>
+                        <constraint firstItem="rgd-sf-LYv" firstAttribute="top" secondItem="OaG-7k-TJC" secondAttribute="top" constant="4" id="fkh-2W-aSU"/>
+                        <constraint firstItem="dLe-gx-PTr" firstAttribute="leading" secondItem="rgd-sf-LYv" secondAttribute="trailing" id="oAJ-wA-jZp"/>
+                        <constraint firstItem="dLe-gx-PTr" firstAttribute="bottom" secondItem="rgd-sf-LYv" secondAttribute="bottom" id="reK-jX-0Iv"/>
+                        <constraint firstItem="rgd-sf-LYv" firstAttribute="leading" secondItem="OaG-7k-TJC" secondAttribute="leading" constant="4" id="vxl-nZ-chQ"/>
+                        <constraint firstItem="eom-HS-EkO" firstAttribute="top" secondItem="OaG-7k-TJC" secondAttribute="top" constant="2" id="yIP-I3-2TK"/>
+                    </constraints>
+                </view>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="BxC-em-1vg" secondAttribute="bottom" id="2i3-7p-V4A"/>
+                <constraint firstItem="BxC-em-1vg" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="3AB-9z-4Z2"/>
+                <constraint firstAttribute="trailing" secondItem="BxC-em-1vg" secondAttribute="trailing" id="8Ig-KU-h3J"/>
+                <constraint firstAttribute="bottom" secondItem="OaG-7k-TJC" secondAttribute="bottom" id="MUo-Dq-bDO"/>
+                <constraint firstAttribute="trailing" secondItem="OaG-7k-TJC" secondAttribute="trailing" id="hKZ-Hz-6Go"/>
+                <constraint firstItem="OaG-7k-TJC" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="piE-NC-RI0"/>
+            </constraints>
+            <point key="canvasLocation" x="137.68115942028987" y="61.607142857142854"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="chat-emoji" width="24" height="24"/>
+        <image name="chat-keyboard" width="20" height="20"/>
+        <image name="interaction-highlight" width="48" height="48"/>
+        <systemColor name="systemGrayColor">
+            <color red="0.55686274509803924" green="0.55686274509803924" blue="0.57647058823529407" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
+</document>

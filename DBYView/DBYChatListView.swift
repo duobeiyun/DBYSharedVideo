@@ -50,7 +50,26 @@ let emojiNameDict: [String:String] = [
     "[:惊讶]": "amazing",
     "[:哼]": "hum"
 ]
-
+let emojis: [String] = [
+    "hello",
+    "love",
+    "smile",
+    "happy",
+    "sad",
+    "yes",
+    "no",
+    "question",
+    "angry",
+    "bye",
+    "like",
+    "fight",
+    "cry",
+    "sorry",
+    "loudly",
+    "strive",
+    "amazing",
+    "hum",
+]
 class DBYChatListView: DBYView {
     let fromCellReuseId: String = "DBYCommentFromCell"
     let toCellReuseId: String = "DBYCommentToCell"
@@ -157,7 +176,6 @@ class DBYChatListView: DBYView {
     override func setupUI() {
         tableView.delegate = self
         tableView.dataSource = self
-        chatBar.emojiImageDict = emojiImageDict
         chatBar.backgroundColor = UIColor.white
         flButton?.isHidden = true
         
@@ -296,7 +314,7 @@ extension DBYChatListView: UITableViewDataSource {
         return UITableView.automaticDimension
     }
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell:DBYCommentCell = DBYCommentCell()
+        var cell:DBYChatCell = DBYChatCell()
         
         if allChatList.count <= indexPath.row {
             return cell
@@ -316,7 +334,7 @@ extension DBYChatListView: UITableViewDataSource {
         chatDict["size"] = size
         let model = DBYCellModel.commentCellModel(dict: chatDict, roomConfig: roomConfig)
         
-        cell = tableView.dequeueReusableCell(withIdentifier: model.identifier) as! DBYCommentCell
+        cell = tableView.dequeueReusableCell(withIdentifier: model.identifier) as! DBYChatCell
         cell.setTextColor(model.textColor)
         cell.setBubbleImage(model.bubbleImage)
         cell.setText(name: model.name,

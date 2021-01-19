@@ -8,108 +8,115 @@
 
 import UIKit
 
-class DBYInputController: UIViewController {
-    
+class DBYInputController: DBYNibViewController {
+    enum ShowType {
+        case emoji
+        case text
+    }
     let borderColor = UIColor(red: 213/255.0, green: 213/255.0, blue: 213/255.0, alpha: 1)
     let btnNormalColor = UIColor(red: 204/255.0, green: 206/255.0, blue: 213/255.0, alpha: 1)
     let btnHilightColor = UIColor(red: 0/255.0, green: 130/255.0, blue: 211/255.0, alpha: 1)
-    
-    lazy var chatBar = DBYChatBar()
+    let emojiViewHeight: CGFloat = 200
+    let emojiViewH_H: CGFloat = 120
     
     var sendTextBlock:((String) -> ())?
+    var textChangeBlock:((String?) -> ())?
+    var showType: ShowType = .text
     
-    var iphoneXTop: CGFloat = 20
-    var iphoneXLeft: CGFloat = 0
-    var iphoneXRight: CGFloat = 0
-    var iphoneXBottom: CGFloat = 0
+    lazy var emojiView: DBYEmojiView = {
+        let v = DBYEmojiView()
+        v.delegate = self
+        v.backgroundColor = UIColor.white
+        v.emojis = emojis
+        return v
+    }()
     
+    @IBOutlet weak var textField: UITextField!
+    @IBOutlet weak var emojiButton: UIButton!
+    @IBOutlet weak var sendButton: UIButton!
+    @IBOutlet weak var bottomView: UIView!
+    @IBOutlet weak var bottomViewBottom: NSLayoutConstraint!
+    
+    @IBAction func emojiButtonClick(sender: UIButton) {
+        sender.isSelected = !sender.isSelected
+        if sender.isSelected {
+            textField.inputView = emojiView
+        } else {
+            textField.inputView = nil
+        }
+        emojiView.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: emojiViewHeight)
+        textField.resignFirstResponder()
+        textField.becomeFirstResponder()
+    }
+    @IBAction func sendButtonClick(sender: UIButton) {
+        sendText()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        emojiButton.isSelected = showType != .text
+        if emojiButton.isSelected {
+            textField.inputView = emojiView
+        } else {
+            textField.inputView = nil
+        }
+        emojiView.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: emojiViewHeight)
+        textField.becomeFirstResponder()
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        chatBar.emojiImageDict = emojiImageDict
-        chatBar.delegate = self
-        view.addSubview(chatBar)
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        setupChatBar()
-    }
-    override func viewWillDisappear(_ animated: Bool) {
-        dismissChatBar()
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyBoardChange),
+                                               name: UIResponder.keyboardWillShowNotification,
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(keyBoardChange),
+                                               name: UIResponder.keyboardWillHideNotification,
+                                               object: nil)
+        textField.textChangeBlock = textChangeBlock
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        dismissChatBar()
-    }
-    func dismissChatBar() {
-        chatBar.endInput()
-        let size = view.bounds.size
-        chatBar.frame = CGRect(x: iphoneXLeft,
-                               y: size.height - 48 - iphoneXBottom,
-                               width: size.width - iphoneXLeft - iphoneXRight,
-                               height: 48 + iphoneXBottom)
+        textField.resignFirstResponder()
         dismiss(animated: true, completion: nil)
     }
-    func setupChatBar() {
-        iphoneXTop = 20
-        iphoneXLeft = 0
-        iphoneXRight = 0
-        iphoneXBottom = 0
-        if isIphoneXSeries() {
-            let orientation = UIApplication.shared.statusBarOrientation
-            if orientation == .landscapeLeft {
-                iphoneXRight = 44
+    @objc func keyBoardChange(notification: NSNotification) {
+        // 判断是否是 边框变化事件
+        if notification.name == UIResponder.keyboardWillShowNotification {
+            // 从 userInfo 字典中，取出键盘高度
+            // 字典中如果保存的是结构体，通常是以 NSValue 的形式保存的
+            let rect = (notification.userInfo![UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
+            UIView.animate(withDuration: 0.2) {
+                self.bottomViewBottom.constant = rect.height
+                self.view.layoutIfNeeded()
             }
-            if orientation == .landscapeRight {
-                iphoneXLeft = 44
-            }
-            if orientation == .portrait {
-                iphoneXTop = 44
-            }
-            iphoneXBottom = 34
         }
-        let size = view.bounds.size
-        chatBar.frame = CGRect(x: iphoneXLeft,
-                               y: size.height - 48 - iphoneXBottom,
-                               width: size.width - iphoneXLeft - iphoneXRight,
-                               height: 48 + iphoneXBottom)
-        chatBar.showKeyboad()
+    }
+    func sendText() {
+        guard let text = textField.text else {
+            return
+        }
+        sendTextBlock?(text)
+        textField.text = ""
+        textField.resignFirstResponder()
+        dismiss(animated: true, completion: nil)
     }
 }
-extension DBYInputController: DBYChatBarDelegate {
-    func chatBar(owner: DBYChatBar, buttonClickWith target: UIButton) {
-        
+extension DBYInputController: DBYEmojiViewDelegate {
+    func emojiView(emojiView: DBYEmojiView, didSelectedAt index: Int) {
+        let imageName = emojis[index]
+        if let emojiName = emojiImageDict[imageName] {
+            textField.text = textField.text?.appending(emojiName)
+        }
     }
-    
-    func chatBarDidBecomeActive(owner: DBYChatBar) {
-        
-    }
-    func chatBar(owner: DBYChatBar, selectEmojiAt index: Int) {
-        
-    }
-    func chatBar(owner: DBYChatBar, send message: String) {
-        sendTextBlock?(message)
-        dismissChatBar()
-    }
-    func chatBarWillShowInputView(rect: CGRect, duration: TimeInterval) {
-        let size = view.bounds.size
-        let frame = CGRect(x: iphoneXLeft,
-                           y: size.height - rect.height - 48,
-                           width: size.width - iphoneXLeft - iphoneXRight,
-                           height: 48)
-        
-        UIView.animate(withDuration: duration, animations: {
-            self.chatBar.frame = frame
-        })
-    }
-    
-    func chatBarWillDismissInputView(duration: TimeInterval) {
-        let size = view.bounds.size
-        chatBar.frame = CGRect(x: iphoneXLeft,
-                               y: size.height - 48 - iphoneXBottom,
-                               width: size.width - iphoneXLeft - iphoneXRight,
-                               height: 48 + iphoneXBottom)
+}
+extension DBYInputController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        sendText()
+        return true
     }
 }

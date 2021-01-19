@@ -43,7 +43,12 @@ public class DBYLiveController: DBY1VNController {
         return arr
     }()
     
-    lazy var inputVC = DBYInputController()
+    lazy var inputVC:DBYInputController = {
+        let vc = DBYInputController()
+        vc.modalPresentationStyle = .custom
+        vc.modalTransitionStyle = .coverVertical
+        return vc
+    }()
     lazy var watermarkView = DBYWatermarkView()
     lazy var marqueeView = DBYMarqueeView()
     lazy var questionView = DBYQustionListView()
@@ -98,9 +103,6 @@ public class DBYLiveController: DBY1VNController {
                 self.showExtendView()
             }
         }
-        let oneTap = UITapGestureRecognizer(target: self,
-                                            action: #selector(viewTap(tap:)))
-        chatListView.addGestureRecognizer(oneTap)
         mainView.showLoadingView(delegate: nil)
         enterRoom()
     }
@@ -174,7 +176,6 @@ public class DBYLiveController: DBY1VNController {
         interactionView.isHidden = true
         
         topBar.set(type: .landscape)
-        chatListView.chatBar.endInput()
         bottomBar.set(type: .liveLandscape)
         segmentedView.containerView?.isScrollEnabled = false
     }
@@ -183,7 +184,6 @@ public class DBYLiveController: DBY1VNController {
         
         chatListView.inputButton.dismiss()
         
-        inputVC.dismiss(animated: true, completion: nil)
         announcementView.isHidden = (announcement?.count ?? 0) <= 0
         topBar.set(type: .portrait)
         bottomBar.set(type: .live)
@@ -237,9 +237,6 @@ public class DBYLiveController: DBY1VNController {
         settingView.models[1].selectedIndex = lineIndex
     }
     //MARK: - private functions
-    @objc func viewTap(tap: UITapGestureRecognizer) {
-        chatListView.chatBar.endInput()
-    }
     func dealWith(reachability: DBYReachability) {
         let netStatus = internetReachability?.currentReachabilityStatus()
         switch netStatus {
@@ -507,9 +504,9 @@ public class DBYLiveController: DBY1VNController {
         if chatListView.isChatForbidden {
             return
         }
-        inputVC.modalPresentationStyle = .custom
-        inputVC.modalTransitionStyle = .crossDissolve
-
+        inputVC.textChangeBlock = {[weak self] text in
+            self?.chatListView.chatBar.setText(text ?? "")
+        }
         inputVC.sendTextBlock = {[weak self] text in
             self?.send(message: text)
         }
@@ -519,9 +516,9 @@ public class DBYLiveController: DBY1VNController {
     @objc func audioOnly(sender:UIButton) {
         sender.isSelected = !sender.isSelected
         if sender.isSelected {
-            mainView.showVideoTipView(type: .audio, delegate: self)
+            mainView.showAudioTipView(delegate: self)
         }else {
-            mainView.hiddenVideoTipView()
+            mainView.hiddenAudioTipView()
         }
         
         liveManager.setReceiveVideoWith(!sender.isSelected) { (message) in
@@ -559,11 +556,6 @@ public class DBYLiveController: DBY1VNController {
         clearChatMessage()
         bottomBar.set(state: .play)
         liveManager.recoverLive()
-    }
-    
-    //MARK: - scrollView
-    public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        chatListView.chatBar.endInput()
     }
 }
 extension DBYLiveController: DBYLiveManagerDelegate {
@@ -771,12 +763,17 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         
     }
     public func liveManager(_ manager: DBYLiveManager!, interActionListChange list: [DBYInteractionModel]!, type: DBYInteractionType) {
+        var hasJoined = false
         for model in list {
             if model.state == .joined {
-                manager.enabelMedia()
-                changeLineButton.isHidden = true
+                hasJoined = true
+                break
             }
         }
+        if hasJoined {
+            manager.enabelMedia()
+        }
+        changeLineButton.isHidden = hasJoined
         interactionView.set(models: list, for: type)
     }
     public func liveManager(_ manager: DBYLiveManager!, thumbupWithCount count: Int, userName: String!) {
@@ -810,30 +807,30 @@ extension DBYLiveController:DBYNetworkTipViewDelegate {
 }
 //MARK: - DBYChatBarDelegate
 extension DBYLiveController: DBYChatBarDelegate {
-    func chatBarDidBecomeActive(owner: DBYChatBar) {
-        
-    }
-    func chatBar(owner: DBYChatBar, selectEmojiAt index: Int) {
-        
-    }
-    func chatBar(owner: DBYChatBar, send message: String) {
-        send(message: message)
-    }
-    func chatBar(owner: DBYChatBar, buttonClickWith target: UIButton) {
-        showInteractionView()
-    }
-    func chatBarWillShowInputView(rect: CGRect, duration: TimeInterval) {
-        if isLandscape() {
-            return
+    func chatBarDidClickEmojiButton(owner: DBYChatBar) {
+        inputVC.sendTextBlock = {[weak self] text in
+            self?.send(message: text)
         }
-        chatListView.showInputView(offset: rect.height)
+        inputVC.textChangeBlock = {[weak self] text in
+            self?.chatListView.chatBar.setText(text ?? "")
+        }
+        inputVC.showType = .emoji
+        present(inputVC, animated: true, completion: nil)
     }
     
-    func chatBarWillDismissInputView(duration: TimeInterval) {
-        if isLandscape() {
-            return
+    func chatBarDidClickTextButton(owner: DBYChatBar) {
+        inputVC.sendTextBlock = {[weak self] text in
+            self?.send(message: text)
         }
-        chatListView.hiddenInputView()
+        inputVC.textChangeBlock = {[weak self] text in
+            self?.chatListView.chatBar.setText(text ?? "")
+        }
+        inputVC.showType = .text
+        present(inputVC, animated: true, completion: nil)
+    }
+    
+    func chatBarDidClickInteractiveButton(owner: DBYChatBar) {
+        showInteractionView()
     }
 }
 //MARK: - DBYVoteViewDelegate
@@ -905,7 +902,7 @@ extension DBYLiveController: DBYBottomBarDelegate {
         }
         if state == .play {
             pauseManager()
-            mainView.showVideoTipView(type: .pause, delegate: self)
+            mainView.showVideoTipView(delegate: self)
         }
     }
     func progressWillChange(owner: DBYBottomBar, value: Float) {
@@ -955,11 +952,11 @@ extension DBYLiveController: DBYVideoTipViewDelegate {
         }
     }
 }
-extension DBYLiveController: DBYCommentCellDelegate {
-    func commentCell(cell: UITableViewCell, didPressWith index: IndexPath) {
+extension DBYLiveController: DBYChatCellDelegate {
+    func chatCell(cell: UITableViewCell, didPressWith index: IndexPath) {
         let chatDict = chatListView.allChatList[index.row]
         let name:String = chatDict["userName"] as? String ?? ""
-        chatListView.chatBar.append(text: "@" + name)
+        chatListView.chatBar.appendText("@" + name)
     }
 }
 //MARK: - DBYInteractionViewDelegate
@@ -992,9 +989,9 @@ extension DBYLiveController: DBYInteractionViewDelegate {
     func closeInteraction(owner: DBYInteractionView, type: DBYInteractionType) {
         interactionView.isHidden = true
         if owner.currentInfo.state == .normal {
-            chatListView.chatBar.interactionButton.isSelected = false
+            chatListView.chatBar.interactiveButton.isSelected = false
         }else {
-            chatListView.chatBar.interactionButton.isSelected = true
+            chatListView.chatBar.interactiveButton.isSelected = true
         }
     }
     

@@ -143,7 +143,7 @@ extension DBYOfflineController: DBYBottomBarDelegate {
     func playStateDidChange(owner: DBYBottomBar, state: DBYPlayState) {
         if state == .play {
             offlineManager.pause()
-            mainView.showVideoTipView(type: .pause, delegate: self)
+            mainView.showVideoTipView(delegate: self)
         }
         if state == .pause {
             offlineManager.resume()
@@ -151,6 +151,7 @@ extension DBYOfflineController: DBYBottomBarDelegate {
         }
         if state == .end {
             offlineManager.play()
+            mainView.hiddenVideoTipView()
         }
     }
     func progressWillChange(owner: DBYBottomBar, value: Float) {

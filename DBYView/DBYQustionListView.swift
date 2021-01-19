@@ -101,7 +101,7 @@ extension DBYQustionListView: UITableViewDataSource {
         return CGFloat.leastNonzeroMagnitude
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell:DBYCommentCell = DBYCommentCell()
+        var cell:DBYChatCell = DBYChatCell()
         
         let chatDict = qaList[indexPath.section]
         
@@ -123,14 +123,14 @@ extension DBYQustionListView: UITableViewDataSource {
         let message:String = infoDict?["msg"] as? String ?? ""
         
         if role == "1" {
-            cell = tableView.dequeueReusableCell(withIdentifier: toIdentifier) as! DBYCommentCell
+            cell = tableView.dequeueReusableCell(withIdentifier: toIdentifier) as! DBYChatCell
             if isPortrait() {
                 cell.setBubbleImage(UIImage(name: "chat-to-bubble"))
             }else {
                 cell.setBubbleImage(UIImage(name: "chat-to-dark-bubble"))
             }
         }else {
-            cell = tableView.dequeueReusableCell(withIdentifier: fromIdentifier) as! DBYCommentCell
+            cell = tableView.dequeueReusableCell(withIdentifier: fromIdentifier) as! DBYChatCell
             if isPortrait() {
                 cell.setBubbleImage(UIImage(name: "chat-from-bubble"))
             }else {

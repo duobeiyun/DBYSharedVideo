@@ -281,8 +281,13 @@ extension DBYOnlineController: DBYBottomBarDelegate {
     func chatButtonClick(owner: DBYBottomBar) {
         topBar.isHidden = true
         bottomBar.isHidden = true
-        segmentedView.isHidden = false
         segmentedView.scrollToIndex(index: 0, animated: false)
+        let rect = segmentedView.landscapeFrame
+        chatListView.inputButton.isHidden = true
+        UIView.animate(withDuration: 0.25) {
+            self.segmentedView.isHidden = false
+            self.segmentedView.frame = rect.offsetBy(dx: -rect.width, dy: 0)
+        }
     }
     
     func voteButtonClick(owner: DBYBottomBar) {
@@ -296,14 +301,15 @@ extension DBYOnlineController: DBYBottomBarDelegate {
     func playStateDidChange(owner: DBYBottomBar, state: DBYPlayState) {
         if state == .pause {
             recoverManager()
-            mainView.showVideoTipView(type: .audio, delegate: self)
+            mainView.hiddenVideoTipView()
         }
         if state == .play {
             pauseManager()
-            mainView.showVideoTipView(type: .pause, delegate: self)
+            mainView.showVideoTipView(delegate: self)
         }
         if state == .end {
             recoverManager()
+            mainView.hiddenVideoTipView()
         }
     }
     func progressWillChange(owner: DBYBottomBar, value: Float) {
@@ -353,7 +359,7 @@ extension DBYOnlineController: DBYSettingViewDelegate {
 }
 extension DBYOnlineController: DBYVideoTipViewDelegate {
     func continueClick(_ owner: DBYPauseTipView) {
-        
+        recoverManager()
+        mainView.hiddenVideoTipView()
     }
-    
 }
