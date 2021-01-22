@@ -159,15 +159,14 @@ class DBYInteractionView: DBYNibView {
         var count = 0
         var inqueueCount = 0
         var userModel:DBYInteractionModel?
-        
+        var info: DBYInteractionInfo
         if type == .audio {
-            currentInfo = audioInfo
-        }
-        if type == .video {
-            currentInfo = videoInfo
+            info = audioInfo
+        } else {
+            info = videoInfo
         }
         tableView.reloadData()
-        for model in currentInfo.models {
+        for model in info.models {
             if model.state == .joined {
                 count += 1
             }
@@ -178,33 +177,54 @@ class DBYInteractionView: DBYNibView {
                 inqueueCount += 1
             }
         }
-        currentInfo.joinedCount = count
-        currentInfo.inqueueCount = inqueueCount
+        info.joinedCount = count
+        info.inqueueCount = inqueueCount
         
         //被邀请上台或上麦
-        if userModel != nil && userModel?.state == .inqueue && currentInfo.state == .normal {
+        if userModel != nil && userModel?.state == .inqueue && info.state == .normal {
             delegate?.receiveInteraction(owner: self, state: .inqueue, type: type, model: userModel)
-            currentInfo.state = .inqueue
+            info.state = .inqueue
         }else
         //上台或上麦
         if userModel != nil && userModel?.state == .joined {
             delegate?.receiveInteraction(owner: self, state: .joined, type: type, model: userModel)
-            currentInfo.state = .joined
+            info.state = .joined
         }else
         //被取消上台或上麦
-        if userModel == nil && currentInfo.state == .joined {
+        if userModel == nil && info.state == .joined {
             delegate?.receiveInteraction(owner: self, state: .quit, type: type, model: userModel)
-            currentInfo.state = .normal
+            info.state = .normal
         }else
         //拒绝上台或上麦
         if userModel == nil && currentInfo.state == .inqueue {
             delegate?.receiveInteraction(owner: self, state: .abort, type: type, model: nil)
-            currentInfo.state = .normal
+            info.state = .normal
         }
         // 等待上台
-        if currentInfo.state == .inqueue && type == .video && inqueueCount > 0 {
+        if info.state == .inqueue && type == .video && inqueueCount > 0 {
             delegate?.waittingForVideo(owner: self, count: inqueueCount)
         }
+    }
+    //MARK: - public
+    func getAudioModel(uid: String) -> DBYInteractionModel? {
+        let models = audioInfo.models
+        var audioModel: DBYInteractionModel?
+        for model in models {
+            if model.userId == uid {
+                audioModel = model
+            }
+        }
+        return audioModel
+    }
+    func getVideoModel(uid: String) -> DBYInteractionModel? {
+        let models = videoInfo.models
+        var videoModel: DBYInteractionModel?
+        for model in models {
+            if model.userId == uid {
+                videoModel = model
+            }
+        }
+        return videoModel
     }
 }
 extension DBYInteractionView: UITableViewDelegate {

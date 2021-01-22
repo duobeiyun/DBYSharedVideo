@@ -92,9 +92,10 @@ public class DBYLiveController: DBY1VNController {
             }
             if roomConfig?.leb == true {
                 self.liveManager.disabelMedia()
-                self.changeLineButton.isHidden = false
+                self.enableChangeLine()
             } else {
                 self.liveManager.enabelMedia()
+                self.disableChangeLine()
             }
             DispatchQueue.main.async {
                 self.questionView.roomConfig = roomConfig
@@ -224,18 +225,7 @@ public class DBYLiveController: DBY1VNController {
             toPortrait()
         }
     }
-    override func showSettingView() {
-        super.showSettingView()
-        guard let lines = quickLines else {
-            return
-        }
-        var items = [DBYSettingItem]()
-        for line in lines {
-            items.append(DBYSettingItem(name: line.name))
-        }
-        settingView.models[1].items = items
-        settingView.models[1].selectedIndex = lineIndex
-    }
+    
     //MARK: - private functions
     func dealWith(reachability: DBYReachability) {
         let netStatus = internetReachability?.currentReachabilityStatus()
@@ -482,6 +472,30 @@ public class DBYLiveController: DBY1VNController {
         }
         return 0
     }
+    func enableChangeLine() {
+        guard let lines = quickLines else {
+            return
+        }
+        var items = [DBYSettingItem]()
+        for line in lines {
+            items.append(DBYSettingItem(name: line.name))
+        }
+        settingView.models[1].items = items
+        settingView.models[1].selectedIndex = lineIndex
+        changeLineButton.isHidden = false
+    }
+    func disableChangeLine() {
+        settingView.models[1].items.removeAll()
+        changeLineButton.isHidden = true
+    }
+    func appendInteractionMessage(model: DBYInteractionModel) {
+        let typeString = model.type == .audio ? " 正在上麦发言":" 正在上台发言"
+        let dict:[String : Any] = [
+            "type": "message",
+            "message": roleString(role: model.userRole) + model.userName + typeString
+        ]
+        self.chatListView.append(dict: dict)
+    }
     //MARK: - objc functions
     @objc func updateAnimation() {
         guard let mq = roomConfig?.marquee else {
@@ -679,19 +693,14 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         removeQustion(questionId: questionId)
     }
     public func liveManager(_ liveManager: DBYLiveManager!, willRecordVideoDataWithUserId uid: String!) {
-        let videoView = createVideoView(uid: uid)
-        liveManager.setLocalVideoView(videoView.video)
-        videoView.setUserName(name: authinfo?.nickName)
-        liveManager.getUserInfo(uid) { (userInfo) in
-            guard let info = userInfo else {
-                return
-            }
-            let dict:[String : Any] = [
-                "type": "message",
-                "message": roleString(role: info.userRole) + info.nickName + " 正在上台发言"
-            ]
-            self.chatListView.append(dict: dict)
+        guard let model = interactionView.getVideoModel(uid: uid) else {
+            return
         }
+        appendInteractionMessage(model: model)
+        
+        let videoView = createVideoView(uid: uid)
+        videoView.setUserName(name: model.userName)
+        liveManager.setLocalVideoView(videoView.video)
     }
     public func liveManager(_ liveManager: DBYLiveManager!, endRecordVideoDataWithUserId uid: String!) {
         removeVideoView(uid: uid)
@@ -700,53 +709,32 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         if uid == authinfo?.teacherId || uid == liveManager.assitantId {
             return
         }
+        guard let model = interactionView.getVideoModel(uid: uid) else {
+            return
+        }
+        appendInteractionMessage(model: model)
         
         let videoView = createVideoView(uid: uid)
+        videoView.setUserName(name: model.userName)
         liveManager.setStudentView(videoView.video, withUserId: uid)
-        liveManager.getUserInfo(uid) { (userInfo) in
-            videoView.setUserName(name: userInfo?.nickName)
-            guard let info = userInfo else {
-                return
-            }
-            let dict:[String : Any] = [
-                "type": "message",
-                "message": roleString(role: info.userRole) + info.nickName + " 正在上台发言"
-            ]
-            self.chatListView.append(dict: dict)
-        }
     }
     public func liveManager(_ liveManager: DBYLiveManager!, endReceiveVideoDataWithUserId uid: String!) {
         removeVideoView(uid: uid)
     }
     public func liveManager(_ liveManager: DBYLiveManager!, willRecordAudioDataWithUserId uid: String!) {
-        if interactionView.currentInfo.type == .video {
+        guard let model = interactionView.getAudioModel(uid: uid) else {
             return
         }
-        liveManager.getUserInfo(uid) { (userInfo) in
-            guard let info = userInfo else {
-                return
-            }
-            let dict:[String : Any] = [
-                "type": "message",
-                "message": roleString(role: info.userRole) + info.nickName + " 正在上麦发言"
-            ]
-            self.chatListView.append(dict: dict)
-        }
+        appendInteractionMessage(model: model)
     }
     public func liveManager(_ liveManager: DBYLiveManager!, endRecordAudioDataWithUserId uid: String!) {
         
     }
     public func liveManager(_ liveManager: DBYLiveManager!, willReceiveAudioDataWithUserId uid: String!) {
-        liveManager.getUserInfo(uid) { (userInfo) in
-            guard let info = userInfo else {
-                return
-            }
-            let dict:[String : Any] = [
-                "type": "message",
-                "message": roleString(role: info.userRole) + info.nickName + " 正在上麦发言"
-            ]
-            self.chatListView.append(dict: dict)
+        guard let model = interactionView.getAudioModel(uid: uid) else {
+            return
         }
+        appendInteractionMessage(model: model)
     }
     public func liveManager(_ liveManager: DBYLiveManager!, endReceiveAudioDataWithUserId uid: String!) {
         
@@ -765,8 +753,10 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         }
         if hasJoined {
             manager.enabelMedia()
+            disableChangeLine()
+        } else {
+            enableChangeLine()
         }
-        changeLineButton.isHidden = hasJoined
     }
     public func liveManager(_ manager: DBYLiveManager!, thumbupWithCount count: Int, userName: String!) {
         if userName.count < 1 {
@@ -782,10 +772,9 @@ extension DBYLiveController: DBYLiveManagerDelegate {
     public func liveManager(_ manager: DBYLiveManager!, quickLinesChanged lines: [DBYPlayLine]!) {
         if lines.count == 1 {
             liveManager.enabelMedia()
-            settingView.models[1].items.removeAll()
+            disableChangeLine()
             return
         }
-        changeLineButton.isHidden = false
         quickLines = lines
         let index = getPriorityLine(lines: lines)
         changeQuickLine(index: index)
@@ -1100,28 +1089,6 @@ extension DBYLiveController: DBYInteractionViewDelegate {
     func switchInteraction(owner: DBYInteractionView, type: DBYInteractionType) {
         
     }
-    func interactionStateChanged(owner: DBYInteractionView, old: DBYInteractionModel?, new: DBYInteractionModel?) {
-        //新增
-        if old == nil && new != nil {
-            
-        }
-        //移除
-        if old != nil && new == nil {
-            
-        }
-        //上台上麦请求
-        if new?.state == .inqueue {
-            
-        }
-        //上台上麦消息
-        if new?.state == .joined {
-            
-        }
-        
-        changeQuickLine(index: 0)
-        changeLineButton.isHidden = true
-    }
-    
 }
 extension DBYLiveController: VideoPlayerStateDelegate {
     func connected() {
