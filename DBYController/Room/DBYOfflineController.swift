@@ -16,6 +16,7 @@ public class DBYOfflineController: DBYPlaybackController {
     @objc public var hasVideo:Bool = false
     
     lazy var offlineManager = DBYOfflinePlayBackManager()
+    var studentView: DBYStudentVideoView?
     
     //MARK: - override functions
     override public func viewDidLoad() {
@@ -33,8 +34,9 @@ public class DBYOfflineController: DBYPlaybackController {
             offlineManager.setTeacherViewWith(mainView.videoView)
         }
         let videoView = createVideoView(uid: authinfo?.userId ?? "")
+        studentView = videoView
         videoView.setUserName(name: authinfo?.nickName)
-        offlineManager.setStudentViewWith(videoView)
+        offlineManager.setStudentViewWith(videoView.video)
         offlineManager.delegate = self
         offlineManager.setPPTViewBackgroundImage(UIImage(name: "black-board"))
         offlineManager.roomID = roomID
@@ -55,6 +57,7 @@ public class DBYOfflineController: DBYPlaybackController {
         super.viewDidDisappear(animated)
     }
     override func initSubViews() {
+        super.initSubViews()
         settingView = DBYSettingViewOfflineFactory.create()
     }
     override func setupStaticUI() {
@@ -70,6 +73,14 @@ public class DBYOfflineController: DBYPlaybackController {
             toPortrait()
         }
     }
+    override func setupLandscapeUI() {
+        super.setupLandscapeUI()
+        topBar.set(type: .landscape)
+    }
+    override func setupPortraitUI() {
+        super.setupPortraitUI()
+        topBar.set(type: .portrait)
+    }
 }
 //MARK: - private functions
 extension DBYOfflineController: DBYOfflinePlayBackManagerDelegate {
@@ -84,7 +95,8 @@ extension DBYOfflineController: DBYOfflinePlayBackManagerDelegate {
         }
     }
     public func offlinePlayBackManager(_ manager: DBYOfflinePlayBackManager!, hasVideo: Bool, in view: UIView!) {
-        
+        print(view.description, "hasvideo: ", hasVideo)
+        studentView?.isHidden = !hasVideo
     }
     public func offlinePlayBackManager(_ manager: DBYOfflinePlayBackManager!, hasNewChatMessageWithChatArray newChatDictArray: [Any]!) {
         guard let chatInfos = newChatDictArray as? [DBYChatEventInfo] else {
@@ -120,7 +132,7 @@ extension DBYOfflineController: DBYTopBarDelegate {
     }
     
     func settingButtonClick(owner: DBYTopBar) {
-        settingClick()
+        showSettingView()
     }
 }
 //MARK: - DBYBottomBarDelegate

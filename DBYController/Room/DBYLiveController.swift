@@ -103,9 +103,9 @@ public class DBYLiveController: DBY1VNController {
                 self.showMarqueeView()
                 self.showExtendView()
             }
+            self.enterRoom()
         }
         mainView.showLoadingView(delegate: nil)
-        enterRoom()
     }
     deinit {
         animationTimer?.stop()
@@ -473,6 +473,7 @@ public class DBYLiveController: DBY1VNController {
         return 0
     }
     func enableChangeLine() {
+        changeLineButton.isHidden = false
         guard let lines = quickLines else {
             return
         }
@@ -482,7 +483,6 @@ public class DBYLiveController: DBY1VNController {
         }
         settingView.models[1].items = items
         settingView.models[1].selectedIndex = lineIndex
-        changeLineButton.isHidden = false
     }
     func disableChangeLine() {
         settingView.models[1].items.removeAll()
@@ -770,11 +770,15 @@ extension DBYLiveController: DBYLiveManagerDelegate {
         chatListView.append(dict: dict)
     }
     public func liveManager(_ manager: DBYLiveManager!, quickLinesChanged lines: [DBYPlayLine]!) {
+        if roomConfig?.leb == false {
+            return
+        }
         if lines.count == 1 {
             liveManager.enabelMedia()
             disableChangeLine()
             return
         }
+        enableChangeLine()
         quickLines = lines
         let index = getPriorityLine(lines: lines)
         changeQuickLine(index: index)
@@ -908,7 +912,7 @@ extension DBYLiveController: DBYTopBarDelegate {
     func settingButtonClick(owner: DBYTopBar) {
         topBar.isHidden = true
         bottomBar.isHidden = true
-        settingClick()
+        showSettingView()
     }
 }
 extension DBYLiveController: DBYSettingViewDelegate {

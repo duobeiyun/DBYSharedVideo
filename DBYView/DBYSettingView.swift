@@ -92,7 +92,7 @@ class DBYSettingViewOfflineFactory: DBYSettingViewFactory {
             settingModel1,
             settingModel2
         ]
-        return DBYSettingView()
+        return settingView
     }
 }
 class DBYSettingHeader: UICollectionReusableView {

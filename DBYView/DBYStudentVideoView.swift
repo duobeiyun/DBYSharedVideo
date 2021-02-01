@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SnapKit
 
 class DBYStudentVideoView: DBYView {
     var userId: String?
@@ -32,11 +33,11 @@ class DBYStudentVideoView: DBYView {
     }
     override func layoutSubviews() {
         super.layoutSubviews()
-        let videoW = bounds.width - 12
+        let videoW = bounds.width
         let videoH = videoW * 0.75
+        video.frame = CGRect(x: 0, y: 0, width: videoW, height: videoH)
+        nameLabel.frame = CGRect(x: 6, y: video.frame.maxY, width: bounds.width - 46, height: 20)
         voiceIcon.frame = CGRect(x: bounds.width - 44, y: bounds.height - 22, width: 40, height: 20)
-        nameLabel.frame = CGRect(x: 6, y: bounds.height - 22, width: bounds.width - 46, height: 20)
-        video.frame = CGRect(x: 6, y: 6, width: videoW, height: videoH)
     }
     func setUserName(name: String?) {
         nameLabel.text = name
